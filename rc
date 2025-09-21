@@ -1,3 +1,3 @@
-export EDTRACE_BASE_DIR=/autumn2025-lectures/  # replace with whatever this site will be hosted
-export EDTRACE_DIST_DIR=$PWD
+export VITE_EDTRACE_BASE_DIR=/`basename $PWD`
+export VITE_EDTRACE_DIST_DIR=$PWD
 . .venv/bin/activate
