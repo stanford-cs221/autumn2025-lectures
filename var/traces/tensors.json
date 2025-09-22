@@ -1,0 +1,6199 @@
+{
+  "files": {
+    "tensors.py": "from edtrace import text, link, image, note\nimport numpy as np\nimport torch\nfrom einops import einsum, reduce, rearrange\nimport timeit\n\n\ndef main():\n    image(\"images/tensor.jpg\", width=200), note(\"This is probably what you think of when you hear the word \\\"tensor\\\".\")\n    text(\"**Tensors** are the atoms of modern machine learning.\")\n    text(\"They are used to represent data, model parameters, gradients, intermediate computations (activations), etc.\")\n    text(\"Tensors show up elsewhere in science and engineering, so they're generally useful to learn.\")\n    text(\"We'll introduce the core ideas through NumPy examples.\")\n\n    creating_tensors()\n    tensor_examples()\n    viewing_tensors()\n    elementwise_operations()\n    matrix_multiplication()\n    efficiency()\n    einops()\n\n    text(\"Summary\")\n    text(\"- Use tensors to represent everything\")\n    text(\"- Express computations using few tensor operations for efficiency (a puzzle!)\")\n    text(\"- Use einops to make computations more legible\")\n    text(\"- Practice (it's like learning a new langauge)!\")\n\n\ndef creating_tensors():\n    text(\"Tensors are represented by multi-dimensional arrays (generalizing vectors and matrices).\")\n\n    text(\"The simplest tensor is simply a **scalar** (rank 0 tensor).\")\n    x = np.array(42)  # @inspect x\n    s = x.shape  # @inspect s\n\n    text(\"A **vector** is a rank 1 tensor.\")  # @clear x s\n    x = np.array([1, 2, 3])  # @inspect x\n    s = x.shape  # @inspect s\n\n    text(\"A **matrix** is a rank 2 tensor.\")  # @clear x s\n    x = np.array([  # @inspect x\n        [1, 2, 3],\n        [4, 5, 6],\n    ])\n    s = x.shape  # @inspect s\n\n    text(\"In general, a **tensor** can be any rank.  Here's a rank 3 tensor.\")  # @clear x s\n    x = np.array([  # @inspect x\n        [\n            [1, 2, 3],\n            [4, 5, 6],\n        ],\n        [\n            [7, 8, 9],\n            [10, 11, 12],\n        ],\n    ])\n    s = x.shape  # @inspect s\n\n    text(\"You can extract slices from this tensor:\")  # @clear s\n    y = x[1]  # @inspect y\n    y = x[1][0]  # @inspect y\n    y = x[1][0][2]  # @inspect y\n\n    text(\"You usually don't create tensors by writing down all the entries.\")  # @clear x y\n\n    text(\"You can use special commands to create structured tensors.\")\n\n    # Create a 2x3 array of zeros\n    x = np.zeros((2, 3))  # @inspect x\n\n    # Create a 2x3 array of ones\n    x = np.ones((2, 3))  # @inspect x\n\n    # Create a 2x3 array filled with random numbers from a normal distribution\n    x = np.random.randn(2, 3)  # @inspect x\n\n    # Create a 3x3 identity matrix\n    x = np.eye(3)  # @inspect x\n\n    # Create a matrix where the diagonal is a vector\n    x = np.diag([1, 2, 3])  # @inspect x\n\n    text(\"Or you can read / write them from disk\")\n    np.save(\"var/x.npy\", x)\n    new_x = np.load(\"var/x.npy\")  # @inspect new_x\n\n\ndef tensor_examples():\n    text(\"Here are some typical tensors that show up in machine learning.\")\n\n    # A D-dimensional data point\n    D = 2  # Number of dimensions\n    x = np.ones(D)  # @inspect x\n    text(\"Here, `np.ones` is arbitrary; we're just trying getting a tensor of the right shape.\")\n\n    text(\"We often batch examples together (for efficiency).\")  # @clear x\n    N = 3  # Number of examples\n    # A dataset of N examples, each D-dimensional point\n    x = np.ones((N, D))  # @inspect x\n\n    text(\"In language modeling, each example is a whole sequence of length\")  # @clear x\n    L = 4  # Length of sequence\n    # A dataset of N examples, each length L, each position is D-dimensional\n    x = np.ones((N, L, D))  # @inspect x\n\n    text(\"In vision, images are have..\")  # @clear x\n    H = 2  # A height\n    W = 2  # A width\n    C = 3  # A number of channels (red, green, blue)\n    x = np.ones((N, H, W, C))\n\n    text(\"In a neural network, we have a weight matrix that transforms a\")  # @clear x\n    Din = 3  # ...a Din-dimensional input\n    Dout = 2  # ...to a Dout-dimensional output\n    w = np.ones((Din, Dout))  # @inspect w\n\n    text(\"In general, the parameters of a neural network model are a collection of tensors.\")\n    text(\"For example, here are the parameters of the DeepSeek v3 model \"), link(\"https://arxiv.org/abs/2412.19437\")\n    link(\"https://huggingface.co/deepseek-ai/DeepSeek-V3?show_file_info=model.safetensors.index.json\", title=\"DeepSeek-V3 on Hugging Face\")\n\n\ndef viewing_tensors():\n    text(\"Given a tensor, you can extract parts of it.\")\n    x = np.random.randn(2, 3)  # @inspect x\n\n    # Get row 0\n    y = x[0]  # @inspect y\n\n    # Get column 1\n    y = x[:, 1]  # @inspect y\n\n    # Transpose the matrix\n    y = x.transpose(1, 0)  # @inspect y\n\n    text(\"Note that these operations do not make a copy of the tensor.\")\n    text(\"...so if you modify the tensor, you modify the view.\")\n    text(\"Check that mutating x also mutates y.\")\n    x[0][0] = 100  # @inspect x y\n    text(\"Generally, be careful and don't mutate tensors if you don't need to!\")\n\n\ndef elementwise_operations():\n    text(\"These operations apply some operation to each element of the tensor\")\n    text(\"...and return a (new) tensor of the same shape.\")\n\n    x = np.array([1, 4, 9])  # @inspect x\n    y = np.power(x, 2)  # @inspect y\n    y = np.sqrt(x)  # @inspect y\n\n    y = x + x  # @inspect y\n    y = x * 3  # @inspect y\n    y = x / 2  # @inspect y\n\n    text(\"`triu` (`tril`) takes the upper (lower) triangular part of a matrix.\")  # @clear y\n    x = np.ones((3, 3))  # @inspect x\n    y = np.triu(x)  # @inspect y\n    y = np.tril(x)  # @inspect y\n    text(\"This is useful for masking parts of the input (for Transformers).\")\n\n    text(\"You can create zeros and ones with the same shape as another tensor:\")\n    y = np.zeros_like(x)  # @inspect y\n    y = np.ones_like(x)  # @inspect y\n\n\ndef matrix_multiplication():\n    text(\"Finally, the bread and butter of deep learning: matrix multiplication.\")\n    x = np.ones((4, 6))  # @inspect x\n    w = np.ones((6, 3))  # @inspect w\n    y = x @ w  # @inspect y\n    assert y.shape == (4, 3)\n\n    text(\"We can batch multiple matrix operations:\")  # @clear y\n    x = np.ones((2, 4, 6))  # @inspect x\n    w = np.ones((6, 3))  # @inspect w\n    y = x @ w  # @inspect y\n    assert y.shape == (2, 4, 3)\n    text(\"In this case, for each slice x[0], x[1], ..., we multiply by `w`.\")\n    text(\"Terminology: w is broadcasted to each slice of x.\")\n\n\ndef efficiency():\n    text(\"There are often multiple ways to compute the same result.\")\n    text(\"Whenever possible, try to express computation as tensor operations.\")\n    N = 16\n    x = np.ones((N, N))\n    w = np.ones((N, N))\n\n    text(\"Let's compute a matrix multiplication in Python.\")\n    def slow_matmul() -> np.ndarray:\n        y = np.zeros((N, N))\n        for i in range(N):\n            for j in range(N):\n                for k in range(N):\n                    y[i, j] += x[i, k] * w[k, j]\n        return y\n    python_time = timeit.timeit(slow_matmul, number=1)  # @inspect slow_time @stepover\n\n    text(\"Let's Fast way: use built-in matrix multiplication\")\n    numpy_time = timeit.timeit(lambda: x @ w, number=1)  # @inspect fast_time @stepover\n\n    # How much faster is NumPy than Python?\n    speedup = python_time / numpy_time  # @inspect speedup\n\n    text(\"Matrix multiplication is even faster on GPUs (for large matrices)!\")\n\ndef einops():\n    einops_motivation()\n\n    text(\"Einops is a library for manipulating tensors where dimensions are named.\")\n    text(\"It is inspired by Einstein summation notation (Einstein, 1916).\")\n    link(title=\"[Einops tutorial]\", url=\"https://einops.rocks/1-einops-basics/\")\n\n    einops_einsum()\n    einops_reduce()\n    einops_rearrange()\n    \n\ndef einops_motivation():\n    text(\"Traditional PyTorch code:\")\n    x = torch.ones(2, 2, 3)      # batch seq hidden  @inspect x\n    y = torch.ones(2, 2, 3)      # batch seq hidden  @inspect y\n    z = x @ y.transpose(-2, -1)  # batch seq seq  @inspect z\n    text(\"Easy to mess up the dimensions (what is -2, -1?)...\")\n\n\ndef einops_einsum():\n    text(\"Einsum is generalized matrix multiplication with good bookkeeping.\")\n\n    x = torch.ones(3, 4)  # seq1 hidden @inspect x\n    y = torch.ones(4, 3)  # hidden seq2 @inspect y\n\n    # Old way\n    z = x @ y   # seq1 seq2  @inspect z\n\n    # New (einops) way\n    z = einsum(x, y, \"seq1 hidden, hidden seq2 -> seq1 seq2\")  # @inspect z\n\n    text(\"Let's try a more complex example...\")  # @clear x y z\n\n    x = torch.ones(2, 3, 4)  # batch seq1 hidden @inspect x\n    y = torch.ones(2, 3, 4)  # batch seq2 hidden @inspect y\n\n    # Old way\n    z = x @ y.transpose(-2, -1)  # batch seq1 seq2  @inspect z\n\n    # New (einops) way\n    z = einsum(x, y, \"batch seq1 hidden, batch seq2 hidden -> batch seq1 seq2\")  # @inspect z\n    text(\"Dimensions that are not named in the output are summed over.\")\n\n    text(\"Or can use `...` to represent broadcasting over any number of dimensions:\")\n    z = einsum(x, y, \"... seq1 hidden, ... seq2 hidden -> ... seq1 seq2\")  # @inspect z\n\n\ndef einops_reduce():\n    text(\"You can reduce a single tensor via some operation (e.g., sum, mean, max, min).\")\n    x = torch.ones(2, 3, 4)  # batch seq hidden @inspect x\n\n    # Old way\n    y = x.sum(dim=-1)  # @inspect y\n\n    # New (einops) way\n    y = reduce(x, \"... hidden -> ...\", \"sum\")  # @inspect y\n\n\ndef einops_rearrange():\n    text(\"Sometimes, a dimension represents two dimensions\")\n    text(\"...and you want to operate on one of them.\")\n\n    x = torch.ones(3, 8)  # batch seq total_hidden @inspect x\n    text(\"...where `total_hidden` is a flattened representation of `heads * hidden1`\")\n    w = torch.ones(4, 4)  # hidden1 hidden2 @inspect w\n\n    text(\"Break up `total_hidden` into two dimensions (`heads` and `hidden1`):\")\n    x = rearrange(x, \"... (heads hidden1) -> ... heads hidden1\", heads=2)  # @inspect x\n\n    text(\"Perform the transformation by `w`:\")\n    x = einsum(x, w, \"... hidden1, hidden1 hidden2 -> ... hidden2\")  # @inspect x\n\n    text(\"Combine `heads` and `hidden2` back together:\")\n    x = rearrange(x, \"... heads hidden2 -> ... (heads hidden2)\")  # @inspect x\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "hidden_line_numbers": {
+    "tensors.py": []
+  },
+  "steps": [
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 8,
+          "function_name": "main",
+          "code": "def main():"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 9,
+          "function_name": "main",
+          "code": "image(\"images/tensor.jpg\", width=200), note(\"This is probably what you think of when you hear the word \\\"tensor\\\".\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "image",
+          "data": "images/tensor.jpg",
+          "style": {
+            "width": 200
+          },
+          "external_link": null,
+          "internal_link": null
+        },
+        {
+          "type": "note",
+          "data": "This is probably what you think of when you hear the word \"tensor\".",
+          "style": null,
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 10,
+          "function_name": "main",
+          "code": "text(\"**Tensors** are the atoms of modern machine learning.\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "**Tensors** are the atoms of modern machine learning.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 11,
+          "function_name": "main",
+          "code": "text(\"They are used to represent data, model parameters, gradients, intermediate computations (activations), etc.\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "They are used to represent data, model parameters, gradients, intermediate computations (activations), etc.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 12,
+          "function_name": "main",
+          "code": "text(\"Tensors show up elsewhere in science and engineering, so they're generally useful to learn.\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Tensors show up elsewhere in science and engineering, so they're generally useful to learn.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 13,
+          "function_name": "main",
+          "code": "text(\"We'll introduce the core ideas through NumPy examples.\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "We'll introduce the core ideas through NumPy examples.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 30,
+          "function_name": "creating_tensors",
+          "code": "def creating_tensors():"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 31,
+          "function_name": "creating_tensors",
+          "code": "text(\"Tensors are represented by multi-dimensional arrays (generalizing vectors and matrices).\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Tensors are represented by multi-dimensional arrays (generalizing vectors and matrices).",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 33,
+          "function_name": "creating_tensors",
+          "code": "text(\"The simplest tensor is simply a **scalar** (rank 0 tensor).\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "The simplest tensor is simply a **scalar** (rank 0 tensor).",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 34,
+          "function_name": "creating_tensors",
+          "code": "x = np.array(42)  # @inspect x"
+        }
+      ],
+      "env": {
+        "x": {
+          "type": "numpy.ndarray",
+          "contents": 42,
+          "dtype": "int64",
+          "shape": []
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 35,
+          "function_name": "creating_tensors",
+          "code": "s = x.shape  # @inspect s"
+        }
+      ],
+      "env": {
+        "s": {
+          "type": "tuple",
+          "contents": [],
+          "dtype": null,
+          "shape": null
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 37,
+          "function_name": "creating_tensors",
+          "code": "text(\"A **vector** is a rank 1 tensor.\")  # @clear x s"
+        }
+      ],
+      "env": {
+        "x": null,
+        "s": null
+      },
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "A **vector** is a rank 1 tensor.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 38,
+          "function_name": "creating_tensors",
+          "code": "x = np.array([1, 2, 3])  # @inspect x"
+        }
+      ],
+      "env": {
+        "x": {
+          "type": "numpy.ndarray",
+          "contents": [
+            1,
+            2,
+            3
+          ],
+          "dtype": "int64",
+          "shape": [
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 39,
+          "function_name": "creating_tensors",
+          "code": "s = x.shape  # @inspect s"
+        }
+      ],
+      "env": {
+        "s": {
+          "type": "tuple",
+          "contents": [
+            {
+              "type": "int",
+              "contents": 3,
+              "dtype": null,
+              "shape": null
+            }
+          ],
+          "dtype": null,
+          "shape": null
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 41,
+          "function_name": "creating_tensors",
+          "code": "text(\"A **matrix** is a rank 2 tensor.\")  # @clear x s"
+        }
+      ],
+      "env": {
+        "x": null,
+        "s": null
+      },
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "A **matrix** is a rank 2 tensor.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 42,
+          "function_name": "creating_tensors",
+          "code": "x = np.array([  # @inspect x"
+        }
+      ],
+      "env": {
+        "x": {
+          "type": "numpy.ndarray",
+          "contents": [
+            1,
+            2,
+            3
+          ],
+          "dtype": "int64",
+          "shape": [
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 43,
+          "function_name": "creating_tensors",
+          "code": "[1, 2, 3],"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 44,
+          "function_name": "creating_tensors",
+          "code": "[4, 5, 6],"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 42,
+          "function_name": "creating_tensors",
+          "code": "x = np.array([  # @inspect x"
+        }
+      ],
+      "env": {
+        "x": {
+          "type": "numpy.ndarray",
+          "contents": [
+            [
+              1,
+              2,
+              3
+            ],
+            [
+              4,
+              5,
+              6
+            ]
+          ],
+          "dtype": "int64",
+          "shape": [
+            2,
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 46,
+          "function_name": "creating_tensors",
+          "code": "s = x.shape  # @inspect s"
+        }
+      ],
+      "env": {
+        "s": {
+          "type": "tuple",
+          "contents": [
+            {
+              "type": "int",
+              "contents": 2,
+              "dtype": null,
+              "shape": null
+            },
+            {
+              "type": "int",
+              "contents": 3,
+              "dtype": null,
+              "shape": null
+            }
+          ],
+          "dtype": null,
+          "shape": null
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 48,
+          "function_name": "creating_tensors",
+          "code": "text(\"In general, a **tensor** can be any rank.  Here's a rank 3 tensor.\")  # @clear x s"
+        }
+      ],
+      "env": {
+        "x": null,
+        "s": null
+      },
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "In general, a **tensor** can be any rank.  Here's a rank 3 tensor.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 49,
+          "function_name": "creating_tensors",
+          "code": "x = np.array([  # @inspect x"
+        }
+      ],
+      "env": {
+        "x": {
+          "type": "numpy.ndarray",
+          "contents": [
+            [
+              1,
+              2,
+              3
+            ],
+            [
+              4,
+              5,
+              6
+            ]
+          ],
+          "dtype": "int64",
+          "shape": [
+            2,
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 51,
+          "function_name": "creating_tensors",
+          "code": "[1, 2, 3],"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 52,
+          "function_name": "creating_tensors",
+          "code": "[4, 5, 6],"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 50,
+          "function_name": "creating_tensors",
+          "code": "["
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 55,
+          "function_name": "creating_tensors",
+          "code": "[7, 8, 9],"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 56,
+          "function_name": "creating_tensors",
+          "code": "[10, 11, 12],"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 54,
+          "function_name": "creating_tensors",
+          "code": "["
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 49,
+          "function_name": "creating_tensors",
+          "code": "x = np.array([  # @inspect x"
+        }
+      ],
+      "env": {
+        "x": {
+          "type": "numpy.ndarray",
+          "contents": [
+            [
+              [
+                1,
+                2,
+                3
+              ],
+              [
+                4,
+                5,
+                6
+              ]
+            ],
+            [
+              [
+                7,
+                8,
+                9
+              ],
+              [
+                10,
+                11,
+                12
+              ]
+            ]
+          ],
+          "dtype": "int64",
+          "shape": [
+            2,
+            2,
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 59,
+          "function_name": "creating_tensors",
+          "code": "s = x.shape  # @inspect s"
+        }
+      ],
+      "env": {
+        "s": {
+          "type": "tuple",
+          "contents": [
+            {
+              "type": "int",
+              "contents": 2,
+              "dtype": null,
+              "shape": null
+            },
+            {
+              "type": "int",
+              "contents": 2,
+              "dtype": null,
+              "shape": null
+            },
+            {
+              "type": "int",
+              "contents": 3,
+              "dtype": null,
+              "shape": null
+            }
+          ],
+          "dtype": null,
+          "shape": null
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 61,
+          "function_name": "creating_tensors",
+          "code": "text(\"You can extract slices from this tensor:\")  # @clear s"
+        }
+      ],
+      "env": {
+        "s": null
+      },
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "You can extract slices from this tensor:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 62,
+          "function_name": "creating_tensors",
+          "code": "y = x[1]  # @inspect y"
+        }
+      ],
+      "env": {
+        "y": {
+          "type": "numpy.ndarray",
+          "contents": [
+            [
+              7,
+              8,
+              9
+            ],
+            [
+              10,
+              11,
+              12
+            ]
+          ],
+          "dtype": "int64",
+          "shape": [
+            2,
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 63,
+          "function_name": "creating_tensors",
+          "code": "y = x[1][0]  # @inspect y"
+        }
+      ],
+      "env": {
+        "y": {
+          "type": "numpy.ndarray",
+          "contents": [
+            7,
+            8,
+            9
+          ],
+          "dtype": "int64",
+          "shape": [
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 64,
+          "function_name": "creating_tensors",
+          "code": "y = x[1][0][2]  # @inspect y"
+        }
+      ],
+      "env": {
+        "y": {
+          "type": "numpy.int64",
+          "contents": 9,
+          "dtype": null,
+          "shape": null
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 66,
+          "function_name": "creating_tensors",
+          "code": "text(\"You usually don't create tensors by writing down all the entries.\")  # @clear x y"
+        }
+      ],
+      "env": {
+        "x": null,
+        "y": null
+      },
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "You usually don't create tensors by writing down all the entries.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 68,
+          "function_name": "creating_tensors",
+          "code": "text(\"You can use special commands to create structured tensors.\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "You can use special commands to create structured tensors.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 71,
+          "function_name": "creating_tensors",
+          "code": "x = np.zeros((2, 3))  # @inspect x"
+        }
+      ],
+      "env": {
+        "x": {
+          "type": "numpy.ndarray",
+          "contents": [
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "dtype": "float64",
+          "shape": [
+            2,
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 74,
+          "function_name": "creating_tensors",
+          "code": "x = np.ones((2, 3))  # @inspect x"
+        }
+      ],
+      "env": {
+        "x": {
+          "type": "numpy.ndarray",
+          "contents": [
+            [
+              1.0,
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0,
+              1.0
+            ]
+          ],
+          "dtype": "float64",
+          "shape": [
+            2,
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 77,
+          "function_name": "creating_tensors",
+          "code": "x = np.random.randn(2, 3)  # @inspect x"
+        }
+      ],
+      "env": {
+        "x": {
+          "type": "numpy.ndarray",
+          "contents": [
+            [
+              -2.845390393805864,
+              0.4859443187039044,
+              1.126272503540939
+            ],
+            [
+              -0.19691966723198104,
+              0.11061573101072165,
+              -0.06857238900086751
+            ]
+          ],
+          "dtype": "float64",
+          "shape": [
+            2,
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 80,
+          "function_name": "creating_tensors",
+          "code": "x = np.eye(3)  # @inspect x"
+        }
+      ],
+      "env": {
+        "x": {
+          "type": "numpy.ndarray",
+          "contents": [
+            [
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "dtype": "float64",
+          "shape": [
+            3,
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 83,
+          "function_name": "creating_tensors",
+          "code": "x = np.diag([1, 2, 3])  # @inspect x"
+        }
+      ],
+      "env": {
+        "x": {
+          "type": "numpy.ndarray",
+          "contents": [
+            [
+              1,
+              0,
+              0
+            ],
+            [
+              0,
+              2,
+              0
+            ],
+            [
+              0,
+              0,
+              3
+            ]
+          ],
+          "dtype": "int64",
+          "shape": [
+            3,
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 85,
+          "function_name": "creating_tensors",
+          "code": "text(\"Or you can read / write them from disk\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Or you can read / write them from disk",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 86,
+          "function_name": "creating_tensors",
+          "code": "np.save(\"var/x.npy\", x)"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 87,
+          "function_name": "creating_tensors",
+          "code": "new_x = np.load(\"var/x.npy\")  # @inspect new_x"
+        }
+      ],
+      "env": {
+        "new_x": {
+          "type": "numpy.ndarray",
+          "contents": [
+            [
+              1,
+              0,
+              0
+            ],
+            [
+              0,
+              2,
+              0
+            ],
+            [
+              0,
+              0,
+              3
+            ]
+          ],
+          "dtype": "int64",
+          "shape": [
+            3,
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "creating_tensors()"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "tensor_examples()"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "tensor_examples()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 90,
+          "function_name": "tensor_examples",
+          "code": "def tensor_examples():"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "tensor_examples()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 91,
+          "function_name": "tensor_examples",
+          "code": "text(\"Here are some typical tensors that show up in machine learning.\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Here are some typical tensors that show up in machine learning.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "tensor_examples()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 94,
+          "function_name": "tensor_examples",
+          "code": "D = 2  # Number of dimensions"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "tensor_examples()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 95,
+          "function_name": "tensor_examples",
+          "code": "x = np.ones(D)  # @inspect x"
+        }
+      ],
+      "env": {
+        "x": {
+          "type": "numpy.ndarray",
+          "contents": [
+            1.0,
+            1.0
+          ],
+          "dtype": "float64",
+          "shape": [
+            2
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "tensor_examples()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 96,
+          "function_name": "tensor_examples",
+          "code": "text(\"Here, `np.ones` is arbitrary; we're just trying getting a tensor of the right shape.\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Here, `np.ones` is arbitrary; we're just trying getting a tensor of the right shape.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "tensor_examples()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 98,
+          "function_name": "tensor_examples",
+          "code": "text(\"We often batch examples together (for efficiency).\")  # @clear x"
+        }
+      ],
+      "env": {
+        "x": null
+      },
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "We often batch examples together (for efficiency).",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "tensor_examples()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 99,
+          "function_name": "tensor_examples",
+          "code": "N = 3  # Number of examples"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "tensor_examples()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 101,
+          "function_name": "tensor_examples",
+          "code": "x = np.ones((N, D))  # @inspect x"
+        }
+      ],
+      "env": {
+        "x": {
+          "type": "numpy.ndarray",
+          "contents": [
+            [
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0
+            ]
+          ],
+          "dtype": "float64",
+          "shape": [
+            3,
+            2
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "tensor_examples()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 103,
+          "function_name": "tensor_examples",
+          "code": "text(\"In language modeling, each example is a whole sequence of length\")  # @clear x"
+        }
+      ],
+      "env": {
+        "x": null
+      },
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "In language modeling, each example is a whole sequence of length",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "tensor_examples()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 104,
+          "function_name": "tensor_examples",
+          "code": "L = 4  # Length of sequence"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "tensor_examples()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 106,
+          "function_name": "tensor_examples",
+          "code": "x = np.ones((N, L, D))  # @inspect x"
+        }
+      ],
+      "env": {
+        "x": {
+          "type": "numpy.ndarray",
+          "contents": [
+            [
+              [
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0
+              ]
+            ],
+            [
+              [
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0
+              ]
+            ],
+            [
+              [
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0
+              ]
+            ]
+          ],
+          "dtype": "float64",
+          "shape": [
+            3,
+            4,
+            2
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "tensor_examples()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 108,
+          "function_name": "tensor_examples",
+          "code": "text(\"In vision, images are have..\")  # @clear x"
+        }
+      ],
+      "env": {
+        "x": null
+      },
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "In vision, images are have..",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "tensor_examples()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 109,
+          "function_name": "tensor_examples",
+          "code": "H = 2  # A height"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "tensor_examples()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 110,
+          "function_name": "tensor_examples",
+          "code": "W = 2  # A width"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "tensor_examples()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 111,
+          "function_name": "tensor_examples",
+          "code": "C = 3  # A number of channels (red, green, blue)"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "tensor_examples()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 112,
+          "function_name": "tensor_examples",
+          "code": "x = np.ones((N, H, W, C))"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "tensor_examples()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 114,
+          "function_name": "tensor_examples",
+          "code": "text(\"In a neural network, we have a weight matrix that transforms a\")  # @clear x"
+        }
+      ],
+      "env": {
+        "x": null
+      },
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "In a neural network, we have a weight matrix that transforms a",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "tensor_examples()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 115,
+          "function_name": "tensor_examples",
+          "code": "Din = 3  # ...a Din-dimensional input"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "tensor_examples()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 116,
+          "function_name": "tensor_examples",
+          "code": "Dout = 2  # ...to a Dout-dimensional output"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "tensor_examples()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 117,
+          "function_name": "tensor_examples",
+          "code": "w = np.ones((Din, Dout))  # @inspect w"
+        }
+      ],
+      "env": {
+        "w": {
+          "type": "numpy.ndarray",
+          "contents": [
+            [
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0
+            ]
+          ],
+          "dtype": "float64",
+          "shape": [
+            3,
+            2
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "tensor_examples()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 119,
+          "function_name": "tensor_examples",
+          "code": "text(\"In general, the parameters of a neural network model are a collection of tensors.\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "In general, the parameters of a neural network model are a collection of tensors.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "tensor_examples()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 120,
+          "function_name": "tensor_examples",
+          "code": "text(\"For example, here are the parameters of the DeepSeek v3 model \"), link(\"https://arxiv.org/abs/2412.19437\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "For example, here are the parameters of the DeepSeek v3 model ",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        },
+        {
+          "type": "link",
+          "data": null,
+          "style": {},
+          "external_link": {
+            "title": "DeepSeek-V3 Technical Report",
+            "authors": [
+              "DeepSeek-AI",
+              "Aixin Liu",
+              "Bei Feng",
+              "Bing Xue",
+              "Bingxuan Wang",
+              "Bochao Wu",
+              "Chengda Lu",
+              "Chenggang Zhao",
+              "Chengqi Deng",
+              "Chenyu Zhang",
+              "Chong Ruan",
+              "Damai Dai",
+              "Daya Guo",
+              "Dejian Yang",
+              "Deli Chen",
+              "Dongjie Ji",
+              "Erhang Li",
+              "Fangyun Lin",
+              "Fucong Dai",
+              "Fuli Luo",
+              "Guangbo Hao",
+              "Guanting Chen",
+              "Guowei Li",
+              "H. Zhang",
+              "Han Bao",
+              "Hanwei Xu",
+              "Haocheng Wang",
+              "Haowei Zhang",
+              "Honghui Ding",
+              "Huajian Xin",
+              "Huazuo Gao",
+              "Hui Li",
+              "Hui Qu",
+              "J. L. Cai",
+              "Jian Liang",
+              "Jianzhong Guo",
+              "Jiaqi Ni",
+              "Jiashi Li",
+              "Jiawei Wang",
+              "Jin Chen",
+              "Jingchang Chen",
+              "Jingyang Yuan",
+              "Junjie Qiu",
+              "Junlong Li",
+              "Junxiao Song",
+              "Kai Dong",
+              "Kai Hu",
+              "Kaige Gao",
+              "Kang Guan",
+              "Kexin Huang",
+              "Kuai Yu",
+              "Lean Wang",
+              "Lecong Zhang",
+              "Lei Xu",
+              "Leyi Xia",
+              "Liang Zhao",
+              "Litong Wang",
+              "Liyue Zhang",
+              "Meng Li",
+              "Miaojun Wang",
+              "Mingchuan Zhang",
+              "Minghua Zhang",
+              "Minghui Tang",
+              "Mingming Li",
+              "Ning Tian",
+              "Panpan Huang",
+              "Peiyi Wang",
+              "Peng Zhang",
+              "Qiancheng Wang",
+              "Qihao Zhu",
+              "Qinyu Chen",
+              "Qiushi Du",
+              "R. J. Chen",
+              "R. L. Jin",
+              "Ruiqi Ge",
+              "Ruisong Zhang",
+              "Ruizhe Pan",
+              "Runji Wang",
+              "Runxin Xu",
+              "Ruoyu Zhang",
+              "Ruyi Chen",
+              "S. S. Li",
+              "Shanghao Lu",
+              "Shangyan Zhou",
+              "Shanhuang Chen",
+              "Shaoqing Wu",
+              "Shengfeng Ye",
+              "Shengfeng Ye",
+              "Shirong Ma",
+              "Shiyu Wang",
+              "Shuang Zhou",
+              "Shuiping Yu",
+              "Shunfeng Zhou",
+              "Shuting Pan",
+              "T. Wang",
+              "Tao Yun",
+              "Tian Pei",
+              "Tianyu Sun",
+              "W. L. Xiao",
+              "Wangding Zeng",
+              "Wanjia Zhao",
+              "Wei An",
+              "Wen Liu",
+              "Wenfeng Liang",
+              "Wenjun Gao",
+              "Wenqin Yu",
+              "Wentao Zhang",
+              "X. Q. Li",
+              "Xiangyue Jin",
+              "Xianzu Wang",
+              "Xiao Bi",
+              "Xiaodong Liu",
+              "Xiaohan Wang",
+              "Xiaojin Shen",
+              "Xiaokang Chen",
+              "Xiaokang Zhang",
+              "Xiaosha Chen",
+              "Xiaotao Nie",
+              "Xiaowen Sun",
+              "Xiaoxiang Wang",
+              "Xin Cheng",
+              "Xin Liu",
+              "Xin Xie",
+              "Xingchao Liu",
+              "Xingkai Yu",
+              "Xinnan Song",
+              "Xinxia Shan",
+              "Xinyi Zhou",
+              "Xinyu Yang",
+              "Xinyuan Li",
+              "Xuecheng Su",
+              "Xuheng Lin",
+              "Y. K. Li",
+              "Y. Q. Wang",
+              "Y. X. Wei",
+              "Y. X. Zhu",
+              "Yang Zhang",
+              "Yanhong Xu",
+              "Yanhong Xu",
+              "Yanping Huang",
+              "Yao Li",
+              "Yao Zhao",
+              "Yaofeng Sun",
+              "Yaohui Li",
+              "Yaohui Wang",
+              "Yi Yu",
+              "Yi Zheng",
+              "Yichao Zhang",
+              "Yifan Shi",
+              "Yiliang Xiong",
+              "Ying He",
+              "Ying Tang",
+              "Yishi Piao",
+              "Yisong Wang",
+              "Yixuan Tan",
+              "Yiyang Ma",
+              "Yiyuan Liu",
+              "Yongqiang Guo",
+              "Yu Wu",
+              "Yuan Ou",
+              "Yuchen Zhu",
+              "Yuduan Wang",
+              "Yue Gong",
+              "Yuheng Zou",
+              "Yujia He",
+              "Yukun Zha",
+              "Yunfan Xiong",
+              "Yunxian Ma",
+              "Yuting Yan",
+              "Yuxiang Luo",
+              "Yuxiang You",
+              "Yuxuan Liu",
+              "Yuyang Zhou",
+              "Z. F. Wu",
+              "Z. Z. Ren",
+              "Zehui Ren",
+              "Zhangli Sha",
+              "Zhe Fu",
+              "Zhean Xu",
+              "Zhen Huang",
+              "Zhen Zhang",
+              "Zhenda Xie",
+              "Zhengyan Zhang",
+              "Zhewen Hao",
+              "Zhibin Gou",
+              "Zhicheng Ma",
+              "Zhigang Yan",
+              "Zhihong Shao",
+              "Zhipeng Xu",
+              "Zhiyu Wu",
+              "Zhongyu Zhang",
+              "Zhuoshu Li",
+              "Zihui Gu",
+              "Zijia Zhu",
+              "Zijun Liu",
+              "Zilin Li",
+              "Ziwei Xie",
+              "Ziyang Song",
+              "Ziyi Gao",
+              "Zizheng Pan"
+            ],
+            "organization": null,
+            "date": "2024-12-27T04:03:16Z",
+            "url": "https://arxiv.org/abs/2412.19437",
+            "description": "We present DeepSeek-V3, a strong Mixture-of-Experts (MoE) language model with 671B total parameters with 37B activated for each token. To achieve efficient inference and cost-effective training, DeepSeek-V3 adopts Multi-head Latent Attention (MLA) and DeepSeekMoE architectures, which were thoroughly validated in DeepSeek-V2. Furthermore, DeepSeek-V3 pioneers an auxiliary-loss-free strategy for load balancing and sets a multi-token prediction training objective for stronger performance. We pre-train DeepSeek-V3 on 14.8 trillion diverse and high-quality tokens, followed by Supervised Fine-Tuning and Reinforcement Learning stages to fully harness its capabilities. Comprehensive evaluations reveal that DeepSeek-V3 outperforms other open-source models and achieves performance comparable to leading closed-source models. Despite its excellent performance, DeepSeek-V3 requires only 2.788M H800 GPU hours for its full training. In addition, its training process is remarkably stable. Throughout the entire training process, we did not experience any irrecoverable loss spikes or perform any rollbacks. The model checkpoints are available at https://github.com/deepseek-ai/DeepSeek-V3.",
+            "notes": null
+          },
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "tensor_examples()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 121,
+          "function_name": "tensor_examples",
+          "code": "link(\"https://huggingface.co/deepseek-ai/DeepSeek-V3?show_file_info=model.safetensors.index.json\", title=\"DeepSeek-V3 on Hugging Face\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "link",
+          "data": null,
+          "style": {},
+          "external_link": {
+            "title": "DeepSeek-V3 on Hugging Face",
+            "authors": null,
+            "organization": null,
+            "date": null,
+            "url": "https://huggingface.co/deepseek-ai/DeepSeek-V3?show_file_info=model.safetensors.index.json",
+            "description": null,
+            "notes": null
+          },
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "tensor_examples()"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "viewing_tensors()"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "viewing_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 124,
+          "function_name": "viewing_tensors",
+          "code": "def viewing_tensors():"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "viewing_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 125,
+          "function_name": "viewing_tensors",
+          "code": "text(\"Given a tensor, you can extract parts of it.\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Given a tensor, you can extract parts of it.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "viewing_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 126,
+          "function_name": "viewing_tensors",
+          "code": "x = np.random.randn(2, 3)  # @inspect x"
+        }
+      ],
+      "env": {
+        "x": {
+          "type": "numpy.ndarray",
+          "contents": [
+            [
+              -1.9004262521989412,
+              0.01632111345068394,
+              -0.8052341082473778
+            ],
+            [
+              0.36308197178883567,
+              0.27070479841309775,
+              0.5481260356122637
+            ]
+          ],
+          "dtype": "float64",
+          "shape": [
+            2,
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "viewing_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 129,
+          "function_name": "viewing_tensors",
+          "code": "y = x[0]  # @inspect y"
+        }
+      ],
+      "env": {
+        "y": {
+          "type": "numpy.ndarray",
+          "contents": [
+            -1.9004262521989412,
+            0.01632111345068394,
+            -0.8052341082473778
+          ],
+          "dtype": "float64",
+          "shape": [
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "viewing_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 132,
+          "function_name": "viewing_tensors",
+          "code": "y = x[:, 1]  # @inspect y"
+        }
+      ],
+      "env": {
+        "y": {
+          "type": "numpy.ndarray",
+          "contents": [
+            0.01632111345068394,
+            0.27070479841309775
+          ],
+          "dtype": "float64",
+          "shape": [
+            2
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "viewing_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 135,
+          "function_name": "viewing_tensors",
+          "code": "y = x.transpose(1, 0)  # @inspect y"
+        }
+      ],
+      "env": {
+        "y": {
+          "type": "numpy.ndarray",
+          "contents": [
+            [
+              -1.9004262521989412,
+              0.36308197178883567
+            ],
+            [
+              0.01632111345068394,
+              0.27070479841309775
+            ],
+            [
+              -0.8052341082473778,
+              0.5481260356122637
+            ]
+          ],
+          "dtype": "float64",
+          "shape": [
+            3,
+            2
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "viewing_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 137,
+          "function_name": "viewing_tensors",
+          "code": "text(\"Note that these operations do not make a copy of the tensor.\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Note that these operations do not make a copy of the tensor.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "viewing_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 138,
+          "function_name": "viewing_tensors",
+          "code": "text(\"...so if you modify the tensor, you modify the view.\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "...so if you modify the tensor, you modify the view.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "viewing_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 139,
+          "function_name": "viewing_tensors",
+          "code": "text(\"Check that mutating x also mutates y.\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Check that mutating x also mutates y.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "viewing_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 140,
+          "function_name": "viewing_tensors",
+          "code": "x[0][0] = 100  # @inspect x y"
+        }
+      ],
+      "env": {
+        "x": {
+          "type": "numpy.ndarray",
+          "contents": [
+            [
+              100.0,
+              0.01632111345068394,
+              -0.8052341082473778
+            ],
+            [
+              0.36308197178883567,
+              0.27070479841309775,
+              0.5481260356122637
+            ]
+          ],
+          "dtype": "float64",
+          "shape": [
+            2,
+            3
+          ]
+        },
+        "y": {
+          "type": "numpy.ndarray",
+          "contents": [
+            [
+              100.0,
+              0.36308197178883567
+            ],
+            [
+              0.01632111345068394,
+              0.27070479841309775
+            ],
+            [
+              -0.8052341082473778,
+              0.5481260356122637
+            ]
+          ],
+          "dtype": "float64",
+          "shape": [
+            3,
+            2
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "viewing_tensors()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 141,
+          "function_name": "viewing_tensors",
+          "code": "text(\"Generally, be careful and don't mutate tensors if you don't need to!\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Generally, be careful and don't mutate tensors if you don't need to!",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "viewing_tensors()"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "elementwise_operations()"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "elementwise_operations()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 144,
+          "function_name": "elementwise_operations",
+          "code": "def elementwise_operations():"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "elementwise_operations()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 145,
+          "function_name": "elementwise_operations",
+          "code": "text(\"These operations apply some operation to each element of the tensor\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "These operations apply some operation to each element of the tensor",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "elementwise_operations()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 146,
+          "function_name": "elementwise_operations",
+          "code": "text(\"...and return a (new) tensor of the same shape.\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "...and return a (new) tensor of the same shape.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "elementwise_operations()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 148,
+          "function_name": "elementwise_operations",
+          "code": "x = np.array([1, 4, 9])  # @inspect x"
+        }
+      ],
+      "env": {
+        "x": {
+          "type": "numpy.ndarray",
+          "contents": [
+            1,
+            4,
+            9
+          ],
+          "dtype": "int64",
+          "shape": [
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "elementwise_operations()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 149,
+          "function_name": "elementwise_operations",
+          "code": "y = np.power(x, 2)  # @inspect y"
+        }
+      ],
+      "env": {
+        "y": {
+          "type": "numpy.ndarray",
+          "contents": [
+            1,
+            16,
+            81
+          ],
+          "dtype": "int64",
+          "shape": [
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "elementwise_operations()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 150,
+          "function_name": "elementwise_operations",
+          "code": "y = np.sqrt(x)  # @inspect y"
+        }
+      ],
+      "env": {
+        "y": {
+          "type": "numpy.ndarray",
+          "contents": [
+            1.0,
+            2.0,
+            3.0
+          ],
+          "dtype": "float64",
+          "shape": [
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "elementwise_operations()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 152,
+          "function_name": "elementwise_operations",
+          "code": "y = x + x  # @inspect y"
+        }
+      ],
+      "env": {
+        "y": {
+          "type": "numpy.ndarray",
+          "contents": [
+            2,
+            8,
+            18
+          ],
+          "dtype": "int64",
+          "shape": [
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "elementwise_operations()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 153,
+          "function_name": "elementwise_operations",
+          "code": "y = x * 3  # @inspect y"
+        }
+      ],
+      "env": {
+        "y": {
+          "type": "numpy.ndarray",
+          "contents": [
+            3,
+            12,
+            27
+          ],
+          "dtype": "int64",
+          "shape": [
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "elementwise_operations()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 154,
+          "function_name": "elementwise_operations",
+          "code": "y = x / 2  # @inspect y"
+        }
+      ],
+      "env": {
+        "y": {
+          "type": "numpy.ndarray",
+          "contents": [
+            0.5,
+            2.0,
+            4.5
+          ],
+          "dtype": "float64",
+          "shape": [
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "elementwise_operations()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 156,
+          "function_name": "elementwise_operations",
+          "code": "text(\"`triu` (`tril`) takes the upper (lower) triangular part of a matrix.\")  # @clear y"
+        }
+      ],
+      "env": {
+        "y": null
+      },
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "`triu` (`tril`) takes the upper (lower) triangular part of a matrix.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "elementwise_operations()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 157,
+          "function_name": "elementwise_operations",
+          "code": "x = np.ones((3, 3))  # @inspect x"
+        }
+      ],
+      "env": {
+        "x": {
+          "type": "numpy.ndarray",
+          "contents": [
+            [
+              1.0,
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0,
+              1.0
+            ]
+          ],
+          "dtype": "float64",
+          "shape": [
+            3,
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "elementwise_operations()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 158,
+          "function_name": "elementwise_operations",
+          "code": "y = np.triu(x)  # @inspect y"
+        }
+      ],
+      "env": {
+        "y": {
+          "type": "numpy.ndarray",
+          "contents": [
+            [
+              1.0,
+              1.0,
+              1.0
+            ],
+            [
+              0.0,
+              1.0,
+              1.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "dtype": "float64",
+          "shape": [
+            3,
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "elementwise_operations()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 159,
+          "function_name": "elementwise_operations",
+          "code": "y = np.tril(x)  # @inspect y"
+        }
+      ],
+      "env": {
+        "y": {
+          "type": "numpy.ndarray",
+          "contents": [
+            [
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              1.0,
+              1.0,
+              0.0
+            ],
+            [
+              1.0,
+              1.0,
+              1.0
+            ]
+          ],
+          "dtype": "float64",
+          "shape": [
+            3,
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "elementwise_operations()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 160,
+          "function_name": "elementwise_operations",
+          "code": "text(\"This is useful for masking parts of the input (for Transformers).\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "This is useful for masking parts of the input (for Transformers).",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "elementwise_operations()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 162,
+          "function_name": "elementwise_operations",
+          "code": "text(\"You can create zeros and ones with the same shape as another tensor:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "You can create zeros and ones with the same shape as another tensor:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "elementwise_operations()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 163,
+          "function_name": "elementwise_operations",
+          "code": "y = np.zeros_like(x)  # @inspect y"
+        }
+      ],
+      "env": {
+        "y": {
+          "type": "numpy.ndarray",
+          "contents": [
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "dtype": "float64",
+          "shape": [
+            3,
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "elementwise_operations()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 164,
+          "function_name": "elementwise_operations",
+          "code": "y = np.ones_like(x)  # @inspect y"
+        }
+      ],
+      "env": {
+        "y": {
+          "type": "numpy.ndarray",
+          "contents": [
+            [
+              1.0,
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0,
+              1.0
+            ]
+          ],
+          "dtype": "float64",
+          "shape": [
+            3,
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "elementwise_operations()"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "matrix_multiplication()"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "matrix_multiplication()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 167,
+          "function_name": "matrix_multiplication",
+          "code": "def matrix_multiplication():"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "matrix_multiplication()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 168,
+          "function_name": "matrix_multiplication",
+          "code": "text(\"Finally, the bread and butter of deep learning: matrix multiplication.\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Finally, the bread and butter of deep learning: matrix multiplication.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "matrix_multiplication()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 169,
+          "function_name": "matrix_multiplication",
+          "code": "x = np.ones((4, 6))  # @inspect x"
+        }
+      ],
+      "env": {
+        "x": {
+          "type": "numpy.ndarray",
+          "contents": [
+            [
+              1.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ]
+          ],
+          "dtype": "float64",
+          "shape": [
+            4,
+            6
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "matrix_multiplication()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 170,
+          "function_name": "matrix_multiplication",
+          "code": "w = np.ones((6, 3))  # @inspect w"
+        }
+      ],
+      "env": {
+        "w": {
+          "type": "numpy.ndarray",
+          "contents": [
+            [
+              1.0,
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0,
+              1.0
+            ]
+          ],
+          "dtype": "float64",
+          "shape": [
+            6,
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "matrix_multiplication()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 171,
+          "function_name": "matrix_multiplication",
+          "code": "y = x @ w  # @inspect y"
+        }
+      ],
+      "env": {
+        "y": {
+          "type": "numpy.ndarray",
+          "contents": [
+            [
+              6.0,
+              6.0,
+              6.0
+            ],
+            [
+              6.0,
+              6.0,
+              6.0
+            ],
+            [
+              6.0,
+              6.0,
+              6.0
+            ],
+            [
+              6.0,
+              6.0,
+              6.0
+            ]
+          ],
+          "dtype": "float64",
+          "shape": [
+            4,
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "matrix_multiplication()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 172,
+          "function_name": "matrix_multiplication",
+          "code": "assert y.shape == (4, 3)"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "matrix_multiplication()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 174,
+          "function_name": "matrix_multiplication",
+          "code": "text(\"We can batch multiple matrix operations:\")  # @clear y"
+        }
+      ],
+      "env": {
+        "y": null
+      },
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "We can batch multiple matrix operations:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "matrix_multiplication()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 175,
+          "function_name": "matrix_multiplication",
+          "code": "x = np.ones((2, 4, 6))  # @inspect x"
+        }
+      ],
+      "env": {
+        "x": {
+          "type": "numpy.ndarray",
+          "contents": [
+            [
+              [
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ]
+            ],
+            [
+              [
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ]
+            ]
+          ],
+          "dtype": "float64",
+          "shape": [
+            2,
+            4,
+            6
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "matrix_multiplication()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 176,
+          "function_name": "matrix_multiplication",
+          "code": "w = np.ones((6, 3))  # @inspect w"
+        }
+      ],
+      "env": {
+        "w": {
+          "type": "numpy.ndarray",
+          "contents": [
+            [
+              1.0,
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0,
+              1.0
+            ]
+          ],
+          "dtype": "float64",
+          "shape": [
+            6,
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "matrix_multiplication()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 177,
+          "function_name": "matrix_multiplication",
+          "code": "y = x @ w  # @inspect y"
+        }
+      ],
+      "env": {
+        "y": {
+          "type": "numpy.ndarray",
+          "contents": [
+            [
+              [
+                6.0,
+                6.0,
+                6.0
+              ],
+              [
+                6.0,
+                6.0,
+                6.0
+              ],
+              [
+                6.0,
+                6.0,
+                6.0
+              ],
+              [
+                6.0,
+                6.0,
+                6.0
+              ]
+            ],
+            [
+              [
+                6.0,
+                6.0,
+                6.0
+              ],
+              [
+                6.0,
+                6.0,
+                6.0
+              ],
+              [
+                6.0,
+                6.0,
+                6.0
+              ],
+              [
+                6.0,
+                6.0,
+                6.0
+              ]
+            ]
+          ],
+          "dtype": "float64",
+          "shape": [
+            2,
+            4,
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "matrix_multiplication()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 178,
+          "function_name": "matrix_multiplication",
+          "code": "assert y.shape == (2, 4, 3)"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "matrix_multiplication()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 179,
+          "function_name": "matrix_multiplication",
+          "code": "text(\"In this case, for each slice x[0], x[1], ..., we multiply by `w`.\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "In this case, for each slice x[0], x[1], ..., we multiply by `w`.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "matrix_multiplication()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 180,
+          "function_name": "matrix_multiplication",
+          "code": "text(\"Terminology: w is broadcasted to each slice of x.\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Terminology: w is broadcasted to each slice of x.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "matrix_multiplication()"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "efficiency()"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "efficiency()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 183,
+          "function_name": "efficiency",
+          "code": "def efficiency():"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "efficiency()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 184,
+          "function_name": "efficiency",
+          "code": "text(\"There are often multiple ways to compute the same result.\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "There are often multiple ways to compute the same result.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "efficiency()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 185,
+          "function_name": "efficiency",
+          "code": "text(\"Whenever possible, try to express computation as tensor operations.\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Whenever possible, try to express computation as tensor operations.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "efficiency()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 186,
+          "function_name": "efficiency",
+          "code": "N = 16"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "efficiency()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 187,
+          "function_name": "efficiency",
+          "code": "x = np.ones((N, N))"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "efficiency()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 188,
+          "function_name": "efficiency",
+          "code": "w = np.ones((N, N))"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "efficiency()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 190,
+          "function_name": "efficiency",
+          "code": "text(\"Let's compute a matrix multiplication in Python.\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Let's compute a matrix multiplication in Python.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "efficiency()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 191,
+          "function_name": "efficiency",
+          "code": "def slow_matmul() -> np.ndarray:"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "efficiency()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 198,
+          "function_name": "efficiency",
+          "code": "python_time = timeit.timeit(slow_matmul, number=1)  # @inspect slow_time @stepover"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "efficiency()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 200,
+          "function_name": "efficiency",
+          "code": "text(\"Let's Fast way: use built-in matrix multiplication\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Let's Fast way: use built-in matrix multiplication",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "efficiency()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 201,
+          "function_name": "efficiency",
+          "code": "numpy_time = timeit.timeit(lambda: x @ w, number=1)  # @inspect fast_time @stepover"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "efficiency()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 201,
+          "function_name": "efficiency",
+          "code": "numpy_time = timeit.timeit(lambda: x @ w, number=1)  # @inspect fast_time @stepover"
+        },
+        {
+          "path": "../../../../.local/share/uv/python/cpython-3.11.11-linux-x86_64-gnu/lib/python3.11/timeit.py",
+          "line_number": 237,
+          "function_name": "timeit",
+          "code": "return Timer(stmt, setup, timer, globals).timeit(number)"
+        },
+        {
+          "path": "../../../../.local/share/uv/python/cpython-3.11.11-linux-x86_64-gnu/lib/python3.11/timeit.py",
+          "line_number": 180,
+          "function_name": "timeit",
+          "code": "timing = self.inner(it, self.timer)"
+        },
+        {
+          "path": "<timeit-src>",
+          "line_number": 6,
+          "function_name": "inner",
+          "code": ""
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 201,
+          "function_name": "<lambda>",
+          "code": "numpy_time = timeit.timeit(lambda: x @ w, number=1)  # @inspect fast_time @stepover"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "efficiency()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 201,
+          "function_name": "efficiency",
+          "code": "numpy_time = timeit.timeit(lambda: x @ w, number=1)  # @inspect fast_time @stepover"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "efficiency()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 204,
+          "function_name": "efficiency",
+          "code": "speedup = python_time / numpy_time  # @inspect speedup"
+        }
+      ],
+      "env": {
+        "speedup": {
+          "type": "float",
+          "contents": 1460.9647427540085,
+          "dtype": null,
+          "shape": null
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "efficiency()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 206,
+          "function_name": "efficiency",
+          "code": "text(\"Matrix multiplication is even faster on GPUs (for large matrices)!\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Matrix multiplication is even faster on GPUs (for large matrices)!",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "efficiency()"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 208,
+          "function_name": "einops",
+          "code": "def einops():"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 209,
+          "function_name": "einops",
+          "code": "einops_motivation()"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 209,
+          "function_name": "einops",
+          "code": "einops_motivation()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 220,
+          "function_name": "einops_motivation",
+          "code": "def einops_motivation():"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 209,
+          "function_name": "einops",
+          "code": "einops_motivation()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 221,
+          "function_name": "einops_motivation",
+          "code": "text(\"Traditional PyTorch code:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Traditional PyTorch code:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 209,
+          "function_name": "einops",
+          "code": "einops_motivation()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 222,
+          "function_name": "einops_motivation",
+          "code": "x = torch.ones(2, 2, 3)      # batch seq hidden  @inspect x"
+        }
+      ],
+      "env": {
+        "x": {
+          "type": "torch.Tensor",
+          "contents": [
+            [
+              [
+                1.0,
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0,
+                1.0
+              ]
+            ],
+            [
+              [
+                1.0,
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0,
+                1.0
+              ]
+            ]
+          ],
+          "dtype": "torch.float32",
+          "shape": [
+            2,
+            2,
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 209,
+          "function_name": "einops",
+          "code": "einops_motivation()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 223,
+          "function_name": "einops_motivation",
+          "code": "y = torch.ones(2, 2, 3)      # batch seq hidden  @inspect y"
+        }
+      ],
+      "env": {
+        "y": {
+          "type": "torch.Tensor",
+          "contents": [
+            [
+              [
+                1.0,
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0,
+                1.0
+              ]
+            ],
+            [
+              [
+                1.0,
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0,
+                1.0
+              ]
+            ]
+          ],
+          "dtype": "torch.float32",
+          "shape": [
+            2,
+            2,
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 209,
+          "function_name": "einops",
+          "code": "einops_motivation()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 224,
+          "function_name": "einops_motivation",
+          "code": "z = x @ y.transpose(-2, -1)  # batch seq seq  @inspect z"
+        }
+      ],
+      "env": {
+        "z": {
+          "type": "torch.Tensor",
+          "contents": [
+            [
+              [
+                3.0,
+                3.0
+              ],
+              [
+                3.0,
+                3.0
+              ]
+            ],
+            [
+              [
+                3.0,
+                3.0
+              ],
+              [
+                3.0,
+                3.0
+              ]
+            ]
+          ],
+          "dtype": "torch.float32",
+          "shape": [
+            2,
+            2,
+            2
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 209,
+          "function_name": "einops",
+          "code": "einops_motivation()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 225,
+          "function_name": "einops_motivation",
+          "code": "text(\"Easy to mess up the dimensions (what is -2, -1?)...\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Easy to mess up the dimensions (what is -2, -1?)...",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 209,
+          "function_name": "einops",
+          "code": "einops_motivation()"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 211,
+          "function_name": "einops",
+          "code": "text(\"Einops is a library for manipulating tensors where dimensions are named.\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Einops is a library for manipulating tensors where dimensions are named.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 212,
+          "function_name": "einops",
+          "code": "text(\"It is inspired by Einstein summation notation (Einstein, 1916).\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "It is inspired by Einstein summation notation (Einstein, 1916).",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 213,
+          "function_name": "einops",
+          "code": "link(title=\"[Einops tutorial]\", url=\"https://einops.rocks/1-einops-basics/\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "link",
+          "data": null,
+          "style": {},
+          "external_link": {
+            "title": "[Einops tutorial]",
+            "authors": null,
+            "organization": null,
+            "date": null,
+            "url": "https://einops.rocks/1-einops-basics/",
+            "description": null,
+            "notes": null
+          },
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 215,
+          "function_name": "einops",
+          "code": "einops_einsum()"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 215,
+          "function_name": "einops",
+          "code": "einops_einsum()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 228,
+          "function_name": "einops_einsum",
+          "code": "def einops_einsum():"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 215,
+          "function_name": "einops",
+          "code": "einops_einsum()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 229,
+          "function_name": "einops_einsum",
+          "code": "text(\"Einsum is generalized matrix multiplication with good bookkeeping.\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Einsum is generalized matrix multiplication with good bookkeeping.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 215,
+          "function_name": "einops",
+          "code": "einops_einsum()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 231,
+          "function_name": "einops_einsum",
+          "code": "x = torch.ones(3, 4)  # seq1 hidden @inspect x"
+        }
+      ],
+      "env": {
+        "x": {
+          "type": "torch.Tensor",
+          "contents": [
+            [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ]
+          ],
+          "dtype": "torch.float32",
+          "shape": [
+            3,
+            4
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 215,
+          "function_name": "einops",
+          "code": "einops_einsum()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 232,
+          "function_name": "einops_einsum",
+          "code": "y = torch.ones(4, 3)  # hidden seq2 @inspect y"
+        }
+      ],
+      "env": {
+        "y": {
+          "type": "torch.Tensor",
+          "contents": [
+            [
+              1.0,
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0,
+              1.0
+            ]
+          ],
+          "dtype": "torch.float32",
+          "shape": [
+            4,
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 215,
+          "function_name": "einops",
+          "code": "einops_einsum()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 235,
+          "function_name": "einops_einsum",
+          "code": "z = x @ y   # seq1 seq2  @inspect z"
+        }
+      ],
+      "env": {
+        "z": {
+          "type": "torch.Tensor",
+          "contents": [
+            [
+              4.0,
+              4.0,
+              4.0
+            ],
+            [
+              4.0,
+              4.0,
+              4.0
+            ],
+            [
+              4.0,
+              4.0,
+              4.0
+            ]
+          ],
+          "dtype": "torch.float32",
+          "shape": [
+            3,
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 215,
+          "function_name": "einops",
+          "code": "einops_einsum()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 238,
+          "function_name": "einops_einsum",
+          "code": "z = einsum(x, y, \"seq1 hidden, hidden seq2 -> seq1 seq2\")  # @inspect z"
+        }
+      ],
+      "env": {
+        "z": {
+          "type": "torch.Tensor",
+          "contents": [
+            [
+              4.0,
+              4.0,
+              4.0
+            ],
+            [
+              4.0,
+              4.0,
+              4.0
+            ],
+            [
+              4.0,
+              4.0,
+              4.0
+            ]
+          ],
+          "dtype": "torch.float32",
+          "shape": [
+            3,
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 215,
+          "function_name": "einops",
+          "code": "einops_einsum()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 240,
+          "function_name": "einops_einsum",
+          "code": "text(\"Let's try a more complex example...\")  # @clear x y z"
+        }
+      ],
+      "env": {
+        "x": null,
+        "y": null,
+        "z": null
+      },
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Let's try a more complex example...",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 215,
+          "function_name": "einops",
+          "code": "einops_einsum()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 242,
+          "function_name": "einops_einsum",
+          "code": "x = torch.ones(2, 3, 4)  # batch seq1 hidden @inspect x"
+        }
+      ],
+      "env": {
+        "x": {
+          "type": "torch.Tensor",
+          "contents": [
+            [
+              [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ]
+            ],
+            [
+              [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ]
+            ]
+          ],
+          "dtype": "torch.float32",
+          "shape": [
+            2,
+            3,
+            4
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 215,
+          "function_name": "einops",
+          "code": "einops_einsum()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 243,
+          "function_name": "einops_einsum",
+          "code": "y = torch.ones(2, 3, 4)  # batch seq2 hidden @inspect y"
+        }
+      ],
+      "env": {
+        "y": {
+          "type": "torch.Tensor",
+          "contents": [
+            [
+              [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ]
+            ],
+            [
+              [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ]
+            ]
+          ],
+          "dtype": "torch.float32",
+          "shape": [
+            2,
+            3,
+            4
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 215,
+          "function_name": "einops",
+          "code": "einops_einsum()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 246,
+          "function_name": "einops_einsum",
+          "code": "z = x @ y.transpose(-2, -1)  # batch seq1 seq2  @inspect z"
+        }
+      ],
+      "env": {
+        "z": {
+          "type": "torch.Tensor",
+          "contents": [
+            [
+              [
+                4.0,
+                4.0,
+                4.0
+              ],
+              [
+                4.0,
+                4.0,
+                4.0
+              ],
+              [
+                4.0,
+                4.0,
+                4.0
+              ]
+            ],
+            [
+              [
+                4.0,
+                4.0,
+                4.0
+              ],
+              [
+                4.0,
+                4.0,
+                4.0
+              ],
+              [
+                4.0,
+                4.0,
+                4.0
+              ]
+            ]
+          ],
+          "dtype": "torch.float32",
+          "shape": [
+            2,
+            3,
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 215,
+          "function_name": "einops",
+          "code": "einops_einsum()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 249,
+          "function_name": "einops_einsum",
+          "code": "z = einsum(x, y, \"batch seq1 hidden, batch seq2 hidden -> batch seq1 seq2\")  # @inspect z"
+        }
+      ],
+      "env": {
+        "z": {
+          "type": "torch.Tensor",
+          "contents": [
+            [
+              [
+                4.0,
+                4.0,
+                4.0
+              ],
+              [
+                4.0,
+                4.0,
+                4.0
+              ],
+              [
+                4.0,
+                4.0,
+                4.0
+              ]
+            ],
+            [
+              [
+                4.0,
+                4.0,
+                4.0
+              ],
+              [
+                4.0,
+                4.0,
+                4.0
+              ],
+              [
+                4.0,
+                4.0,
+                4.0
+              ]
+            ]
+          ],
+          "dtype": "torch.float32",
+          "shape": [
+            2,
+            3,
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 215,
+          "function_name": "einops",
+          "code": "einops_einsum()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 250,
+          "function_name": "einops_einsum",
+          "code": "text(\"Dimensions that are not named in the output are summed over.\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Dimensions that are not named in the output are summed over.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 215,
+          "function_name": "einops",
+          "code": "einops_einsum()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 252,
+          "function_name": "einops_einsum",
+          "code": "text(\"Or can use `...` to represent broadcasting over any number of dimensions:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Or can use `...` to represent broadcasting over any number of dimensions:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 215,
+          "function_name": "einops",
+          "code": "einops_einsum()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 253,
+          "function_name": "einops_einsum",
+          "code": "z = einsum(x, y, \"... seq1 hidden, ... seq2 hidden -> ... seq1 seq2\")  # @inspect z"
+        }
+      ],
+      "env": {
+        "z": {
+          "type": "torch.Tensor",
+          "contents": [
+            [
+              [
+                4.0,
+                4.0,
+                4.0
+              ],
+              [
+                4.0,
+                4.0,
+                4.0
+              ],
+              [
+                4.0,
+                4.0,
+                4.0
+              ]
+            ],
+            [
+              [
+                4.0,
+                4.0,
+                4.0
+              ],
+              [
+                4.0,
+                4.0,
+                4.0
+              ],
+              [
+                4.0,
+                4.0,
+                4.0
+              ]
+            ]
+          ],
+          "dtype": "torch.float32",
+          "shape": [
+            2,
+            3,
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 215,
+          "function_name": "einops",
+          "code": "einops_einsum()"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 216,
+          "function_name": "einops",
+          "code": "einops_reduce()"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 216,
+          "function_name": "einops",
+          "code": "einops_reduce()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 256,
+          "function_name": "einops_reduce",
+          "code": "def einops_reduce():"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 216,
+          "function_name": "einops",
+          "code": "einops_reduce()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 257,
+          "function_name": "einops_reduce",
+          "code": "text(\"You can reduce a single tensor via some operation (e.g., sum, mean, max, min).\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "You can reduce a single tensor via some operation (e.g., sum, mean, max, min).",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 216,
+          "function_name": "einops",
+          "code": "einops_reduce()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 258,
+          "function_name": "einops_reduce",
+          "code": "x = torch.ones(2, 3, 4)  # batch seq hidden @inspect x"
+        }
+      ],
+      "env": {
+        "x": {
+          "type": "torch.Tensor",
+          "contents": [
+            [
+              [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ]
+            ],
+            [
+              [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ]
+            ]
+          ],
+          "dtype": "torch.float32",
+          "shape": [
+            2,
+            3,
+            4
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 216,
+          "function_name": "einops",
+          "code": "einops_reduce()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 261,
+          "function_name": "einops_reduce",
+          "code": "y = x.sum(dim=-1)  # @inspect y"
+        }
+      ],
+      "env": {
+        "y": {
+          "type": "torch.Tensor",
+          "contents": [
+            [
+              4.0,
+              4.0,
+              4.0
+            ],
+            [
+              4.0,
+              4.0,
+              4.0
+            ]
+          ],
+          "dtype": "torch.float32",
+          "shape": [
+            2,
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 216,
+          "function_name": "einops",
+          "code": "einops_reduce()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 264,
+          "function_name": "einops_reduce",
+          "code": "y = reduce(x, \"... hidden -> ...\", \"sum\")  # @inspect y"
+        }
+      ],
+      "env": {
+        "y": {
+          "type": "torch.Tensor",
+          "contents": [
+            [
+              4.0,
+              4.0,
+              4.0
+            ],
+            [
+              4.0,
+              4.0,
+              4.0
+            ]
+          ],
+          "dtype": "torch.float32",
+          "shape": [
+            2,
+            3
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 216,
+          "function_name": "einops",
+          "code": "einops_reduce()"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 217,
+          "function_name": "einops",
+          "code": "einops_rearrange()"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 217,
+          "function_name": "einops",
+          "code": "einops_rearrange()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 267,
+          "function_name": "einops_rearrange",
+          "code": "def einops_rearrange():"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 217,
+          "function_name": "einops",
+          "code": "einops_rearrange()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 268,
+          "function_name": "einops_rearrange",
+          "code": "text(\"Sometimes, a dimension represents two dimensions\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Sometimes, a dimension represents two dimensions",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 217,
+          "function_name": "einops",
+          "code": "einops_rearrange()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 269,
+          "function_name": "einops_rearrange",
+          "code": "text(\"...and you want to operate on one of them.\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "...and you want to operate on one of them.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 217,
+          "function_name": "einops",
+          "code": "einops_rearrange()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 271,
+          "function_name": "einops_rearrange",
+          "code": "x = torch.ones(3, 8)  # batch seq total_hidden @inspect x"
+        }
+      ],
+      "env": {
+        "x": {
+          "type": "torch.Tensor",
+          "contents": [
+            [
+              1.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ]
+          ],
+          "dtype": "torch.float32",
+          "shape": [
+            3,
+            8
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 217,
+          "function_name": "einops",
+          "code": "einops_rearrange()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 272,
+          "function_name": "einops_rearrange",
+          "code": "text(\"...where `total_hidden` is a flattened representation of `heads * hidden1`\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "...where `total_hidden` is a flattened representation of `heads * hidden1`",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 217,
+          "function_name": "einops",
+          "code": "einops_rearrange()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 273,
+          "function_name": "einops_rearrange",
+          "code": "w = torch.ones(4, 4)  # hidden1 hidden2 @inspect w"
+        }
+      ],
+      "env": {
+        "w": {
+          "type": "torch.Tensor",
+          "contents": [
+            [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ]
+          ],
+          "dtype": "torch.float32",
+          "shape": [
+            4,
+            4
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 217,
+          "function_name": "einops",
+          "code": "einops_rearrange()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 275,
+          "function_name": "einops_rearrange",
+          "code": "text(\"Break up `total_hidden` into two dimensions (`heads` and `hidden1`):\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Break up `total_hidden` into two dimensions (`heads` and `hidden1`):",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 217,
+          "function_name": "einops",
+          "code": "einops_rearrange()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 276,
+          "function_name": "einops_rearrange",
+          "code": "x = rearrange(x, \"... (heads hidden1) -> ... heads hidden1\", heads=2)  # @inspect x"
+        }
+      ],
+      "env": {
+        "x": {
+          "type": "torch.Tensor",
+          "contents": [
+            [
+              [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ]
+            ],
+            [
+              [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ]
+            ],
+            [
+              [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ]
+            ]
+          ],
+          "dtype": "torch.float32",
+          "shape": [
+            3,
+            2,
+            4
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 217,
+          "function_name": "einops",
+          "code": "einops_rearrange()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 278,
+          "function_name": "einops_rearrange",
+          "code": "text(\"Perform the transformation by `w`:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Perform the transformation by `w`:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 217,
+          "function_name": "einops",
+          "code": "einops_rearrange()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 279,
+          "function_name": "einops_rearrange",
+          "code": "x = einsum(x, w, \"... hidden1, hidden1 hidden2 -> ... hidden2\")  # @inspect x"
+        }
+      ],
+      "env": {
+        "x": {
+          "type": "torch.Tensor",
+          "contents": [
+            [
+              [
+                4.0,
+                4.0,
+                4.0,
+                4.0
+              ],
+              [
+                4.0,
+                4.0,
+                4.0,
+                4.0
+              ]
+            ],
+            [
+              [
+                4.0,
+                4.0,
+                4.0,
+                4.0
+              ],
+              [
+                4.0,
+                4.0,
+                4.0,
+                4.0
+              ]
+            ],
+            [
+              [
+                4.0,
+                4.0,
+                4.0,
+                4.0
+              ],
+              [
+                4.0,
+                4.0,
+                4.0,
+                4.0
+              ]
+            ]
+          ],
+          "dtype": "torch.float32",
+          "shape": [
+            3,
+            2,
+            4
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 217,
+          "function_name": "einops",
+          "code": "einops_rearrange()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 281,
+          "function_name": "einops_rearrange",
+          "code": "text(\"Combine `heads` and `hidden2` back together:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Combine `heads` and `hidden2` back together:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 217,
+          "function_name": "einops",
+          "code": "einops_rearrange()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 282,
+          "function_name": "einops_rearrange",
+          "code": "x = rearrange(x, \"... heads hidden2 -> ... (heads hidden2)\")  # @inspect x"
+        }
+      ],
+      "env": {
+        "x": {
+          "type": "torch.Tensor",
+          "contents": [
+            [
+              4.0,
+              4.0,
+              4.0,
+              4.0,
+              4.0,
+              4.0,
+              4.0,
+              4.0
+            ],
+            [
+              4.0,
+              4.0,
+              4.0,
+              4.0,
+              4.0,
+              4.0,
+              4.0,
+              4.0
+            ],
+            [
+              4.0,
+              4.0,
+              4.0,
+              4.0,
+              4.0,
+              4.0,
+              4.0,
+              4.0
+            ]
+          ],
+          "dtype": "torch.float32",
+          "shape": [
+            3,
+            8
+          ]
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        },
+        {
+          "path": "tensors.py",
+          "line_number": 217,
+          "function_name": "einops",
+          "code": "einops_rearrange()"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "einops()"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 23,
+          "function_name": "main",
+          "code": "text(\"Summary\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Summary",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 24,
+          "function_name": "main",
+          "code": "text(\"- Use tensors to represent everything\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Use tensors to represent everything",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 25,
+          "function_name": "main",
+          "code": "text(\"- Express computations using few tensor operations for efficiency (a puzzle!)\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Express computations using few tensor operations for efficiency (a puzzle!)",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 26,
+          "function_name": "main",
+          "code": "text(\"- Use einops to make computations more legible\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Use einops to make computations more legible",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "tensors.py",
+          "line_number": 27,
+          "function_name": "main",
+          "code": "text(\"- Practice (it's like learning a new langauge)!\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Practice (it's like learning a new langauge)!",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    }
+  ]
+}

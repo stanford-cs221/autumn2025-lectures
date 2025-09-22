@@ -8,14 +8,25 @@ view in your browser on the links below or run locally if you clone this
 repository.  If you notice any problems or have any questions, please file an
 GitHub issue or submit a pull request.
 
+### Mon Sep 22: foundations (lecture 1)
 
-### Mon 9/22
+- [welcome](https://stanford-cs221.github.io/autumn2025-lectures/?trace=welcome)
+- [history](https://stanford-cs221.github.io/autumn2025-lectures/?trace=history)
+- [tensors](https://stanford-cs221.github.io/autumn2025-lectures/?trace=tensors)
 
-- [Welcome](https://stanford-cs221.github.io/autumn2025-lectures/?trace=welcome)
-- [Responsibility](https://stanford-cs221.github.io/autumn2025-lectures/?trace=responsibility)
-- [History](https://stanford-cs221.github.io/autumn2025-lectures/?trace=history)
-- [Tensors](https://stanford-cs221.github.io/autumn2025-lectures/?trace=tensors)
+### Wed Sep 24: learning i (lecture 2)
 
-### Wed 9/24
+- [linear_regression](https://stanford-cs221.github.io/autumn2025-lectures/?trace=linear_regression): under construction
+- [linear_classification](https://stanford-cs221.github.io/autumn2025-lectures/?trace=linear_classification): under construction
+- [stochastic_gradient_descent](https://stanford-cs221.github.io/autumn2025-lectures/?trace=linear_regression): under construction
 
-Under construction.
+### Mon Sep 29: learning ii (lecture 3)
+
+- [neural_networks](https://stanford-cs221.github.io/autumn2025-lectures/?trace=neural_networks): under construction
+- [backpropagation](https://stanford-cs221.github.io/autumn2025-lectures/?trace=backpropagation): under construction
+
+### Wed Oct 1: learning iii (lecture 4)
+
+- [differentiable_programming](https://stanford-cs221.github.io/autumn2025-lectures/?trace=differentiable_programming): under construction
+- [generalization](https://stanford-cs221.github.io/autumn2025-lectures/?trace=generalization): under construction
+- [best_practices](https://stanford-cs221.github.io/autumn2025-lectures/?trace=best_practices): under construction

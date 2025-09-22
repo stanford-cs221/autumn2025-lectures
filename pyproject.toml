@@ -6,4 +6,6 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "edtrace>=0.1.0",
+    "einops>=0.8.1",
+    "jaxtyping>=0.3.2",
 ]
