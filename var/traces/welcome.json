@@ -1,6 +1,6 @@
 {
   "files": {
-    "welcome.py": "from edtrace import text, image, link, note\n\ndef main():\n    text(\"## Welcome to CS221 (Artificial Intelligence: Principles and Techniques)\")\n    image(\"images/course-staff.png\", width=600)\n\n    what_is_ai()\n    about_this_course()\n    what_is_this_program()\n\n\ndef what_is_ai():\n    text(\"We have lots of examples of AI all around us:\")\n    text(\"- AI assistants: ChatGPT, Claude, Gemini, Grok\")\n    text(\"- Autonomous vehicles: Waymo, Wayve\")\n    text(\"- Game playing: [Deep Blue](https://en.wikipedia.org/wiki/Deep_Blue_(chess_computer)), [AlphaGo](https://en.wikipedia.org/wiki/AlphaGo), [AlphaStar](https://en.wikipedia.org/wiki/AlphaStar_(software))\")\n    text(\"- Competition math and programming: [IMO](https://x.com/OpenAI/status/1946594928945148246), [IOI](https://codeforces.com/blog/entry/134091), [ICPC](https://venturebeat.com/ai/google-and-openais-coding-wins-at-university-competition-show-enterprise-ai)\")\n    text(\"- 3D protein structure prediction: [AlphaFold](https://deepmind.google/science/alphafold/)\")\n\n    text(\"But what exactly **is** AI?\")\n\n    text(\"Artificial intelligence\")\n    text(\"- artificial: runs on a computer (or robot)\")\n    text(\"- intelligence: ???\")\n\n    text(\"We could define **intelligence** in terms of humans...\")\n    text(\"...but we seek a definition from general principles.\")\n\n    text(\"### Ingredients of intelligence\")\n    text(\"What kinds of things should an intelligent agent be able to do?\")\n    image(\"images/perceive-reason-act-learn.png\", width=600)\n    image(\"images/self-driving-image.png\", width=400)\n\n    text(\"**Perceive**: process raw inputs from the world\")\n    text(\"- visual scene understanding\")\n    text(\"- speech recognition\")\n    text(\"- natural language understanding\")\n\n    text(\"**Reason**: use knowledge + percepts to draw inferences about the world\")\n    text(\"- uniform cost search (in a deterministic world)\")\n    text(\"- value iteration (decision-making under uncertainty)\")\n    text(\"- minimax (for adversial games)\")\n    text(\"- probabilistic inference (in Bayesian networks)\")\n\n    text(\"**Act**: output actions that affect the world\")\n    text(\"- Text/image generation\")\n    text(\"- Speech synthesis\")\n    text(\"- Robot manipulation\")\n\n    text(\"**Learn**: update agent based on experience\")\n    text(\"- Gradient descent\")\n    text(\"- Q-learning (reinforcement learning)\")\n    text(\"- Expectation maximization (for Bayesian networks)\")\n\n    text(\"...all under **resource constraints**\")\n    text(\"- Computation: running time (also: memory, communication)\")\n    text(\"- Information: data / experience, available inputs in a given situation\")\n\n    text(\"### Goals\")\n\n    text(\"But what does the **developer** want the agent to achieve?\")\n    text(\"- An agent explicitly or implicitly encodes values / goals / objectives / utility functions\")\n    text(\"- Alignment: how do make these values correspond to what the developer wants?\")\n    text(\"- Example: ChatGPT aims to be informative, avoid hallucinations, refuse harmful queries\")\n\n    text(\"Also what impact **we** want the agent to have on society?\")\n    text(\"- Issues: privacy, copyright, jobs, inequality, geopolitics\")\n    text(\"- This is a deep, **sociotechnical** problem (who's we?)\")\n    text(\"- Fundamental tradeoffs between people's values\")\n    text(\"- Unintended consequences (social media, impact on education)\")\n\n    text(\"### Summary\")\n    text(\"- Ingredients of intelligence: perception, reasoning, action, learning\")\n    text(\"- Resource constraints: computation, information\"), note(\"So we'll want to develop algorithms that are compute and data efficient.\")\n    text(\"- Developer goals: how do we build AI to accomplish something?\")\n    text(\"- Societal goals: how can we develop AI that benefits society?\")\n\n\ndef about_this_course():\n    text(\"Course philosophy\")\n    text(\"- Timeless foundations (e.g., gradient descent)\")\n    text(\"- Modern examples (e.g., GPT-5 solving 12/12 problems at the ICPC)\")\n    text(\"- Learn by doing: grounded in building practical applications\")\n\n    text(\"Changes this year:\")\n    text(\"- Tensor-native: from deep learning to value iteration to Bayesian network inference\")\n    text(\"- Cut constraint satisfaction problems :(\")\n    text(\"- Deep dive into societal impact (e.g., copyright, supply chains, policy)\")\n\n    text(\"All course policies, coursework, and schedule are online:\")\n    link(\"https://stanford-cs221.github.io/autumn2025/\")\n\n\ndef what_is_this_program():\n    text(\"This is an *executable lecture*, a program whose execution delivers the content of a lecture.\")\n    \n    text(\"We can step through code:\")\n    total = 0  # @inspect total\n    for x in [1, 2, 3]:  # @inspect x\n        total += x  # @inspect total\n\n    text(\"- Lectures inherit the hierarchical structure of code\")\n    text(\"- Code is more precise (than English and also than math)\")\n    text(\"- Need to write code to build AI at the end of the day\")\n\n\nif __name__ == \"__main__\":\n    main()\n"
+    "welcome.py": "from edtrace import text, image, link, note\n\ndef main():\n    text(\"## Welcome to CS221 (Artificial Intelligence: Principles and Techniques)\")\n    image(\"images/course-staff.png\", width=600)\n\n    what_is_ai()\n    about_this_course()\n    what_is_this_program()\n\n\ndef what_is_ai():\n    text(\"We have lots of examples of AI all around us:\")\n    text(\"- AI assistants: ChatGPT, Claude, Gemini, Grok\")\n    text(\"- Autonomous vehicles: Waymo, Wayve\")\n    text(\"- Game playing: [Deep Blue](https://en.wikipedia.org/wiki/Deep_Blue_(chess_computer)), [AlphaGo](https://en.wikipedia.org/wiki/AlphaGo), [AlphaStar](https://en.wikipedia.org/wiki/AlphaStar_(software))\")\n    text(\"- Competition math and programming: [IMO](https://x.com/OpenAI/status/1946594928945148246), [IOI](https://codeforces.com/blog/entry/134091), [ICPC](https://venturebeat.com/ai/google-and-openais-coding-wins-at-university-competition-show-enterprise-ai)\")\n    text(\"- 3D protein structure prediction: [AlphaFold](https://deepmind.google/science/alphafold/)\")\n\n    text(\"But what exactly **is** AI?\")\n\n    text(\"Artificial intelligence\")\n    text(\"- artificial: runs on a computer (or robot)\")\n    text(\"- intelligence: ???\")\n\n    text(\"We could define **intelligence** in terms of humans...\")\n    text(\"...but we seek a definition from general principles.\")\n\n    text(\"### Ingredients of intelligence\")\n    text(\"What kinds of things should an intelligent agent be able to do?\")\n    image(\"images/perceive-reason-act-learn.png\", width=600)\n\n    text(\"Motivating example: driving\")\n    image(\"images/self-driving-image.png\", width=400)\n\n    text(\"**Perceive**: process raw inputs from the world\")\n    text(\"- visual scene understanding\")\n    text(\"- speech recognition\")\n    text(\"- natural language understanding\")\n\n    text(\"**Reason**: use knowledge + percepts to draw inferences about the world\")\n    text(\"- uniform cost search (in a deterministic world)\")\n    text(\"- value iteration (decision-making under uncertainty)\")\n    text(\"- minimax (for adversial games)\")\n    text(\"- probabilistic inference (in Bayesian networks)\")\n\n    text(\"**Act**: output actions that affect the world\")\n    text(\"- Text/image generation\")\n    text(\"- Speech synthesis\")\n    text(\"- Robot manipulation\")\n\n    text(\"**Learn**: update agent based on experience\")\n    text(\"- Gradient descent\")\n    text(\"- Q-learning (reinforcement learning)\")\n    text(\"- Expectation maximization (for Bayesian networks)\")\n\n    text(\"...all under **resource constraints**\")\n    text(\"- Computation: running time (also: memory, communication)\")\n    text(\"- Information: data / experience, available inputs in a given situation\")\n\n    text(\"### Goals\")\n    text(\"But what does the **developer** want the agent to achieve?\")\n    text(\"- An agent explicitly or implicitly encodes values / goals / objectives / utility functions\")\n    text(\"- Alignment: how do make these values correspond to what the developer wants?\")\n    text(\"- Example: ChatGPT aims to be informative, avoid hallucinations, refuse harmful queries\")\n\n    text(\"Also what impact **we** want the agent to have on society?\")\n    text(\"- Issues: privacy, copyright, jobs, inequality, geopolitics\")\n    text(\"- This is a deep, **sociotechnical** problem (who's we?)\")\n    text(\"- Fundamental tradeoffs between people's values\")\n    text(\"- Unintended consequences (social media, impact on education)\")\n\n    text(\"### Summary\")\n    text(\"- Ingredients of intelligence: perception, reasoning, action, learning\")\n    text(\"- Resource constraints: computation, information\"), note(\"So we'll want to develop algorithms that are compute and data efficient.\")\n    text(\"- Developer goals: how do we build AI to accomplish something?\")\n    text(\"- Societal goals: how can we develop AI that benefits society?\")\n\n\ndef about_this_course():\n    text(\"Course philosophy\")\n    text(\"- Timeless foundations (e.g., gradient descent)\")\n    text(\"- Modern examples (e.g., GPT-5 solving 12/12 problems at the ICPC)\")\n    text(\"- Learn by doing: grounded in building practical applications\")\n\n    text(\"Changes this year:\")\n    text(\"- Tensor-native: from deep learning to value iteration to Bayesian network inference\")\n    text(\"- Cut constraint satisfaction problems :(\")\n    text(\"- Deep dive into societal impact (e.g., copyright, supply chains, policy)\")\n\n    text(\"All course policies, coursework, and schedule are online:\")\n    link(\"https://stanford-cs221.github.io/autumn2025/\")\n\n\ndef what_is_this_program():\n    text(\"This is an *executable lecture*, a program whose execution delivers the content of a lecture.\")\n    \n    text(\"We can step through code:\")\n    total = 0  # @inspect total\n    for x in [1, 2, 3]:  # @inspect x\n        total += x  # @inspect total\n\n    text(\"- Lectures inherit the hierarchical structure of code\")\n    text(\"- Code is more precise (than English and also than math)\")\n    text(\"- Need to write code to build AI at the end of the day\")\n    text(\"- Check out the toolbar at the top right (e.g., control display)\")\n\n\nif __name__ == \"__main__\":\n    main()\n"
   },
   "hidden_line_numbers": {
     "welcome.py": []
@@ -492,7 +492,33 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 32,
+          "line_number": 33,
+          "function_name": "what_is_ai",
+          "code": "text(\"Motivating example: driving\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Motivating example: driving",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "welcome.py",
+          "line_number": 7,
+          "function_name": "main",
+          "code": "what_is_ai()"
+        },
+        {
+          "path": "welcome.py",
+          "line_number": 34,
           "function_name": "what_is_ai",
           "code": "image(\"images/self-driving-image.png\", width=400)"
         }
@@ -520,7 +546,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 34,
+          "line_number": 36,
           "function_name": "what_is_ai",
           "code": "text(\"**Perceive**: process raw inputs from the world\")"
         }
@@ -546,7 +572,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 35,
+          "line_number": 37,
           "function_name": "what_is_ai",
           "code": "text(\"- visual scene understanding\")"
         }
@@ -572,7 +598,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 36,
+          "line_number": 38,
           "function_name": "what_is_ai",
           "code": "text(\"- speech recognition\")"
         }
@@ -598,7 +624,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 37,
+          "line_number": 39,
           "function_name": "what_is_ai",
           "code": "text(\"- natural language understanding\")"
         }
@@ -624,7 +650,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 39,
+          "line_number": 41,
           "function_name": "what_is_ai",
           "code": "text(\"**Reason**: use knowledge + percepts to draw inferences about the world\")"
         }
@@ -650,7 +676,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 40,
+          "line_number": 42,
           "function_name": "what_is_ai",
           "code": "text(\"- uniform cost search (in a deterministic world)\")"
         }
@@ -676,7 +702,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 41,
+          "line_number": 43,
           "function_name": "what_is_ai",
           "code": "text(\"- value iteration (decision-making under uncertainty)\")"
         }
@@ -702,7 +728,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 42,
+          "line_number": 44,
           "function_name": "what_is_ai",
           "code": "text(\"- minimax (for adversial games)\")"
         }
@@ -728,7 +754,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 43,
+          "line_number": 45,
           "function_name": "what_is_ai",
           "code": "text(\"- probabilistic inference (in Bayesian networks)\")"
         }
@@ -754,7 +780,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 45,
+          "line_number": 47,
           "function_name": "what_is_ai",
           "code": "text(\"**Act**: output actions that affect the world\")"
         }
@@ -780,7 +806,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 46,
+          "line_number": 48,
           "function_name": "what_is_ai",
           "code": "text(\"- Text/image generation\")"
         }
@@ -806,7 +832,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 47,
+          "line_number": 49,
           "function_name": "what_is_ai",
           "code": "text(\"- Speech synthesis\")"
         }
@@ -832,7 +858,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 48,
+          "line_number": 50,
           "function_name": "what_is_ai",
           "code": "text(\"- Robot manipulation\")"
         }
@@ -858,7 +884,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 50,
+          "line_number": 52,
           "function_name": "what_is_ai",
           "code": "text(\"**Learn**: update agent based on experience\")"
         }
@@ -884,7 +910,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 51,
+          "line_number": 53,
           "function_name": "what_is_ai",
           "code": "text(\"- Gradient descent\")"
         }
@@ -910,7 +936,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 52,
+          "line_number": 54,
           "function_name": "what_is_ai",
           "code": "text(\"- Q-learning (reinforcement learning)\")"
         }
@@ -936,7 +962,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 53,
+          "line_number": 55,
           "function_name": "what_is_ai",
           "code": "text(\"- Expectation maximization (for Bayesian networks)\")"
         }
@@ -962,7 +988,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 55,
+          "line_number": 57,
           "function_name": "what_is_ai",
           "code": "text(\"...all under **resource constraints**\")"
         }
@@ -988,7 +1014,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 56,
+          "line_number": 58,
           "function_name": "what_is_ai",
           "code": "text(\"- Computation: running time (also: memory, communication)\")"
         }
@@ -1014,7 +1040,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 57,
+          "line_number": 59,
           "function_name": "what_is_ai",
           "code": "text(\"- Information: data / experience, available inputs in a given situation\")"
         }
@@ -1040,7 +1066,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 59,
+          "line_number": 61,
           "function_name": "what_is_ai",
           "code": "text(\"### Goals\")"
         }
@@ -1066,7 +1092,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 61,
+          "line_number": 62,
           "function_name": "what_is_ai",
           "code": "text(\"But what does the **developer** want the agent to achieve?\")"
         }
@@ -1092,7 +1118,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 62,
+          "line_number": 63,
           "function_name": "what_is_ai",
           "code": "text(\"- An agent explicitly or implicitly encodes values / goals / objectives / utility functions\")"
         }
@@ -1118,7 +1144,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 63,
+          "line_number": 64,
           "function_name": "what_is_ai",
           "code": "text(\"- Alignment: how do make these values correspond to what the developer wants?\")"
         }
@@ -1144,7 +1170,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 64,
+          "line_number": 65,
           "function_name": "what_is_ai",
           "code": "text(\"- Example: ChatGPT aims to be informative, avoid hallucinations, refuse harmful queries\")"
         }
@@ -1170,7 +1196,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 66,
+          "line_number": 67,
           "function_name": "what_is_ai",
           "code": "text(\"Also what impact **we** want the agent to have on society?\")"
         }
@@ -1196,7 +1222,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 67,
+          "line_number": 68,
           "function_name": "what_is_ai",
           "code": "text(\"- Issues: privacy, copyright, jobs, inequality, geopolitics\")"
         }
@@ -1222,7 +1248,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 68,
+          "line_number": 69,
           "function_name": "what_is_ai",
           "code": "text(\"- This is a deep, **sociotechnical** problem (who's we?)\")"
         }
@@ -1248,7 +1274,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 69,
+          "line_number": 70,
           "function_name": "what_is_ai",
           "code": "text(\"- Fundamental tradeoffs between people's values\")"
         }
@@ -1274,7 +1300,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 70,
+          "line_number": 71,
           "function_name": "what_is_ai",
           "code": "text(\"- Unintended consequences (social media, impact on education)\")"
         }
@@ -1300,7 +1326,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 72,
+          "line_number": 73,
           "function_name": "what_is_ai",
           "code": "text(\"### Summary\")"
         }
@@ -1326,7 +1352,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 73,
+          "line_number": 74,
           "function_name": "what_is_ai",
           "code": "text(\"- Ingredients of intelligence: perception, reasoning, action, learning\")"
         }
@@ -1352,7 +1378,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 74,
+          "line_number": 75,
           "function_name": "what_is_ai",
           "code": "text(\"- Resource constraints: computation, information\"), note(\"So we'll want to develop algorithms that are compute and data efficient.\")"
         }
@@ -1385,7 +1411,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 75,
+          "line_number": 76,
           "function_name": "what_is_ai",
           "code": "text(\"- Developer goals: how do we build AI to accomplish something?\")"
         }
@@ -1411,7 +1437,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 76,
+          "line_number": 77,
           "function_name": "what_is_ai",
           "code": "text(\"- Societal goals: how can we develop AI that benefits society?\")"
         }
@@ -1461,7 +1487,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 79,
+          "line_number": 80,
           "function_name": "about_this_course",
           "code": "def about_this_course():"
         }
@@ -1479,7 +1505,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 80,
+          "line_number": 81,
           "function_name": "about_this_course",
           "code": "text(\"Course philosophy\")"
         }
@@ -1505,7 +1531,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 81,
+          "line_number": 82,
           "function_name": "about_this_course",
           "code": "text(\"- Timeless foundations (e.g., gradient descent)\")"
         }
@@ -1531,7 +1557,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 82,
+          "line_number": 83,
           "function_name": "about_this_course",
           "code": "text(\"- Modern examples (e.g., GPT-5 solving 12/12 problems at the ICPC)\")"
         }
@@ -1557,7 +1583,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 83,
+          "line_number": 84,
           "function_name": "about_this_course",
           "code": "text(\"- Learn by doing: grounded in building practical applications\")"
         }
@@ -1583,7 +1609,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 85,
+          "line_number": 86,
           "function_name": "about_this_course",
           "code": "text(\"Changes this year:\")"
         }
@@ -1609,7 +1635,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 86,
+          "line_number": 87,
           "function_name": "about_this_course",
           "code": "text(\"- Tensor-native: from deep learning to value iteration to Bayesian network inference\")"
         }
@@ -1635,7 +1661,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 87,
+          "line_number": 88,
           "function_name": "about_this_course",
           "code": "text(\"- Cut constraint satisfaction problems :(\")"
         }
@@ -1661,7 +1687,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 88,
+          "line_number": 89,
           "function_name": "about_this_course",
           "code": "text(\"- Deep dive into societal impact (e.g., copyright, supply chains, policy)\")"
         }
@@ -1687,7 +1713,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 90,
+          "line_number": 91,
           "function_name": "about_this_course",
           "code": "text(\"All course policies, coursework, and schedule are online:\")"
         }
@@ -1713,7 +1739,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 91,
+          "line_number": 92,
           "function_name": "about_this_course",
           "code": "link(\"https://stanford-cs221.github.io/autumn2025/\")"
         }
@@ -1771,7 +1797,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 94,
+          "line_number": 95,
           "function_name": "what_is_this_program",
           "code": "def what_is_this_program():"
         }
@@ -1789,7 +1815,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 95,
+          "line_number": 96,
           "function_name": "what_is_this_program",
           "code": "text(\"This is an *executable lecture*, a program whose execution delivers the content of a lecture.\")"
         }
@@ -1815,7 +1841,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 97,
+          "line_number": 98,
           "function_name": "what_is_this_program",
           "code": "text(\"We can step through code:\")"
         }
@@ -1841,7 +1867,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 98,
+          "line_number": 99,
           "function_name": "what_is_this_program",
           "code": "total = 0  # @inspect total"
         }
@@ -1866,7 +1892,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 99,
+          "line_number": 100,
           "function_name": "what_is_this_program",
           "code": "for x in [1, 2, 3]:  # @inspect x"
         }
@@ -1891,7 +1917,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 100,
+          "line_number": 101,
           "function_name": "what_is_this_program",
           "code": "total += x  # @inspect total"
         }
@@ -1916,7 +1942,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 99,
+          "line_number": 100,
           "function_name": "what_is_this_program",
           "code": "for x in [1, 2, 3]:  # @inspect x"
         }
@@ -1941,7 +1967,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 100,
+          "line_number": 101,
           "function_name": "what_is_this_program",
           "code": "total += x  # @inspect total"
         }
@@ -1966,7 +1992,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 99,
+          "line_number": 100,
           "function_name": "what_is_this_program",
           "code": "for x in [1, 2, 3]:  # @inspect x"
         }
@@ -1991,7 +2017,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 100,
+          "line_number": 101,
           "function_name": "what_is_this_program",
           "code": "total += x  # @inspect total"
         }
@@ -2016,7 +2042,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 99,
+          "line_number": 100,
           "function_name": "what_is_this_program",
           "code": "for x in [1, 2, 3]:  # @inspect x"
         }
@@ -2041,7 +2067,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 102,
+          "line_number": 103,
           "function_name": "what_is_this_program",
           "code": "text(\"- Lectures inherit the hierarchical structure of code\")"
         }
@@ -2067,7 +2093,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 103,
+          "line_number": 104,
           "function_name": "what_is_this_program",
           "code": "text(\"- Code is more precise (than English and also than math)\")"
         }
@@ -2093,7 +2119,7 @@
         },
         {
           "path": "welcome.py",
-          "line_number": 104,
+          "line_number": 105,
           "function_name": "what_is_this_program",
           "code": "text(\"- Need to write code to build AI at the end of the day\")"
         }
@@ -2103,6 +2129,32 @@
         {
           "type": "markdown",
           "data": "- Need to write code to build AI at the end of the day",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "welcome.py",
+          "line_number": 9,
+          "function_name": "main",
+          "code": "what_is_this_program()"
+        },
+        {
+          "path": "welcome.py",
+          "line_number": 106,
+          "function_name": "what_is_this_program",
+          "code": "text(\"- Check out the toolbar at the top right (e.g., control display)\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Check out the toolbar at the top right (e.g., control display)",
           "style": {},
           "external_link": null,
           "internal_link": null

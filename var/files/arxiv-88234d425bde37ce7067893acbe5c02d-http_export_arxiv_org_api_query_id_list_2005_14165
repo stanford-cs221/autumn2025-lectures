@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <link href="http://arxiv.org/api/query?search_query%3D%26id_list%3D2005.14165%26start%3D0%26max_results%3D10" rel="self" type="application/atom+xml"/>
+  <title type="html">ArXiv Query: search_query=&amp;id_list=2005.14165&amp;start=0&amp;max_results=10</title>
+  <id>http://arxiv.org/api/5qPrSXIcs1+mMdCz8BcgICZrT4A</id>
+  <updated>2025-09-21T00:00:00-04:00</updated>
+  <opensearch:totalResults xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">1</opensearch:totalResults>
+  <opensearch:startIndex xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">0</opensearch:startIndex>
+  <opensearch:itemsPerPage xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">10</opensearch:itemsPerPage>
+  <entry>
+    <id>http://arxiv.org/abs/2005.14165v4</id>
+    <updated>2020-07-22T19:47:17Z</updated>
+    <published>2020-05-28T17:29:03Z</published>
+    <title>Language Models are Few-Shot Learners</title>
+    <summary>  Recent work has demonstrated substantial gains on many NLP tasks and
+benchmarks by pre-training on a large corpus of text followed by fine-tuning on
+a specific task. While typically task-agnostic in architecture, this method
+still requires task-specific fine-tuning datasets of thousands or tens of
+thousands of examples. By contrast, humans can generally perform a new language
+task from only a few examples or from simple instructions - something which
+current NLP systems still largely struggle to do. Here we show that scaling up
+language models greatly improves task-agnostic, few-shot performance, sometimes
+even reaching competitiveness with prior state-of-the-art fine-tuning
+approaches. Specifically, we train GPT-3, an autoregressive language model with
+175 billion parameters, 10x more than any previous non-sparse language model,
+and test its performance in the few-shot setting. For all tasks, GPT-3 is
+applied without any gradient updates or fine-tuning, with tasks and few-shot
+demonstrations specified purely via text interaction with the model. GPT-3
+achieves strong performance on many NLP datasets, including translation,
+question-answering, and cloze tasks, as well as several tasks that require
+on-the-fly reasoning or domain adaptation, such as unscrambling words, using a
+novel word in a sentence, or performing 3-digit arithmetic. At the same time,
+we also identify some datasets where GPT-3's few-shot learning still struggles,
+as well as some datasets where GPT-3 faces methodological issues related to
+training on large web corpora. Finally, we find that GPT-3 can generate samples
+of news articles which human evaluators have difficulty distinguishing from
+articles written by humans. We discuss broader societal impacts of this finding
+and of GPT-3 in general.
+</summary>
+    <author>
+      <name>Tom B. Brown</name>
+    </author>
+    <author>
+      <name>Benjamin Mann</name>
+    </author>
+    <author>
+      <name>Nick Ryder</name>
+    </author>
+    <author>
+      <name>Melanie Subbiah</name>
+    </author>
+    <author>
+      <name>Jared Kaplan</name>
+    </author>
+    <author>
+      <name>Prafulla Dhariwal</name>
+    </author>
+    <author>
+      <name>Arvind Neelakantan</name>
+    </author>
+    <author>
+      <name>Pranav Shyam</name>
+    </author>
+    <author>
+      <name>Girish Sastry</name>
+    </author>
+    <author>
+      <name>Amanda Askell</name>
+    </author>
+    <author>
+      <name>Sandhini Agarwal</name>
+    </author>
+    <author>
+      <name>Ariel Herbert-Voss</name>
+    </author>
+    <author>
+      <name>Gretchen Krueger</name>
+    </author>
+    <author>
+      <name>Tom Henighan</name>
+    </author>
+    <author>
+      <name>Rewon Child</name>
+    </author>
+    <author>
+      <name>Aditya Ramesh</name>
+    </author>
+    <author>
+      <name>Daniel M. Ziegler</name>
+    </author>
+    <author>
+      <name>Jeffrey Wu</name>
+    </author>
+    <author>
+      <name>Clemens Winter</name>
+    </author>
+    <author>
+      <name>Christopher Hesse</name>
+    </author>
+    <author>
+      <name>Mark Chen</name>
+    </author>
+    <author>
+      <name>Eric Sigler</name>
+    </author>
+    <author>
+      <name>Mateusz Litwin</name>
+    </author>
+    <author>
+      <name>Scott Gray</name>
+    </author>
+    <author>
+      <name>Benjamin Chess</name>
+    </author>
+    <author>
+      <name>Jack Clark</name>
+    </author>
+    <author>
+      <name>Christopher Berner</name>
+    </author>
+    <author>
+      <name>Sam McCandlish</name>
+    </author>
+    <author>
+      <name>Alec Radford</name>
+    </author>
+    <author>
+      <name>Ilya Sutskever</name>
+    </author>
+    <author>
+      <name>Dario Amodei</name>
+    </author>
+    <arxiv:comment xmlns:arxiv="http://arxiv.org/schemas/atom">40+32 pages</arxiv:comment>
+    <link href="http://arxiv.org/abs/2005.14165v4" rel="alternate" type="text/html"/>
+    <link title="pdf" href="http://arxiv.org/pdf/2005.14165v4" rel="related" type="application/pdf"/>
+    <arxiv:primary_category xmlns:arxiv="http://arxiv.org/schemas/atom" term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+  </entry>
+</feed>

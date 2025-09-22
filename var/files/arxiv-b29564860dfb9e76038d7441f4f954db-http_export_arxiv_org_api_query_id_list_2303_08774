@@ -1,0 +1,1070 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <link href="http://arxiv.org/api/query?search_query%3D%26id_list%3D2303.08774%26start%3D0%26max_results%3D10" rel="self" type="application/atom+xml"/>
+  <title type="html">ArXiv Query: search_query=&amp;id_list=2303.08774&amp;start=0&amp;max_results=10</title>
+  <id>http://arxiv.org/api/QzNYWqKq+J4WS62/AKiDfpkbQx0</id>
+  <updated>2025-09-21T00:00:00-04:00</updated>
+  <opensearch:totalResults xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">1</opensearch:totalResults>
+  <opensearch:startIndex xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">0</opensearch:startIndex>
+  <opensearch:itemsPerPage xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">10</opensearch:itemsPerPage>
+  <entry>
+    <id>http://arxiv.org/abs/2303.08774v6</id>
+    <updated>2024-03-04T06:01:33Z</updated>
+    <published>2023-03-15T17:15:04Z</published>
+    <title>GPT-4 Technical Report</title>
+    <summary>  We report the development of GPT-4, a large-scale, multimodal model which can
+accept image and text inputs and produce text outputs. While less capable than
+humans in many real-world scenarios, GPT-4 exhibits human-level performance on
+various professional and academic benchmarks, including passing a simulated bar
+exam with a score around the top 10% of test takers. GPT-4 is a
+Transformer-based model pre-trained to predict the next token in a document.
+The post-training alignment process results in improved performance on measures
+of factuality and adherence to desired behavior. A core component of this
+project was developing infrastructure and optimization methods that behave
+predictably across a wide range of scales. This allowed us to accurately
+predict some aspects of GPT-4's performance based on models trained with no
+more than 1/1,000th the compute of GPT-4.
+</summary>
+    <author>
+      <name> OpenAI</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Josh Achiam</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Steven Adler</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Sandhini Agarwal</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Lama Ahmad</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ilge Akkaya</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Florencia Leoni Aleman</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Diogo Almeida</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Janko Altenschmidt</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Sam Altman</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Shyamal Anadkat</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Red Avila</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Igor Babuschkin</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Suchir Balaji</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Valerie Balcom</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Paul Baltescu</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Haiming Bao</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Mohammad Bavarian</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jeff Belgum</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Irwan Bello</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jake Berdine</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Gabriel Bernadett-Shapiro</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Christopher Berner</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Lenny Bogdonoff</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Oleg Boiko</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Madelaine Boyd</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Anna-Luisa Brakman</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Greg Brockman</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Tim Brooks</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Miles Brundage</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Kevin Button</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Trevor Cai</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Rosie Campbell</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Andrew Cann</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Brittany Carey</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Chelsea Carlson</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Rory Carmichael</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Brooke Chan</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Che Chang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Fotis Chantzis</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Derek Chen</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Sully Chen</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ruby Chen</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jason Chen</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Mark Chen</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ben Chess</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Chester Cho</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Casey Chu</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Hyung Won Chung</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Dave Cummings</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jeremiah Currier</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Yunxing Dai</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Cory Decareaux</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Thomas Degry</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Noah Deutsch</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Damien Deville</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Arka Dhar</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>David Dohan</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Steve Dowling</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Sheila Dunning</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Adrien Ecoffet</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Atty Eleti</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Tyna Eloundou</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>David Farhi</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Liam Fedus</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Niko Felix</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Simón Posada Fishman</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Juston Forte</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Isabella Fulford</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Leo Gao</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Elie Georges</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Christian Gibson</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Vik Goel</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Tarun Gogineni</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Gabriel Goh</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Rapha Gontijo-Lopes</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jonathan Gordon</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Morgan Grafstein</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Scott Gray</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ryan Greene</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Joshua Gross</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Shixiang Shane Gu</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Yufei Guo</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Chris Hallacy</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jesse Han</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jeff Harris</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Yuchen He</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Mike Heaton</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Johannes Heidecke</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Chris Hesse</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Alan Hickey</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Wade Hickey</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Peter Hoeschele</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Brandon Houghton</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Kenny Hsu</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Shengli Hu</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Xin Hu</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Joost Huizinga</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Shantanu Jain</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Shawn Jain</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Joanne Jang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Angela Jiang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Roger Jiang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Haozhun Jin</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Denny Jin</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Shino Jomoto</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Billie Jonn</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Heewoo Jun</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Tomer Kaftan</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Łukasz Kaiser</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ali Kamali</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ingmar Kanitscheider</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Nitish Shirish Keskar</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Tabarak Khan</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Logan Kilpatrick</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jong Wook Kim</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Christina Kim</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Yongjik Kim</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jan Hendrik Kirchner</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jamie Kiros</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Matt Knight</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Daniel Kokotajlo</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Łukasz Kondraciuk</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Andrew Kondrich</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Aris Konstantinidis</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Kyle Kosic</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Gretchen Krueger</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Vishal Kuo</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Michael Lampe</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ikai Lan</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Teddy Lee</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jan Leike</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jade Leung</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Daniel Levy</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Chak Ming Li</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Rachel Lim</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Molly Lin</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Stephanie Lin</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Mateusz Litwin</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Theresa Lopez</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ryan Lowe</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Patricia Lue</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Anna Makanju</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Kim Malfacini</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Sam Manning</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Todor Markov</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Yaniv Markovski</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Bianca Martin</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Katie Mayer</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Andrew Mayne</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Bob McGrew</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Scott Mayer McKinney</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Christine McLeavey</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Paul McMillan</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jake McNeil</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>David Medina</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Aalok Mehta</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jacob Menick</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Luke Metz</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Andrey Mishchenko</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Pamela Mishkin</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Vinnie Monaco</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Evan Morikawa</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Daniel Mossing</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Tong Mu</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Mira Murati</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Oleg Murk</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>David Mély</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ashvin Nair</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Reiichiro Nakano</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Rajeev Nayak</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Arvind Neelakantan</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Richard Ngo</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Hyeonwoo Noh</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Long Ouyang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Cullen O'Keefe</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jakub Pachocki</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Alex Paino</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Joe Palermo</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ashley Pantuliano</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Giambattista Parascandolo</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Joel Parish</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Emy Parparita</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Alex Passos</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Mikhail Pavlov</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Andrew Peng</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Adam Perelman</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Filipe de Avila Belbute Peres</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Michael Petrov</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Henrique Ponde de Oliveira Pinto</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name> Michael</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Rai</arxiv:affiliation>
+    </author>
+    <author>
+      <name> Pokorny</name>
+    </author>
+    <author>
+      <name>Michelle Pokrass</name>
+    </author>
+    <author>
+      <name>Vitchyr H. Pong</name>
+    </author>
+    <author>
+      <name>Tolly Powell</name>
+    </author>
+    <author>
+      <name>Alethea Power</name>
+    </author>
+    <author>
+      <name>Boris Power</name>
+    </author>
+    <author>
+      <name>Elizabeth Proehl</name>
+    </author>
+    <author>
+      <name>Raul Puri</name>
+    </author>
+    <author>
+      <name>Alec Radford</name>
+    </author>
+    <author>
+      <name>Jack Rae</name>
+    </author>
+    <author>
+      <name>Aditya Ramesh</name>
+    </author>
+    <author>
+      <name>Cameron Raymond</name>
+    </author>
+    <author>
+      <name>Francis Real</name>
+    </author>
+    <author>
+      <name>Kendra Rimbach</name>
+    </author>
+    <author>
+      <name>Carl Ross</name>
+    </author>
+    <author>
+      <name>Bob Rotsted</name>
+    </author>
+    <author>
+      <name>Henri Roussez</name>
+    </author>
+    <author>
+      <name>Nick Ryder</name>
+    </author>
+    <author>
+      <name>Mario Saltarelli</name>
+    </author>
+    <author>
+      <name>Ted Sanders</name>
+    </author>
+    <author>
+      <name>Shibani Santurkar</name>
+    </author>
+    <author>
+      <name>Girish Sastry</name>
+    </author>
+    <author>
+      <name>Heather Schmidt</name>
+    </author>
+    <author>
+      <name>David Schnurr</name>
+    </author>
+    <author>
+      <name>John Schulman</name>
+    </author>
+    <author>
+      <name>Daniel Selsam</name>
+    </author>
+    <author>
+      <name>Kyla Sheppard</name>
+    </author>
+    <author>
+      <name>Toki Sherbakov</name>
+    </author>
+    <author>
+      <name>Jessica Shieh</name>
+    </author>
+    <author>
+      <name>Sarah Shoker</name>
+    </author>
+    <author>
+      <name>Pranav Shyam</name>
+    </author>
+    <author>
+      <name>Szymon Sidor</name>
+    </author>
+    <author>
+      <name>Eric Sigler</name>
+    </author>
+    <author>
+      <name>Maddie Simens</name>
+    </author>
+    <author>
+      <name>Jordan Sitkin</name>
+    </author>
+    <author>
+      <name>Katarina Slama</name>
+    </author>
+    <author>
+      <name>Ian Sohl</name>
+    </author>
+    <author>
+      <name>Benjamin Sokolowsky</name>
+    </author>
+    <author>
+      <name>Yang Song</name>
+    </author>
+    <author>
+      <name>Natalie Staudacher</name>
+    </author>
+    <author>
+      <name>Felipe Petroski Such</name>
+    </author>
+    <author>
+      <name>Natalie Summers</name>
+    </author>
+    <author>
+      <name>Ilya Sutskever</name>
+    </author>
+    <author>
+      <name>Jie Tang</name>
+    </author>
+    <author>
+      <name>Nikolas Tezak</name>
+    </author>
+    <author>
+      <name>Madeleine B. Thompson</name>
+    </author>
+    <author>
+      <name>Phil Tillet</name>
+    </author>
+    <author>
+      <name>Amin Tootoonchian</name>
+    </author>
+    <author>
+      <name>Elizabeth Tseng</name>
+    </author>
+    <author>
+      <name>Preston Tuggle</name>
+    </author>
+    <author>
+      <name>Nick Turley</name>
+    </author>
+    <author>
+      <name>Jerry Tworek</name>
+    </author>
+    <author>
+      <name>Juan Felipe Cerón Uribe</name>
+    </author>
+    <author>
+      <name>Andrea Vallone</name>
+    </author>
+    <author>
+      <name>Arun Vijayvergiya</name>
+    </author>
+    <author>
+      <name>Chelsea Voss</name>
+    </author>
+    <author>
+      <name>Carroll Wainwright</name>
+    </author>
+    <author>
+      <name>Justin Jay Wang</name>
+    </author>
+    <author>
+      <name>Alvin Wang</name>
+    </author>
+    <author>
+      <name>Ben Wang</name>
+    </author>
+    <author>
+      <name>Jonathan Ward</name>
+    </author>
+    <author>
+      <name>Jason Wei</name>
+    </author>
+    <author>
+      <name>CJ Weinmann</name>
+    </author>
+    <author>
+      <name>Akila Welihinda</name>
+    </author>
+    <author>
+      <name>Peter Welinder</name>
+    </author>
+    <author>
+      <name>Jiayi Weng</name>
+    </author>
+    <author>
+      <name>Lilian Weng</name>
+    </author>
+    <author>
+      <name>Matt Wiethoff</name>
+    </author>
+    <author>
+      <name>Dave Willner</name>
+    </author>
+    <author>
+      <name>Clemens Winter</name>
+    </author>
+    <author>
+      <name>Samuel Wolrich</name>
+    </author>
+    <author>
+      <name>Hannah Wong</name>
+    </author>
+    <author>
+      <name>Lauren Workman</name>
+    </author>
+    <author>
+      <name>Sherwin Wu</name>
+    </author>
+    <author>
+      <name>Jeff Wu</name>
+    </author>
+    <author>
+      <name>Michael Wu</name>
+    </author>
+    <author>
+      <name>Kai Xiao</name>
+    </author>
+    <author>
+      <name>Tao Xu</name>
+    </author>
+    <author>
+      <name>Sarah Yoo</name>
+    </author>
+    <author>
+      <name>Kevin Yu</name>
+    </author>
+    <author>
+      <name>Qiming Yuan</name>
+    </author>
+    <author>
+      <name>Wojciech Zaremba</name>
+    </author>
+    <author>
+      <name>Rowan Zellers</name>
+    </author>
+    <author>
+      <name>Chong Zhang</name>
+    </author>
+    <author>
+      <name>Marvin Zhang</name>
+    </author>
+    <author>
+      <name>Shengjia Zhao</name>
+    </author>
+    <author>
+      <name>Tianhao Zheng</name>
+    </author>
+    <author>
+      <name>Juntang Zhuang</name>
+    </author>
+    <author>
+      <name>William Zhuk</name>
+    </author>
+    <author>
+      <name>Barret Zoph</name>
+    </author>
+    <arxiv:comment xmlns:arxiv="http://arxiv.org/schemas/atom">100 pages; updated authors list; fixed author names and added
+  citation</arxiv:comment>
+    <link href="http://arxiv.org/abs/2303.08774v6" rel="alternate" type="text/html"/>
+    <link title="pdf" href="http://arxiv.org/pdf/2303.08774v6" rel="related" type="application/pdf"/>
+    <arxiv:primary_category xmlns:arxiv="http://arxiv.org/schemas/atom" term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+  </entry>
+</feed>

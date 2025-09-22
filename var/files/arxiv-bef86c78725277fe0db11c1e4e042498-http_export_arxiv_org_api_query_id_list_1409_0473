@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <link href="http://arxiv.org/api/query?search_query%3D%26id_list%3D1409.0473%26start%3D0%26max_results%3D10" rel="self" type="application/atom+xml"/>
+  <title type="html">ArXiv Query: search_query=&amp;id_list=1409.0473&amp;start=0&amp;max_results=10</title>
+  <id>http://arxiv.org/api/oVEpW9m5Uc1Q51qDH7DEAZecWg8</id>
+  <updated>2025-09-21T00:00:00-04:00</updated>
+  <opensearch:totalResults xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">1</opensearch:totalResults>
+  <opensearch:startIndex xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">0</opensearch:startIndex>
+  <opensearch:itemsPerPage xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">10</opensearch:itemsPerPage>
+  <entry>
+    <id>http://arxiv.org/abs/1409.0473v7</id>
+    <updated>2016-05-19T21:53:22Z</updated>
+    <published>2014-09-01T16:33:02Z</published>
+    <title>Neural Machine Translation by Jointly Learning to Align and Translate</title>
+    <summary>  Neural machine translation is a recently proposed approach to machine
+translation. Unlike the traditional statistical machine translation, the neural
+machine translation aims at building a single neural network that can be
+jointly tuned to maximize the translation performance. The models proposed
+recently for neural machine translation often belong to a family of
+encoder-decoders and consists of an encoder that encodes a source sentence into
+a fixed-length vector from which a decoder generates a translation. In this
+paper, we conjecture that the use of a fixed-length vector is a bottleneck in
+improving the performance of this basic encoder-decoder architecture, and
+propose to extend this by allowing a model to automatically (soft-)search for
+parts of a source sentence that are relevant to predicting a target word,
+without having to form these parts as a hard segment explicitly. With this new
+approach, we achieve a translation performance comparable to the existing
+state-of-the-art phrase-based system on the task of English-to-French
+translation. Furthermore, qualitative analysis reveals that the
+(soft-)alignments found by the model agree well with our intuition.
+</summary>
+    <author>
+      <name>Dzmitry Bahdanau</name>
+    </author>
+    <author>
+      <name>Kyunghyun Cho</name>
+    </author>
+    <author>
+      <name>Yoshua Bengio</name>
+    </author>
+    <arxiv:comment xmlns:arxiv="http://arxiv.org/schemas/atom">Accepted at ICLR 2015 as oral presentation</arxiv:comment>
+    <link href="http://arxiv.org/abs/1409.0473v7" rel="alternate" type="text/html"/>
+    <link title="pdf" href="http://arxiv.org/pdf/1409.0473v7" rel="related" type="application/pdf"/>
+    <arxiv:primary_category xmlns:arxiv="http://arxiv.org/schemas/atom" term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.NE" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+  </entry>
+</feed>

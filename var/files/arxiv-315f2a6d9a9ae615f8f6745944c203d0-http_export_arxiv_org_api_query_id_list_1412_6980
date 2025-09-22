@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <link href="http://arxiv.org/api/query?search_query%3D%26id_list%3D1412.6980%26start%3D0%26max_results%3D10" rel="self" type="application/atom+xml"/>
+  <title type="html">ArXiv Query: search_query=&amp;id_list=1412.6980&amp;start=0&amp;max_results=10</title>
+  <id>http://arxiv.org/api/f4WeybaesAZp74Y0p6uXGbIQOfE</id>
+  <updated>2025-09-21T00:00:00-04:00</updated>
+  <opensearch:totalResults xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">1</opensearch:totalResults>
+  <opensearch:startIndex xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">0</opensearch:startIndex>
+  <opensearch:itemsPerPage xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">10</opensearch:itemsPerPage>
+  <entry>
+    <id>http://arxiv.org/abs/1412.6980v9</id>
+    <updated>2017-01-30T01:27:54Z</updated>
+    <published>2014-12-22T13:54:29Z</published>
+    <title>Adam: A Method for Stochastic Optimization</title>
+    <summary>  We introduce Adam, an algorithm for first-order gradient-based optimization
+of stochastic objective functions, based on adaptive estimates of lower-order
+moments. The method is straightforward to implement, is computationally
+efficient, has little memory requirements, is invariant to diagonal rescaling
+of the gradients, and is well suited for problems that are large in terms of
+data and/or parameters. The method is also appropriate for non-stationary
+objectives and problems with very noisy and/or sparse gradients. The
+hyper-parameters have intuitive interpretations and typically require little
+tuning. Some connections to related algorithms, on which Adam was inspired, are
+discussed. We also analyze the theoretical convergence properties of the
+algorithm and provide a regret bound on the convergence rate that is comparable
+to the best known results under the online convex optimization framework.
+Empirical results demonstrate that Adam works well in practice and compares
+favorably to other stochastic optimization methods. Finally, we discuss AdaMax,
+a variant of Adam based on the infinity norm.
+</summary>
+    <author>
+      <name>Diederik P. Kingma</name>
+    </author>
+    <author>
+      <name>Jimmy Ba</name>
+    </author>
+    <arxiv:comment xmlns:arxiv="http://arxiv.org/schemas/atom">Published as a conference paper at the 3rd International Conference
+  for Learning Representations, San Diego, 2015</arxiv:comment>
+    <link href="http://arxiv.org/abs/1412.6980v9" rel="alternate" type="text/html"/>
+    <link title="pdf" href="http://arxiv.org/pdf/1412.6980v9" rel="related" type="application/pdf"/>
+    <arxiv:primary_category xmlns:arxiv="http://arxiv.org/schemas/atom" term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+  </entry>
+</feed>

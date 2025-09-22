@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <link href="http://arxiv.org/api/query?search_query%3D%26id_list%3D1810.04805%26start%3D0%26max_results%3D10" rel="self" type="application/atom+xml"/>
+  <title type="html">ArXiv Query: search_query=&amp;id_list=1810.04805&amp;start=0&amp;max_results=10</title>
+  <id>http://arxiv.org/api/4uc0UchY33cY7HHUkkdQVmWK55s</id>
+  <updated>2025-09-21T00:00:00-04:00</updated>
+  <opensearch:totalResults xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">1</opensearch:totalResults>
+  <opensearch:startIndex xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">0</opensearch:startIndex>
+  <opensearch:itemsPerPage xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">10</opensearch:itemsPerPage>
+  <entry>
+    <id>http://arxiv.org/abs/1810.04805v2</id>
+    <updated>2019-05-24T20:37:26Z</updated>
+    <published>2018-10-11T00:50:01Z</published>
+    <title>BERT: Pre-training of Deep Bidirectional Transformers for Language
+  Understanding</title>
+    <summary>  We introduce a new language representation model called BERT, which stands
+for Bidirectional Encoder Representations from Transformers. Unlike recent
+language representation models, BERT is designed to pre-train deep
+bidirectional representations from unlabeled text by jointly conditioning on
+both left and right context in all layers. As a result, the pre-trained BERT
+model can be fine-tuned with just one additional output layer to create
+state-of-the-art models for a wide range of tasks, such as question answering
+and language inference, without substantial task-specific architecture
+modifications.
+  BERT is conceptually simple and empirically powerful. It obtains new
+state-of-the-art results on eleven natural language processing tasks, including
+pushing the GLUE score to 80.5% (7.7% point absolute improvement), MultiNLI
+accuracy to 86.7% (4.6% absolute improvement), SQuAD v1.1 question answering
+Test F1 to 93.2 (1.5 point absolute improvement) and SQuAD v2.0 Test F1 to 83.1
+(5.1 point absolute improvement).
+</summary>
+    <author>
+      <name>Jacob Devlin</name>
+    </author>
+    <author>
+      <name>Ming-Wei Chang</name>
+    </author>
+    <author>
+      <name>Kenton Lee</name>
+    </author>
+    <author>
+      <name>Kristina Toutanova</name>
+    </author>
+    <link href="http://arxiv.org/abs/1810.04805v2" rel="alternate" type="text/html"/>
+    <link title="pdf" href="http://arxiv.org/pdf/1810.04805v2" rel="related" type="application/pdf"/>
+    <arxiv:primary_category xmlns:arxiv="http://arxiv.org/schemas/atom" term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+  </entry>
+</feed>

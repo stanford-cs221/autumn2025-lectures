@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <link href="http://arxiv.org/api/query?search_query%3D%26id_list%3D1802.05365%26start%3D0%26max_results%3D10" rel="self" type="application/atom+xml"/>
+  <title type="html">ArXiv Query: search_query=&amp;id_list=1802.05365&amp;start=0&amp;max_results=10</title>
+  <id>http://arxiv.org/api/52UT+MMEDqaWj2SCrjMgzPqfZQ4</id>
+  <updated>2025-09-21T00:00:00-04:00</updated>
+  <opensearch:totalResults xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">1</opensearch:totalResults>
+  <opensearch:startIndex xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">0</opensearch:startIndex>
+  <opensearch:itemsPerPage xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">10</opensearch:itemsPerPage>
+  <entry>
+    <id>http://arxiv.org/abs/1802.05365v2</id>
+    <updated>2018-03-22T21:59:40Z</updated>
+    <published>2018-02-15T00:05:11Z</published>
+    <title>Deep contextualized word representations</title>
+    <summary>  We introduce a new type of deep contextualized word representation that
+models both (1) complex characteristics of word use (e.g., syntax and
+semantics), and (2) how these uses vary across linguistic contexts (i.e., to
+model polysemy). Our word vectors are learned functions of the internal states
+of a deep bidirectional language model (biLM), which is pre-trained on a large
+text corpus. We show that these representations can be easily added to existing
+models and significantly improve the state of the art across six challenging
+NLP problems, including question answering, textual entailment and sentiment
+analysis. We also present an analysis showing that exposing the deep internals
+of the pre-trained network is crucial, allowing downstream models to mix
+different types of semi-supervision signals.
+</summary>
+    <author>
+      <name>Matthew E. Peters</name>
+    </author>
+    <author>
+      <name>Mark Neumann</name>
+    </author>
+    <author>
+      <name>Mohit Iyyer</name>
+    </author>
+    <author>
+      <name>Matt Gardner</name>
+    </author>
+    <author>
+      <name>Christopher Clark</name>
+    </author>
+    <author>
+      <name>Kenton Lee</name>
+    </author>
+    <author>
+      <name>Luke Zettlemoyer</name>
+    </author>
+    <arxiv:comment xmlns:arxiv="http://arxiv.org/schemas/atom">NAACL 2018. Originally posted to openreview 27 Oct 2017. v2 updated
+  for NAACL camera ready</arxiv:comment>
+    <link href="http://arxiv.org/abs/1802.05365v2" rel="alternate" type="text/html"/>
+    <link title="pdf" href="http://arxiv.org/pdf/1802.05365v2" rel="related" type="application/pdf"/>
+    <arxiv:primary_category xmlns:arxiv="http://arxiv.org/schemas/atom" term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+  </entry>
+</feed>

@@ -1,0 +1,2269 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <link href="http://arxiv.org/api/query?search_query%3D%26id_list%3D2407.21783%26start%3D0%26max_results%3D10" rel="self" type="application/atom+xml"/>
+  <title type="html">ArXiv Query: search_query=&amp;id_list=2407.21783&amp;start=0&amp;max_results=10</title>
+  <id>http://arxiv.org/api/WCU9kYXIzjrpK9AnpgbQM7hZjzI</id>
+  <updated>2025-09-21T00:00:00-04:00</updated>
+  <opensearch:totalResults xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">1</opensearch:totalResults>
+  <opensearch:startIndex xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">0</opensearch:startIndex>
+  <opensearch:itemsPerPage xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">10</opensearch:itemsPerPage>
+  <entry>
+    <id>http://arxiv.org/abs/2407.21783v3</id>
+    <updated>2024-11-23T23:27:33Z</updated>
+    <published>2024-07-31T17:54:27Z</published>
+    <title>The Llama 3 Herd of Models</title>
+    <summary>  Modern artificial intelligence (AI) systems are powered by foundation models.
+This paper presents a new set of foundation models, called Llama 3. It is a
+herd of language models that natively support multilinguality, coding,
+reasoning, and tool usage. Our largest model is a dense Transformer with 405B
+parameters and a context window of up to 128K tokens. This paper presents an
+extensive empirical evaluation of Llama 3. We find that Llama 3 delivers
+comparable quality to leading language models such as GPT-4 on a plethora of
+tasks. We publicly release Llama 3, including pre-trained and post-trained
+versions of the 405B parameter language model and our Llama Guard 3 model for
+input and output safety. The paper also presents the results of experiments in
+which we integrate image, video, and speech capabilities into Llama 3 via a
+compositional approach. We observe this approach performs competitively with
+the state-of-the-art on image, video, and speech recognition tasks. The
+resulting models are not yet being broadly released as they are still under
+development.
+</summary>
+    <author>
+      <name>Aaron Grattafiori</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Abhimanyu Dubey</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Abhinav Jauhri</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Abhinav Pandey</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Abhishek Kadian</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ahmad Al-Dahle</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Aiesha Letman</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Akhil Mathur</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Alan Schelten</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Alex Vaughan</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Amy Yang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Angela Fan</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Anirudh Goyal</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Anthony Hartshorn</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Aobo Yang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Archi Mitra</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Archie Sravankumar</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Artem Korenev</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Arthur Hinsvark</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Arun Rao</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Aston Zhang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Aurelien Rodriguez</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Austen Gregerson</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ava Spataru</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Baptiste Roziere</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Bethany Biron</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Binh Tang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Bobbie Chern</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Charlotte Caucheteux</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Chaya Nayak</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Chloe Bi</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Chris Marra</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Chris McConnell</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Christian Keller</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Christophe Touret</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Chunyang Wu</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Corinne Wong</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Cristian Canton Ferrer</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Cyrus Nikolaidis</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Damien Allonsius</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Daniel Song</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Danielle Pintz</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Danny Livshits</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Danny Wyatt</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>David Esiobu</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Dhruv Choudhary</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Dhruv Mahajan</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Diego Garcia-Olano</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Diego Perino</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Dieuwke Hupkes</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Egor Lakomkin</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ehab AlBadawy</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Elina Lobanova</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Emily Dinan</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Eric Michael Smith</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Filip Radenovic</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Francisco Guzmán</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Frank Zhang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Gabriel Synnaeve</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Gabrielle Lee</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Georgia Lewis Anderson</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Govind Thattai</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Graeme Nail</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Gregoire Mialon</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Guan Pang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Guillem Cucurell</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Hailey Nguyen</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Hannah Korevaar</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Hu Xu</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Hugo Touvron</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Iliyan Zarov</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Imanol Arrieta Ibarra</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Isabel Kloumann</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ishan Misra</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ivan Evtimov</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jack Zhang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jade Copet</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jaewon Lee</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jan Geffert</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jana Vranes</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jason Park</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jay Mahadeokar</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jeet Shah</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jelmer van der Linde</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jennifer Billock</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jenny Hong</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jenya Lee</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jeremy Fu</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jianfeng Chi</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jianyu Huang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jiawen Liu</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jie Wang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jiecao Yu</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Joanna Bitton</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Joe Spisak</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jongsoo Park</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Joseph Rocca</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Joshua Johnstun</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Joshua Saxe</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Junteng Jia</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Kalyan Vasuden Alwala</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Karthik Prasad</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Kartikeya Upasani</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Kate Plawiak</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ke Li</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Kenneth Heafield</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Kevin Stone</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Khalid El-Arini</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Krithika Iyer</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Kshitiz Malik</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Kuenley Chiu</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Kunal Bhalla</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Kushal Lakhotia</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Lauren Rantala-Yeary</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Laurens van der Maaten</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Lawrence Chen</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Liang Tan</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Liz Jenkins</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Louis Martin</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Lovish Madaan</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Lubo Malo</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Lukas Blecher</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Lukas Landzaat</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Luke de Oliveira</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Madeline Muzzi</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Mahesh Pasupuleti</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Mannat Singh</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Manohar Paluri</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Marcin Kardas</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Maria Tsimpoukelli</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Mathew Oldham</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Mathieu Rita</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Maya Pavlova</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Melanie Kambadur</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Mike Lewis</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Min Si</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Mitesh Kumar Singh</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Mona Hassan</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Naman Goyal</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Narjes Torabi</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Nikolay Bashlykov</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Nikolay Bogoychev</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Niladri Chatterji</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ning Zhang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Olivier Duchenne</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Onur Çelebi</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Patrick Alrassy</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Pengchuan Zhang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Pengwei Li</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Petar Vasic</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Peter Weng</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Prajjwal Bhargava</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Pratik Dubal</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Praveen Krishnan</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Punit Singh Koura</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Puxin Xu</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Qing He</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Qingxiao Dong</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ragavan Srinivasan</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Raj Ganapathy</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ramon Calderer</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ricardo Silveira Cabral</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Robert Stojnic</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Roberta Raileanu</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Rohan Maheswari</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Rohit Girdhar</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Rohit Patel</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Romain Sauvestre</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ronnie Polidoro</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Roshan Sumbaly</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ross Taylor</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ruan Silva</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Rui Hou</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Rui Wang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Saghar Hosseini</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Sahana Chennabasappa</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Sanjay Singh</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Sean Bell</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Seohyun Sonia Kim</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Sergey Edunov</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Shaoliang Nie</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Sharan Narang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Sharath Raparthy</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Sheng Shen</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Shengye Wan</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Shruti Bhosale</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Shun Zhang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Simon Vandenhende</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Soumya Batra</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Spencer Whitman</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Sten Sootla</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Stephane Collot</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Suchin Gururangan</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Sydney Borodinsky</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Tamar Herman</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Tara Fowler</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Tarek Sheasha</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Thomas Georgiou</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Thomas Scialom</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Tobias Speckbacher</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Todor Mihaylov</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Tong Xiao</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ujjwal Karn</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Vedanuj Goswami</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Vibhor Gupta</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Vignesh Ramanathan</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Viktor Kerkez</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Vincent Gonguet</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Virginie Do</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Vish Vogeti</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Vítor Albiero</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Vladan Petrovic</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Weiwei Chu</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Wenhan Xiong</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Wenyin Fu</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Whitney Meers</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Xavier Martinet</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Xiaodong Wang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Xiaofang Wang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Xiaoqing Ellen Tan</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Xide Xia</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Xinfeng Xie</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Xuchao Jia</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Xuewei Wang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Yaelle Goldschlag</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Yashesh Gaur</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Yasmine Babaei</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Yi Wen</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Yiwen Song</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Yuchen Zhang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Yue Li</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Yuning Mao</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Zacharie Delpierre Coudert</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Zheng Yan</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Zhengxing Chen</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Zoe Papakipos</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Aaditya Singh</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Aayushi Srivastava</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Abha Jain</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Adam Kelsey</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Adam Shajnfeld</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Adithya Gangidi</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Adolfo Victoria</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ahuva Goldstand</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ajay Menon</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ajay Sharma</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Alex Boesenberg</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Alexei Baevski</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Allie Feinstein</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Amanda Kallet</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Amit Sangani</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Amos Teo</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Anam Yunus</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Andrei Lupu</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Andres Alvarado</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Andrew Caples</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Andrew Gu</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Andrew Ho</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Andrew Poulton</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Andrew Ryan</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ankit Ramchandani</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Annie Dong</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Annie Franco</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Anuj Goyal</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Aparajita Saraf</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Arkabandhu Chowdhury</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ashley Gabriel</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ashwin Bharambe</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Assaf Eisenman</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Azadeh Yazdan</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Beau James</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ben Maurer</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Benjamin Leonhardi</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Bernie Huang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Beth Loyd</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Beto De Paola</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Bhargavi Paranjape</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Bing Liu</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Bo Wu</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Boyu Ni</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Braden Hancock</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Bram Wasti</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Brandon Spence</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Brani Stojkovic</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Brian Gamido</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Britt Montalvo</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Carl Parker</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Carly Burton</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Catalina Mejia</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ce Liu</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Changhan Wang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Changkyu Kim</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Chao Zhou</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Chester Hu</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ching-Hsiang Chu</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Chris Cai</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Chris Tindal</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Christoph Feichtenhofer</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Cynthia Gao</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Damon Civin</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Dana Beaty</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Daniel Kreymer</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Daniel Li</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>David Adkins</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>David Xu</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Davide Testuggine</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Delia David</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Devi Parikh</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Diana Liskovich</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Didem Foss</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Dingkang Wang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Duc Le</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Dustin Holland</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Edward Dowling</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Eissa Jamil</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Elaine Montgomery</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Eleonora Presani</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Emily Hahn</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Emily Wood</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Eric-Tuan Le</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Erik Brinkman</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Esteban Arcaute</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Evan Dunbar</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Evan Smothers</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Fei Sun</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Felix Kreuk</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Feng Tian</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Filippos Kokkinos</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Firat Ozgenel</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Francesco Caggioni</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Frank Kanayet</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Frank Seide</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Gabriela Medina Florez</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Gabriella Schwarz</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Gada Badeer</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Georgia Swee</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Gil Halpern</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Grant Herman</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Grigory Sizov</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name> Guangyi</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Jack</arxiv:affiliation>
+    </author>
+    <author>
+      <name> Zhang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Guna Lakshminarayanan</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Hakan Inan</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Hamid Shojanazeri</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Han Zou</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Hannah Wang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Hanwen Zha</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Haroun Habeeb</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Harrison Rudolph</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Helen Suk</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Henry Aspegren</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Hunter Goldman</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Hongyuan Zhan</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ibrahim Damlaj</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Igor Molybog</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Igor Tufanov</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ilias Leontiadis</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Irina-Elena Veliche</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Itai Gat</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jake Weissman</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>James Geboski</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>James Kohli</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Janice Lam</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Japhet Asher</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jean-Baptiste Gaya</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jeff Marcus</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jeff Tang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jennifer Chan</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jenny Zhen</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jeremy Reizenstein</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jeremy Teboul</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jessica Zhong</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jian Jin</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jingyi Yang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Joe Cummings</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jon Carvill</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jon Shepard</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jonathan McPhie</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Jonathan Torres</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Josh Ginsburg</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Junjie Wang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Kai Wu</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Kam Hou U</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Karan Saxena</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Kartikay Khandelwal</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Katayoun Zand</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Kathy Matosich</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Kaushik Veeraraghavan</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Kelly Michelena</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Keqian Li</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Kiran Jagadeesh</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Kun Huang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Kunal Chawla</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Kyle Huang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Lailin Chen</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Lakshya Garg</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Lavender A</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Leandro Silva</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Lee Bell</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Lei Zhang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Liangpeng Guo</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Licheng Yu</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Liron Moshkovich</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Luca Wehrstedt</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Madian Khabsa</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Manav Avalani</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Manish Bhatt</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Martynas Mankus</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Matan Hasson</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Matthew Lennie</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Matthias Reso</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Maxim Groshev</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Maxim Naumov</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Maya Lathi</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Meghan Keneally</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Miao Liu</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Michael L. Seltzer</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Michal Valko</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Michelle Restrepo</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Mihir Patel</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Mik Vyatskov</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Mikayel Samvelyan</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Mike Clark</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Mike Macey</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Mike Wang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Miquel Jubert Hermoso</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Mo Metanat</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Mohammad Rastegari</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Munish Bansal</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Nandhini Santhanam</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Natascha Parks</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Natasha White</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Navyata Bawa</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Nayan Singhal</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Nick Egebo</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Nicolas Usunier</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Nikhil Mehta</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Nikolay Pavlovich Laptev</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ning Dong</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Norman Cheng</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Oleg Chernoguz</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Olivia Hart</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Omkar Salpekar</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ozlem Kalinli</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Parkin Kent</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Parth Parekh</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Paul Saab</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Pavan Balaji</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Pedro Rittner</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Philip Bontrager</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Pierre Roux</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Piotr Dollar</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Polina Zvyagina</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Prashant Ratanchandani</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Pritish Yuvraj</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Qian Liang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Rachad Alao</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Rachel Rodriguez</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Rafi Ayub</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Raghotham Murthy</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Raghu Nayani</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Rahul Mitra</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Rangaprabhu Parthasarathy</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Raymond Li</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Rebekkah Hogan</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Robin Battey</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Rocky Wang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Russ Howes</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ruty Rinott</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Sachin Mehta</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Sachin Siby</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Sai Jayesh Bondu</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Samyak Datta</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Sara Chugh</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Sara Hunt</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Sargun Dhillon</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Sasha Sidorov</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Satadru Pan</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Saurabh Mahajan</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Saurabh Verma</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Seiji Yamamoto</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Sharadh Ramaswamy</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Shaun Lindsay</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Shaun Lindsay</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Sheng Feng</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Shenghao Lin</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Shengxin Cindy Zha</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Shishir Patil</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Shiva Shankar</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Shuqiang Zhang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Shuqiang Zhang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Sinong Wang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Sneha Agarwal</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Soji Sajuyigbe</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Soumith Chintala</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Stephanie Max</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Stephen Chen</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Steve Kehoe</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Steve Satterfield</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Sudarshan Govindaprasad</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Sumit Gupta</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Summer Deng</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Sungmin Cho</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Sunny Virk</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Suraj Subramanian</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Sy Choudhury</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Sydney Goldman</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Tal Remez</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Tamar Glaser</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Tamara Best</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Thilo Koehler</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Thomas Robinson</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Tianhe Li</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Tianjun Zhang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Tim Matthews</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Timothy Chou</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Tzook Shaked</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Varun Vontimitta</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Victoria Ajayi</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Victoria Montanez</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Vijai Mohan</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Vinay Satish Kumar</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Vishal Mangla</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Vlad Ionescu</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Vlad Poenaru</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Vlad Tiberiu Mihailescu</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Vladimir Ivanov</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Wei Li</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Wenchen Wang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Wenwen Jiang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Wes Bouaziz</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Will Constable</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Xiaocheng Tang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Xiaojian Wu</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Xiaolan Wang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Xilun Wu</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Xinbo Gao</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Yaniv Kleinman</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Yanjun Chen</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ye Hu</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ye Jia</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ye Qi</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Yenda Li</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Yilin Zhang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Ying Zhang</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Yossi Adi</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Youngjin Nam</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name> Yu</name>
+      <arxiv:affiliation xmlns:arxiv="http://arxiv.org/schemas/atom">Sid</arxiv:affiliation>
+    </author>
+    <author>
+      <name> Wang</name>
+    </author>
+    <author>
+      <name>Yu Zhao</name>
+    </author>
+    <author>
+      <name>Yuchen Hao</name>
+    </author>
+    <author>
+      <name>Yundi Qian</name>
+    </author>
+    <author>
+      <name>Yunlu Li</name>
+    </author>
+    <author>
+      <name>Yuzi He</name>
+    </author>
+    <author>
+      <name>Zach Rait</name>
+    </author>
+    <author>
+      <name>Zachary DeVito</name>
+    </author>
+    <author>
+      <name>Zef Rosnbrick</name>
+    </author>
+    <author>
+      <name>Zhaoduo Wen</name>
+    </author>
+    <author>
+      <name>Zhenyu Yang</name>
+    </author>
+    <author>
+      <name>Zhiwei Zhao</name>
+    </author>
+    <author>
+      <name>Zhiyu Ma</name>
+    </author>
+    <link href="http://arxiv.org/abs/2407.21783v3" rel="alternate" type="text/html"/>
+    <link title="pdf" href="http://arxiv.org/pdf/2407.21783v3" rel="related" type="application/pdf"/>
+    <arxiv:primary_category xmlns:arxiv="http://arxiv.org/schemas/atom" term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+  </entry>
+</feed>

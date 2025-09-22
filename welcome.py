@@ -29,6 +29,8 @@ def what_is_ai():
     text("### Ingredients of intelligence")
     text("What kinds of things should an intelligent agent be able to do?")
     image("images/perceive-reason-act-learn.png", width=600)
+
+    text("Motivating example: driving")
     image("images/self-driving-image.png", width=400)
 
     text("**Perceive**: process raw inputs from the world")
@@ -57,7 +59,6 @@ def what_is_ai():
     text("- Information: data / experience, available inputs in a given situation")
 
     text("### Goals")
-
     text("But what does the **developer** want the agent to achieve?")
     text("- An agent explicitly or implicitly encodes values / goals / objectives / utility functions")
     text("- Alignment: how do make these values correspond to what the developer wants?")
@@ -102,6 +103,7 @@ def what_is_this_program():
     text("- Lectures inherit the hierarchical structure of code")
     text("- Code is more precise (than English and also than math)")
     text("- Need to write code to build AI at the end of the day")
+    text("- Check out the toolbar at the top right (e.g., control display)")
 
 
 if __name__ == "__main__":
