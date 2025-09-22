@@ -1,6 +1,6 @@
 {
   "files": {
-    "tensors.py": "from edtrace import text, link, image, note\nimport numpy as np\nimport torch\nfrom einops import einsum, reduce, rearrange\nimport timeit\n\n\ndef main():\n    image(\"images/tensor.jpg\", width=200), note(\"This is probably what you think of when you hear the word \\\"tensor\\\".\")\n    text(\"**Tensors** are the atoms of modern machine learning.\")\n    text(\"They are used to represent data, model parameters, gradients, intermediate computations (activations), etc.\")\n    text(\"Tensors show up elsewhere in science and engineering, so they're generally useful to learn.\")\n    text(\"We'll introduce the core ideas through NumPy examples.\")\n\n    creating_tensors()\n    tensor_examples()\n    viewing_tensors()\n    elementwise_operations()\n    matrix_multiplication()\n    efficiency()\n    einops()\n\n    text(\"Summary\")\n    text(\"- Use tensors to represent everything\")\n    text(\"- Express computations using few tensor operations for efficiency (a puzzle!)\")\n    text(\"- Use einops to make computations more legible\")\n    text(\"- Practice (it's like learning a new langauge)!\")\n\n\ndef creating_tensors():\n    text(\"Tensors are represented by multi-dimensional arrays (generalizing vectors and matrices).\")\n\n    text(\"The simplest tensor is simply a **scalar** (rank 0 tensor).\")\n    x = np.array(42)  # @inspect x\n    s = x.shape  # @inspect s\n\n    text(\"A **vector** is a rank 1 tensor.\")  # @clear x s\n    x = np.array([1, 2, 3])  # @inspect x\n    s = x.shape  # @inspect s\n\n    text(\"A **matrix** is a rank 2 tensor.\")  # @clear x s\n    x = np.array([  # @inspect x\n        [1, 2, 3],\n        [4, 5, 6],\n    ])\n    s = x.shape  # @inspect s\n\n    text(\"In general, a **tensor** can be any rank.  Here's a rank 3 tensor.\")  # @clear x s\n    x = np.array([  # @inspect x\n        [\n            [1, 2, 3],\n            [4, 5, 6],\n        ],\n        [\n            [7, 8, 9],\n            [10, 11, 12],\n        ],\n    ])\n    s = x.shape  # @inspect s\n\n    text(\"You can extract slices from this tensor:\")  # @clear s\n    y = x[1]  # @inspect y\n    y = x[1][0]  # @inspect y\n    y = x[1][0][2]  # @inspect y\n\n    text(\"You usually don't create tensors by writing down all the entries.\")  # @clear x y\n\n    text(\"You can use special commands to create structured tensors.\")\n\n    # Create a 2x3 array of zeros\n    x = np.zeros((2, 3))  # @inspect x\n\n    # Create a 2x3 array of ones\n    x = np.ones((2, 3))  # @inspect x\n\n    # Create a 2x3 array filled with random numbers from a normal distribution\n    x = np.random.randn(2, 3)  # @inspect x\n\n    # Create a 3x3 identity matrix\n    x = np.eye(3)  # @inspect x\n\n    # Create a matrix where the diagonal is a vector\n    x = np.diag([1, 2, 3])  # @inspect x\n\n    text(\"Or you can read / write them from disk\")\n    np.save(\"var/x.npy\", x)\n    new_x = np.load(\"var/x.npy\")  # @inspect new_x\n\n\ndef tensor_examples():\n    text(\"Here are some typical tensors that show up in machine learning.\")\n\n    # A D-dimensional data point\n    D = 2  # Number of dimensions\n    x = np.ones(D)  # @inspect x\n    text(\"Here, `np.ones` is arbitrary; we're just trying getting a tensor of the right shape.\")\n\n    text(\"We often batch examples together (for efficiency).\")  # @clear x\n    N = 3  # Number of examples\n    # A dataset of N examples, each D-dimensional point\n    x = np.ones((N, D))  # @inspect x\n\n    text(\"In language modeling, each example is a whole sequence of length\")  # @clear x\n    L = 4  # Length of sequence\n    # A dataset of N examples, each length L, each position is D-dimensional\n    x = np.ones((N, L, D))  # @inspect x\n\n    text(\"In vision, images are have..\")  # @clear x\n    H = 2  # A height\n    W = 2  # A width\n    C = 3  # A number of channels (red, green, blue)\n    x = np.ones((N, H, W, C))\n\n    text(\"In a neural network, we have a weight matrix that transforms a\")  # @clear x\n    Din = 3  # ...a Din-dimensional input\n    Dout = 2  # ...to a Dout-dimensional output\n    w = np.ones((Din, Dout))  # @inspect w\n\n    text(\"In general, the parameters of a neural network model are a collection of tensors.\")\n    text(\"For example, here are the parameters of the DeepSeek v3 model \"), link(\"https://arxiv.org/abs/2412.19437\")\n    link(\"https://huggingface.co/deepseek-ai/DeepSeek-V3?show_file_info=model.safetensors.index.json\", title=\"DeepSeek-V3 on Hugging Face\")\n\n\ndef viewing_tensors():\n    text(\"Given a tensor, you can extract parts of it.\")\n    x = np.random.randn(2, 3)  # @inspect x\n\n    # Get row 0\n    y = x[0]  # @inspect y\n\n    # Get column 1\n    y = x[:, 1]  # @inspect y\n\n    # Transpose the matrix\n    y = x.transpose(1, 0)  # @inspect y\n\n    text(\"Note that these operations do not make a copy of the tensor.\")\n    text(\"...so if you modify the tensor, you modify the view.\")\n    text(\"Check that mutating x also mutates y.\")\n    x[0][0] = 100  # @inspect x y\n    text(\"Generally, be careful and don't mutate tensors if you don't need to!\")\n\n\ndef elementwise_operations():\n    text(\"These operations apply some operation to each element of the tensor\")\n    text(\"...and return a (new) tensor of the same shape.\")\n\n    x = np.array([1, 4, 9])  # @inspect x\n    y = np.power(x, 2)  # @inspect y\n    y = np.sqrt(x)  # @inspect y\n\n    y = x + x  # @inspect y\n    y = x * 3  # @inspect y\n    y = x / 2  # @inspect y\n\n    text(\"`triu` (`tril`) takes the upper (lower) triangular part of a matrix.\")  # @clear y\n    x = np.ones((3, 3))  # @inspect x\n    y = np.triu(x)  # @inspect y\n    y = np.tril(x)  # @inspect y\n    text(\"This is useful for masking parts of the input (for Transformers).\")\n\n    text(\"You can create zeros and ones with the same shape as another tensor:\")\n    y = np.zeros_like(x)  # @inspect y\n    y = np.ones_like(x)  # @inspect y\n\n\ndef matrix_multiplication():\n    text(\"Finally, the bread and butter of deep learning: matrix multiplication.\")\n    x = np.ones((4, 6))  # @inspect x\n    w = np.ones((6, 3))  # @inspect w\n    y = x @ w  # @inspect y\n    assert y.shape == (4, 3)\n\n    text(\"We can batch multiple matrix operations:\")  # @clear y\n    x = np.ones((2, 4, 6))  # @inspect x\n    w = np.ones((6, 3))  # @inspect w\n    y = x @ w  # @inspect y\n    assert y.shape == (2, 4, 3)\n    text(\"In this case, for each slice x[0], x[1], ..., we multiply by `w`.\")\n    text(\"Terminology: w is broadcasted to each slice of x.\")\n\n\ndef efficiency():\n    text(\"There are often multiple ways to compute the same result.\")\n    text(\"Whenever possible, try to express computation as tensor operations.\")\n    N = 16\n    x = np.ones((N, N))\n    w = np.ones((N, N))\n\n    text(\"Let's compute a matrix multiplication in Python.\")\n    def slow_matmul() -> np.ndarray:\n        y = np.zeros((N, N))\n        for i in range(N):\n            for j in range(N):\n                for k in range(N):\n                    y[i, j] += x[i, k] * w[k, j]\n        return y\n    python_time = timeit.timeit(slow_matmul, number=1)  # @inspect slow_time @stepover\n\n    text(\"Let's Fast way: use built-in matrix multiplication\")\n    numpy_time = timeit.timeit(lambda: x @ w, number=1)  # @inspect fast_time @stepover\n\n    # How much faster is NumPy than Python?\n    speedup = python_time / numpy_time  # @inspect speedup\n\n    text(\"Matrix multiplication is even faster on GPUs (for large matrices)!\")\n\ndef einops():\n    einops_motivation()\n\n    text(\"Einops is a library for manipulating tensors where dimensions are named.\")\n    text(\"It is inspired by Einstein summation notation (Einstein, 1916).\")\n    link(title=\"[Einops tutorial]\", url=\"https://einops.rocks/1-einops-basics/\")\n\n    einops_einsum()\n    einops_reduce()\n    einops_rearrange()\n    \n\ndef einops_motivation():\n    text(\"Traditional PyTorch code:\")\n    x = torch.ones(2, 2, 3)      # batch seq hidden  @inspect x\n    y = torch.ones(2, 2, 3)      # batch seq hidden  @inspect y\n    z = x @ y.transpose(-2, -1)  # batch seq seq  @inspect z\n    text(\"Easy to mess up the dimensions (what is -2, -1?)...\")\n\n\ndef einops_einsum():\n    text(\"Einsum is generalized matrix multiplication with good bookkeeping.\")\n\n    x = torch.ones(3, 4)  # seq1 hidden @inspect x\n    y = torch.ones(4, 3)  # hidden seq2 @inspect y\n\n    # Old way\n    z = x @ y   # seq1 seq2  @inspect z\n\n    # New (einops) way\n    z = einsum(x, y, \"seq1 hidden, hidden seq2 -> seq1 seq2\")  # @inspect z\n\n    text(\"Let's try a more complex example...\")  # @clear x y z\n\n    x = torch.ones(2, 3, 4)  # batch seq1 hidden @inspect x\n    y = torch.ones(2, 3, 4)  # batch seq2 hidden @inspect y\n\n    # Old way\n    z = x @ y.transpose(-2, -1)  # batch seq1 seq2  @inspect z\n\n    # New (einops) way\n    z = einsum(x, y, \"batch seq1 hidden, batch seq2 hidden -> batch seq1 seq2\")  # @inspect z\n    text(\"Dimensions that are not named in the output are summed over.\")\n\n    text(\"Or can use `...` to represent broadcasting over any number of dimensions:\")\n    z = einsum(x, y, \"... seq1 hidden, ... seq2 hidden -> ... seq1 seq2\")  # @inspect z\n\n\ndef einops_reduce():\n    text(\"You can reduce a single tensor via some operation (e.g., sum, mean, max, min).\")\n    x = torch.ones(2, 3, 4)  # batch seq hidden @inspect x\n\n    # Old way\n    y = x.sum(dim=-1)  # @inspect y\n\n    # New (einops) way\n    y = reduce(x, \"... hidden -> ...\", \"sum\")  # @inspect y\n\n\ndef einops_rearrange():\n    text(\"Sometimes, a dimension represents two dimensions\")\n    text(\"...and you want to operate on one of them.\")\n\n    x = torch.ones(3, 8)  # batch seq total_hidden @inspect x\n    text(\"...where `total_hidden` is a flattened representation of `heads * hidden1`\")\n    w = torch.ones(4, 4)  # hidden1 hidden2 @inspect w\n\n    text(\"Break up `total_hidden` into two dimensions (`heads` and `hidden1`):\")\n    x = rearrange(x, \"... (heads hidden1) -> ... heads hidden1\", heads=2)  # @inspect x\n\n    text(\"Perform the transformation by `w`:\")\n    x = einsum(x, w, \"... hidden1, hidden1 hidden2 -> ... hidden2\")  # @inspect x\n\n    text(\"Combine `heads` and `hidden2` back together:\")\n    x = rearrange(x, \"... heads hidden2 -> ... (heads hidden2)\")  # @inspect x\n\n\nif __name__ == \"__main__\":\n    main()\n"
+    "tensors.py": "from edtrace import text, link, image, note\nimport numpy as np\nimport torch\nfrom einops import einsum, reduce, rearrange\nimport timeit\n\n\ndef main():\n    image(\"images/tensor.jpg\", width=200), note(\"This is probably what you think of when you hear the word \\\"tensor\\\".\")\n    text(\"**Tensors** are the atoms of modern machine learning.\")\n    text(\"They are used to represent data, model parameters, gradients, intermediate computations (activations), etc.\")\n    text(\"Tensors show up elsewhere in science and engineering, so they're generally useful to learn.\")\n    text(\"We'll introduce the core ideas through NumPy examples.\")\n\n    creating_tensors()\n    tensor_examples()\n    viewing_tensors()\n    elementwise_operations()\n    matrix_multiplication()\n    efficiency()\n    einops()\n\n    text(\"Summary\")\n    text(\"- Use tensors to represent everything\")\n    text(\"- Express computations using few tensor operations for efficiency (a puzzle!)\")\n    text(\"- Use einops to make computations more legible\")\n    text(\"- Practice (it's like learning a new langauge)!\")\n\n\ndef creating_tensors():\n    text(\"Tensors are represented by multi-dimensional arrays (generalizing vectors and matrices).\")\n\n    text(\"The simplest tensor is simply a **scalar** (rank 0 tensor).\")\n    x = np.array(42)  # @inspect x\n    s = x.shape  # @inspect s\n\n    text(\"A **vector** is a rank 1 tensor.\")  # @clear x s\n    x = np.array([1, 2, 3])  # @inspect x\n    s = x.shape  # @inspect s\n\n    text(\"A **matrix** is a rank 2 tensor.\")  # @clear x s\n    x = np.array([  # @inspect x\n        [1, 2, 3],\n        [4, 5, 6],\n    ])\n    s = x.shape  # @inspect s\n\n    text(\"In general, a **tensor** can be any rank.  Here's a rank 3 tensor.\")  # @clear x s\n    x = np.array([  # @inspect x\n        [\n            [1, 2, 3],\n            [4, 5, 6],\n        ],\n        [\n            [7, 8, 9],\n            [10, 11, 12],\n        ],\n    ])\n    s = x.shape  # @inspect s\n\n    text(\"You can extract slices from this tensor:\")  # @clear s\n    y = x[1]  # @inspect y\n    y = x[1][0]  # @inspect y\n    y = x[1][0][2]  # @inspect y\n\n    text(\"You usually don't create tensors by writing down all the entries.\")  # @clear x y\n\n    text(\"You can use special commands to create structured tensors.\")\n\n    # Create a 2x3 array of zeros\n    x = np.zeros((2, 3))  # @inspect x\n\n    # Create a 2x3 array of ones\n    x = np.ones((2, 3))  # @inspect x\n\n    # Create a 2x3 array filled with random numbers from a normal distribution\n    x = np.random.randn(2, 3)  # @inspect x\n\n    # Create a 3x3 identity matrix\n    x = np.eye(3)  # @inspect x\n\n    # Create a matrix where the diagonal is a vector\n    x = np.diag([1, 2, 3])  # @inspect x\n\n    text(\"Or you can read / write them from disk\")\n    np.save(\"var/x.npy\", x)\n    new_x = np.load(\"var/x.npy\")  # @inspect new_x\n\n\ndef tensor_examples():\n    text(\"Here are some typical tensors that show up in machine learning.\")\n\n    # A D-dimensional data point\n    D = 2  # Number of dimensions\n    x = np.ones(D)  # @inspect x\n    text(\"Here, `np.ones` is arbitrary; we're just trying getting a tensor of the right shape.\")\n\n    text(\"We often batch examples together (for efficiency).\")  # @clear x\n    N = 3  # Number of examples\n    # A dataset of N examples, each D-dimensional point\n    x = np.ones((N, D))  # @inspect x\n\n    text(\"In language modeling, each example is a whole sequence of length\")  # @clear x\n    L = 4  # Length of sequence\n    # A dataset of N examples, each length L, each position is D-dimensional\n    x = np.ones((N, L, D))  # @inspect x\n\n    text(\"In vision, images are have..\")  # @clear x\n    H = 2  # A height\n    W = 2  # A width\n    C = 3  # A number of channels (red, green, blue)\n    x = np.ones((N, H, W, C))\n\n    text(\"In a neural network, we have a weight matrix that transforms a\")  # @clear x\n    Din = 3  # ...a Din-dimensional input\n    Dout = 2  # ...to a Dout-dimensional output\n    w = np.ones((Din, Dout))  # @inspect w\n\n    text(\"In general, the parameters of a neural network model are a collection of tensors.\")\n    text(\"For example, here are the parameters of the DeepSeek v3 model \"), link(\"https://arxiv.org/abs/2412.19437\")\n    link(\"https://huggingface.co/deepseek-ai/DeepSeek-V3?show_file_info=model.safetensors.index.json\", title=\"DeepSeek-V3 on Hugging Face\")\n\n\ndef viewing_tensors():\n    text(\"Given a tensor, you can extract parts of it.\")\n    x = np.random.randn(2, 3)  # @inspect x\n\n    # Get row 0\n    y = x[0]  # @inspect y\n\n    # Get column 1\n    y = x[:, 1]  # @inspect y\n\n    # Transpose the matrix\n    y = x.transpose(1, 0)  # @inspect y\n\n    text(\"Note that these operations do not make a copy of the tensor.\")\n    text(\"...so if you modify the tensor, you modify the view.\")\n    text(\"Check that mutating x also mutates y.\")\n    x[0][0] = 100  # @inspect x y\n    text(\"Generally, be careful and don't mutate tensors if you don't need to!\")\n\n\ndef elementwise_operations():\n    text(\"These operations apply some operation to each element of the tensor\")\n    text(\"...and return a (new) tensor of the same shape.\")\n\n    x = np.array([1, 4, 9])  # @inspect x\n    y = np.power(x, 2)  # @inspect y\n    y = np.sqrt(x)  # @inspect y\n\n    y = x + x  # @inspect y\n    y = x * 3  # @inspect y\n    y = x / 2  # @inspect y\n\n    text(\"`triu` (`tril`) takes the upper (lower) triangular part of a matrix.\")  # @clear y\n    x = np.ones((3, 3))  # @inspect x\n    y = np.triu(x)  # @inspect y\n    y = np.tril(x)  # @inspect y\n    text(\"This is useful for masking parts of the input (for Transformers).\")\n\n    text(\"You can create zeros and ones with the same shape as another tensor:\")\n    y = np.zeros_like(x)  # @inspect y\n    y = np.ones_like(x)  # @inspect y\n\n\ndef matrix_multiplication():\n    text(\"Finally, the bread and butter of deep learning: matrix multiplication.\")\n    x = np.ones((4, 6))  # @inspect x\n    w = np.ones((6, 3))  # @inspect w\n    y = x @ w  # @inspect y\n    assert y.shape == (4, 3)\n\n    text(\"We can batch multiple matrix operations:\")  # @clear y\n    x = np.ones((2, 4, 6))  # @inspect x\n    w = np.ones((6, 3))  # @inspect w\n    y = x @ w  # @inspect y\n    assert y.shape == (2, 4, 3)\n    text(\"In this case, for each slice x[0], x[1], ..., we multiply by `w`.\")\n    text(\"Terminology: w is broadcasted to each slice of x.\")\n\n\ndef efficiency():\n    text(\"There are often multiple ways to compute the same result.\")\n    text(\"Whenever possible, try to express computation as tensor operations.\")\n    N = 16\n    x = np.ones((N, N))\n    w = np.ones((N, N))\n\n    text(\"Let's compute a matrix multiplication in Python.\")\n    def slow_matmul() -> np.ndarray:\n        y = np.zeros((N, N))\n        for i in range(N):\n            for j in range(N):\n                for k in range(N):\n                    y[i, j] += x[i, k] * w[k, j]\n        return y\n    python_time = timeit.timeit(slow_matmul, number=1)  # @inspect slow_time @stepover\n\n    text(\"Let's now do it in NumPy.\")\n    numpy_time = timeit.timeit(lambda: x @ w, number=1)  # @inspect fast_time @stepover\n\n    # How much faster is NumPy than Python?\n    speedup = python_time / numpy_time  # @inspect speedup\n\n    text(\"Matrix multiplication is even faster on GPUs (for large matrices)!\")\n\ndef einops():\n    einops_motivation()\n\n    text(\"Einops is a library for manipulating tensors where dimensions are named.\")\n    text(\"It is inspired by Einstein summation notation (Einstein, 1916).\")\n    link(title=\"[Einops tutorial]\", url=\"https://einops.rocks/1-einops-basics/\")\n\n    einops_einsum()\n    einops_reduce()\n    einops_rearrange()\n    \n\ndef einops_motivation():\n    text(\"Traditional PyTorch code:\")\n    x = torch.ones(2, 2, 3)      # batch seq hidden  @inspect x\n    y = torch.ones(2, 2, 3)      # batch seq hidden  @inspect y\n    z = x @ y.transpose(-2, -1)  # batch seq seq  @inspect z\n    text(\"Easy to mess up the dimensions (what is -2, -1?)...\")\n\n\ndef einops_einsum():\n    text(\"Einsum is generalized matrix multiplication with good bookkeeping.\")\n\n    x = torch.ones(3, 4)  # seq1 hidden @inspect x\n    y = torch.ones(4, 3)  # hidden seq2 @inspect y\n\n    # Old way\n    z = x @ y   # seq1 seq2  @inspect z\n\n    # New (einops) way\n    z = einsum(x, y, \"seq1 hidden, hidden seq2 -> seq1 seq2\")  # @inspect z\n\n    text(\"Let's try a more complex example...\")  # @clear x y z\n\n    x = torch.ones(2, 3, 4)  # batch seq1 hidden @inspect x\n    y = torch.ones(2, 3, 4)  # batch seq2 hidden @inspect y\n\n    # Old way\n    z = x @ y.transpose(-2, -1)  # batch seq1 seq2  @inspect z\n\n    # New (einops) way\n    z = einsum(x, y, \"batch seq1 hidden, batch seq2 hidden -> batch seq1 seq2\")  # @inspect z\n    text(\"Dimensions that are not named in the output are summed over.\")\n\n    text(\"Or can use `...` to represent broadcasting over any number of dimensions:\")\n    z = einsum(x, y, \"... seq1 hidden, ... seq2 hidden -> ... seq1 seq2\")  # @inspect z\n\n\ndef einops_reduce():\n    text(\"You can reduce a single tensor via some operation (e.g., sum, mean, max, min).\")\n    x = torch.ones(2, 3, 4)  # batch seq hidden @inspect x\n\n    # Old way\n    y = x.sum(dim=-1)  # @inspect y\n\n    # New (einops) way\n    y = reduce(x, \"... hidden -> ...\", \"sum\")  # @inspect y\n\n\ndef einops_rearrange():\n    text(\"Sometimes, a dimension represents two dimensions\")\n    text(\"...and you want to operate on one of them.\")\n\n    x = torch.ones(3, 8)  # batch seq total_hidden @inspect x\n    text(\"...where `total_hidden` is a flattened representation of `heads * hidden1`\")\n    w = torch.ones(4, 4)  # hidden1 hidden2 @inspect w\n\n    text(\"Break up `total_hidden` into two dimensions (`heads` and `hidden1`):\")\n    x = rearrange(x, \"... (heads hidden1) -> ... heads hidden1\", heads=2)  # @inspect x\n\n    text(\"Perform the transformation by `w`:\")\n    x = einsum(x, w, \"... hidden1, hidden1 hidden2 -> ... hidden2\")  # @inspect x\n\n    text(\"Combine `heads` and `hidden2` back together:\")\n    x = rearrange(x, \"... heads hidden2 -> ... (heads hidden2)\")  # @inspect x\n\n\nif __name__ == \"__main__\":\n    main()\n"
   },
   "hidden_line_numbers": {
     "tensors.py": []
@@ -1074,14 +1074,14 @@
           "type": "numpy.ndarray",
           "contents": [
             [
-              -2.845390393805864,
-              0.4859443187039044,
-              1.126272503540939
+              0.6463082546490335,
+              0.692676742506321,
+              0.02102417090265157
             ],
             [
-              -0.19691966723198104,
-              0.11061573101072165,
-              -0.06857238900086751
+              -0.2436219761903324,
+              -0.8406539716156328,
+              1.6490949490658375
             ]
           ],
           "dtype": "float64",
@@ -2223,14 +2223,14 @@
           "type": "numpy.ndarray",
           "contents": [
             [
-              -1.9004262521989412,
-              0.01632111345068394,
-              -0.8052341082473778
+              0.6408218987400253,
+              0.7240789560080745,
+              0.5755266301197551
             ],
             [
-              0.36308197178883567,
-              0.27070479841309775,
-              0.5481260356122637
+              -0.14319579040178604,
+              -0.5078106406359296,
+              0.33625263259535604
             ]
           ],
           "dtype": "float64",
@@ -2261,9 +2261,9 @@
         "y": {
           "type": "numpy.ndarray",
           "contents": [
-            -1.9004262521989412,
-            0.01632111345068394,
-            -0.8052341082473778
+            0.6408218987400253,
+            0.7240789560080745,
+            0.5755266301197551
           ],
           "dtype": "float64",
           "shape": [
@@ -2292,8 +2292,8 @@
         "y": {
           "type": "numpy.ndarray",
           "contents": [
-            0.01632111345068394,
-            0.27070479841309775
+            0.7240789560080745,
+            -0.5078106406359296
           ],
           "dtype": "float64",
           "shape": [
@@ -2323,16 +2323,16 @@
           "type": "numpy.ndarray",
           "contents": [
             [
-              -1.9004262521989412,
-              0.36308197178883567
+              0.6408218987400253,
+              -0.14319579040178604
             ],
             [
-              0.01632111345068394,
-              0.27070479841309775
+              0.7240789560080745,
+              -0.5078106406359296
             ],
             [
-              -0.8052341082473778,
-              0.5481260356122637
+              0.5755266301197551,
+              0.33625263259535604
             ]
           ],
           "dtype": "float64",
@@ -2443,13 +2443,13 @@
           "contents": [
             [
               100.0,
-              0.01632111345068394,
-              -0.8052341082473778
+              0.7240789560080745,
+              0.5755266301197551
             ],
             [
-              0.36308197178883567,
-              0.27070479841309775,
-              0.5481260356122637
+              -0.14319579040178604,
+              -0.5078106406359296,
+              0.33625263259535604
             ]
           ],
           "dtype": "float64",
@@ -2463,15 +2463,15 @@
           "contents": [
             [
               100.0,
-              0.36308197178883567
+              -0.14319579040178604
             ],
             [
-              0.01632111345068394,
-              0.27070479841309775
+              0.7240789560080745,
+              -0.5078106406359296
             ],
             [
-              -0.8052341082473778,
-              0.5481260356122637
+              0.5755266301197551,
+              0.33625263259535604
             ]
           ],
           "dtype": "float64",
@@ -3895,14 +3895,14 @@
           "path": "tensors.py",
           "line_number": 200,
           "function_name": "efficiency",
-          "code": "text(\"Let's Fast way: use built-in matrix multiplication\")"
+          "code": "text(\"Let's now do it in NumPy.\")"
         }
       ],
       "env": {},
       "renderings": [
         {
           "type": "markdown",
-          "data": "Let's Fast way: use built-in matrix multiplication",
+          "data": "Let's now do it in NumPy.",
           "style": {},
           "external_link": null,
           "internal_link": null
@@ -4005,7 +4005,7 @@
       "env": {
         "speedup": {
           "type": "float",
-          "contents": 1460.9647427540085,
+          "contents": 2267.967640635055,
           "dtype": null,
           "shape": null
         }

@@ -197,7 +197,7 @@ def efficiency():
         return y
     python_time = timeit.timeit(slow_matmul, number=1)  # @inspect slow_time @stepover
 
-    text("Let's Fast way: use built-in matrix multiplication")
+    text("Let's now do it in NumPy.")
     numpy_time = timeit.timeit(lambda: x @ w, number=1)  # @inspect fast_time @stepover
 
     # How much faster is NumPy than Python?
