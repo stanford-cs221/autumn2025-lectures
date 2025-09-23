@@ -41,7 +41,7 @@ def what_is_ai():
     text("**Reason**: use knowledge + percepts to draw inferences about the world")
     text("- uniform cost search (in a deterministic world)")
     text("- value iteration (decision-making under uncertainty)")
-    text("- minimax (for adversial games)")
+    text("- minimax (for adversarial games)")
     text("- probabilistic inference (in Bayesian networks)")
 
     text("**Act**: output actions that affect the world")

@@ -40,7 +40,7 @@ def symbolic_ai():
     text("- Goal was to make a \"significant advance\" in 2 months")
     text("- Coined the term \"artificial intelligence\"")
 
-    text("1952: Arthur Samuel\'s chckers playing program")
+    text("1952: Arthur Samuel\'s checkers playing program")
     text("- Weights were learned")
     text("- Played at strong amateur level")
 

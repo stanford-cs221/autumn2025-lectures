@@ -24,7 +24,7 @@ def main():
     text("- Use tensors to represent everything")
     text("- Express computations using few tensor operations for efficiency (a puzzle!)")
     text("- Use einops to make computations more legible")
-    text("- Practice (it's like learning a new langauge)!")
+    text("- Practice (it's like learning a new language)!")
 
 
 def creating_tensors():
@@ -105,7 +105,7 @@ def tensor_examples():
     # A dataset of N examples, each length L, each position is D-dimensional
     x = np.ones((N, L, D))  # @inspect x
 
-    text("In vision, images are have..")  # @clear x
+    text("In vision, images have..")  # @clear x
     H = 2  # A height
     W = 2  # A width
     C = 3  # A number of channels (red, green, blue)
