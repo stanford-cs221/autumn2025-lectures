@@ -112,7 +112,7 @@ wheels = [
 
 [[package]]
 name = "edtrace"
-version = "0.1.6"
+version = "0.1.8"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "altair" },
@@ -121,9 +121,9 @@ dependencies = [
     { name = "sympy" },
     { name = "torch" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/9e/cc/4fbf044c5b796ff30875e5c2985739fc49613cd4ff679f7dd547e3f83d15/edtrace-0.1.6.tar.gz", hash = "sha256:8ca7ee6cfc82087539b565ccfce0ab19413444e2ccf901909fb8b5e4c066d852", size = 8922 }
+sdist = { url = "https://files.pythonhosted.org/packages/02/6a/c59f62f34b38501a433d68d059b92f21eef818b470ac79059ec3a6fc5c98/edtrace-0.1.8.tar.gz", hash = "sha256:6602a9e2979ef37a4d88ec47a95cefd11968de57951ecf1039c76f595c1188e6", size = 9204 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/01/32/f7a43d93d14db13b72899d365b261f65ce806f6b6dcac62db3153ae8ae78/edtrace-0.1.6-py3-none-any.whl", hash = "sha256:91a5766c50e1b97945e683017c4d4430d69f602463d95532bc055610a8be96be", size = 10408 },
+    { url = "https://files.pythonhosted.org/packages/79/51/cd6077d8931b098c0428853e0838750a7606ccc33c946cc554fc8c46bf28/edtrace-0.1.8-py3-none-any.whl", hash = "sha256:5d070939f4948d04a642fbf055d8be716ea927e9d27505f271cf11f829efb575", size = 10617 },
 ]
 
 [[package]]

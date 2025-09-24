@@ -16,14 +16,14 @@ GitHub issue or submit a pull request.
 
 ### Wed Sep 24: learning i (lecture 2)
 
-- [linear_regression](https://stanford-cs221.github.io/autumn2025-lectures/?trace=linear_regression): under construction
-- [linear_classification](https://stanford-cs221.github.io/autumn2025-lectures/?trace=linear_classification): under construction
-- [stochastic_gradient_descent](https://stanford-cs221.github.io/autumn2025-lectures/?trace=linear_regression): under construction
+- [backpropagation](https://stanford-cs221.github.io/autumn2025-lectures/?trace=backpropagation)
+- [linear_regression](https://stanford-cs221.github.io/autumn2025-lectures/?trace=linear_regression)
 
 ### Mon Sep 29: learning ii (lecture 3)
 
+- [linear_classification](https://stanford-cs221.github.io/autumn2025-lectures/?trace=linear_classification): under construction
 - [neural_networks](https://stanford-cs221.github.io/autumn2025-lectures/?trace=neural_networks): under construction
-- [backpropagation](https://stanford-cs221.github.io/autumn2025-lectures/?trace=backpropagation): under construction
+- [stochastic_gradient_descent](https://stanford-cs221.github.io/autumn2025-lectures/?trace=linear_regression): under construction
 
 ### Wed Oct 1: learning iii (lecture 4)
 

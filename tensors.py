@@ -268,7 +268,7 @@ def einops_rearrange():
     text("Sometimes, a dimension represents two dimensions")
     text("...and you want to operate on one of them.")
 
-    x = torch.ones(3, 8)  # batch seq total_hidden @inspect x
+    x = torch.ones(3, 8)  # seq total_hidden @inspect x
     text("...where `total_hidden` is a flattened representation of `heads * hidden1`")
     w = torch.ones(4, 4)  # hidden1 hidden2 @inspect w
 
