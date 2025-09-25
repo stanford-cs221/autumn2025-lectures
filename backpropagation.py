@@ -75,22 +75,22 @@ def einops_review():
     # Sum of all entries: y += m[i][j] for all i, j
     y = einsum(m, "i j ->")  # @inspect y
 
-    # Row sums: y[i] += m[i][j] for all i
+    # Row sums: y[i] += m[i][j] for all i, j
     y = einsum(m, "i j -> i")  # @inspect y
 
-    # Column sums: y[j] += m[i][j] for all j
+    # Column sums: y[j] += m[i][j] for all i, j
     y = einsum(m, "i j -> j")  # @inspect y
 
     # Transpose: y[j][i] += m[i][j] for all i, j
     y = einsum(m, "i j -> j i")  # @inspect y
 
-    # Matrix vector product: y[i] += m[i][j] * x[j] for all i
+    # Matrix vector product: y[i] += m[i][j] * x[j] for all i, j
     y = einsum(m, x, "i j, j -> i")  # @inspect y
 
-    # Matrix-matrix product m m^T: y[i][j] += m[i][k] * m[j][k] for all i, j
+    # Matrix-matrix product m m^T: y[i][j] += m[i][k] * m[j][k] for all i, j, k
     y = einsum(m, m, "i k, j k -> i j")  # @inspect y
 
-    # Matrix-matrix product m^T m: y[i][j] += m[k][i] * m[k][j] for all i, j
+    # Matrix-matrix product m^T m: y[i][j] += m[k][i] * m[k][j] for all i, j, k
     y = einsum(m, m, "k i, k j -> i j")  # @inspect y
 
     text("General setup:")
