@@ -22,11 +22,10 @@ GitHub issue or submit a pull request.
 ### Mon Sep 29: learning ii (lecture 3)
 
 - [linear_classification](https://stanford-cs221.github.io/autumn2025-lectures/?trace=linear_classification)
-- [stochastic_gradient_descent](https://stanford-cs221.github.io/autumn2025-lectures/?trace=stochastic_gradient_descent)
-- [training](https://stanford-cs221.github.io/autumn2025-lectures/?trace=training): under construction
 
 ### Wed Oct 1: learning iii (lecture 4)
 
 - [neural_networks](https://stanford-cs221.github.io/autumn2025-lectures/?trace=neural_networks): under construction
+- [training](https://stanford-cs221.github.io/autumn2025-lectures/?trace=training): under construction
 - [generalization](https://stanford-cs221.github.io/autumn2025-lectures/?trace=generalization): under construction
 - [best_practices](https://stanford-cs221.github.io/autumn2025-lectures/?trace=best_practices): under construction
