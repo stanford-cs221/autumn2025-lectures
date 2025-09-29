@@ -35,9 +35,9 @@ def main():
     text("Summary")
     text("- Linear classification: linear functions → one of K choices")
     text("- Zero-one loss: leads to zero-gradients almost everywhere")
-    text("- Logistic loss: probabilistic interpretation, can ")
-    text("- Multiclass classification: multiple logits and probabilities")
-    text("- Tokenization: convert strings to tensors")
+    text("- Logistic loss: classifier outputs probabilities, leads to non-zero gradients")
+    text("- Multiclass classification: one logit and one probability per class")
+    text("- Tokenization: to handle text, convert strings to tensors")
 
     
 def prediction_task():
