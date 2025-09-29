@@ -8,6 +8,8 @@ import functools
 import tiktoken
 
 def main():
+    image("images/survey1.png", width=800)
+
     text("Last unit: linear regression")
     text("- Prediction task (regression): input → output: real number")
     text("- Hypothesis class: linear functions")
