@@ -8,6 +8,12 @@ view in your browser on the links below or run locally if you clone this
 repository.  If you notice any problems or have any questions, please file an
 GitHub issue or submit a pull request.
 
+To run locally:
+
+    apt-get install graphviz
+    uv sync
+    python -m edtrace.execute -m welcome
+
 ### Mon Sep 22: foundations (lecture 1)
 
 - [welcome](https://stanford-cs221.github.io/autumn2025-lectures/?trace=welcome)
@@ -25,7 +31,4 @@ GitHub issue or submit a pull request.
 
 ### Wed Oct 1: learning iii (lecture 4)
 
-- [neural_networks](https://stanford-cs221.github.io/autumn2025-lectures/?trace=neural_networks): under construction
-- [training](https://stanford-cs221.github.io/autumn2025-lectures/?trace=training): under construction
-- [generalization](https://stanford-cs221.github.io/autumn2025-lectures/?trace=generalization): under construction
-- [best_practices](https://stanford-cs221.github.io/autumn2025-lectures/?trace=best_practices): under construction
+- [deep_learning](https://stanford-cs221.github.io/autumn2025-lectures/?trace=deep_learning)

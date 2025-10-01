@@ -3,6 +3,7 @@ from dataclasses import dataclass
 import numpy as np
 from altair import Chart, Data
 from einops import einsum
+from graphviz import Digraph
 
 
 def main():
@@ -317,6 +318,7 @@ class Node:
         self.dependencies = dependencies
         self.value = None
         self.grad = None
+        self.forward()
 
     def forward(self):
         raise NotImplementedError
@@ -333,6 +335,23 @@ class Node:
         if self.dependencies:
             result["dependencies"] = [dep.asdict() for dep in self.dependencies]
         return result
+
+    def get_graphviz(self) -> Digraph:
+        """
+        Return a graph image of the computation graph.
+        """
+        dot = Digraph()
+        visited = set()
+        def recurse(node: Node):
+            if id(node) in visited:
+                return
+            visited.add(id(node))
+            for dep in node.dependencies:
+                recurse(dep)
+                dot.edge(str(id(dep)), str(id(node)))
+            dot.node(str(id(node)), node.name)
+        recurse(self)
+        return dot
 
     
 class Input(Node):
@@ -384,6 +403,18 @@ class Multiply(Node):
         x, y = self.dependencies
         x.grad += self.grad @ y.value.T  # @inspect self
         y.grad += x.value.T @ self.grad  # @inspect self
+
+
+class DotProduct(Node):
+    """Multiply the two dependencies."""
+    def forward(self):
+        x, y = self.dependencies  # @inspect x.value y.value
+        self.value = x.value @ y.value  # @inspect self.value
+    
+    def backward(self):  # @inspect self
+        x, y = self.dependencies
+        x.grad += self.grad * y.value  # @inspect self
+        y.grad += x.value * self.grad  # @inspect self
 
 
 class Squared(Node):

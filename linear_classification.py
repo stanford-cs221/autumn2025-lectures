@@ -6,6 +6,7 @@ from altair import Chart, Data
 from einops import reduce
 import functools
 import tiktoken
+from util import make_plot
 
 def main():
     image("images/survey1.png", width=800)
@@ -602,27 +603,6 @@ class Vocabulary:
 
 def example_to_point(example: Example) -> dict:
     return {"x0": example.x[0], "x1": example.x[1], "color": "red" if example.target_y == 1 else "blue"}
-
-
-def make_plot(title: str,
-              xlabel: str,
-              ylabel: str,
-              f: Callable[[float], float] | None,
-              xrange: tuple[float, float] = (-3, 3),
-              points: list[dict] | None = None) -> dict:
-    to_show = []
-
-    if f is not None:
-        values = [{xlabel: x, ylabel: f(x)} for x in np.linspace(xrange[0], xrange[1], 30)]
-        line = Chart(Data(values=values)).properties(title=title).mark_line().encode(x=f"{xlabel}:Q", y=f"{ylabel}:Q")
-        to_show.append(line)
-
-    if points is not None:
-        points = Chart(Data(values=points)).mark_point().encode(x=f"{xlabel}:Q", y=f"{ylabel}:Q", color="color:N")
-        to_show.append(points)
-
-    chart = functools.reduce(lambda c1, c2: c1 + c2, to_show)
-    return chart.to_dict()
 
 
 if __name__ == "__main__":
