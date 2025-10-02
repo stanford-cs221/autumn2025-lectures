@@ -10,7 +10,7 @@ from graphviz import Digraph
 
 
 def main():
-    text("Last units: linear regression/classification")
+    text("Last unit: linear regression/classification")
     text("This unit: non-linear regression/classification")
 
     pytorch_basics()
@@ -55,7 +55,7 @@ def compare_numpy_and_pytorch():
     text("Here's a simple computation graph using NumPy + our own library:")
     x = Input("x", np.array([1, 2, 3]))  # @inspect x
     y = Input("y", np.array([4, 5, 6]))  # @inspect y
-    z = DotProduct("z", x, y)  # @inspect z
+    z = DotProduct("z", x, y)  # @inspect z @clear x y
     image(z.get_graphviz().render("var/graph-xyz", format="png"), width=100)
     backpropagation(z)  # @inspect z
 
@@ -90,7 +90,7 @@ def node_or_value():
 
     text("In PyTorch, we use tensors (nodes) directly as values (don't do `x.value`).")  # @clear z l2
     text("By default, PyTorch references by node.")
-    text("To reference by value, we have to wrap a computation using `no_grad()`.")
+    text("To reference by value, call `detach()`.")
     x = torch.tensor(1., requires_grad=True)  # @inspect x
     y = x ** 2  # @inspect y
     z = y ** 2  # @inspect z
@@ -279,8 +279,10 @@ def multi_layer_perceptron_linear():
     logits = (x @ w1) @ w2  # @inspect logits
     
     text("Alternatively, collapse `w1` and `w2` into a single matrix:")
+    logits2 = x @ (w1 @ w2)  # This is just a linear classifier!  @inspect logits2
+    text("which we can rewrite as:")
     w = w1 @ w2  # A single weight vector @inspect w
-    logits2 = x @ w  # This is just a linear classifier!  @inspect logits2
+    logits2 = x @ w  # @inspect logits2
 
     text("Ok, so how do we actually go beyond linear classifiers?")
 
@@ -314,7 +316,7 @@ def multi_layer_perceptron():
     y = relu(x)  # @inspect y
     plot(make_plot("relu", "x", "y", lambda x: np.maximum(x, 0)))  # @stepover
 
-    text("Where does the name come from?")
+    text("Where does the name **multi-layer perceptron** come from?")
     text("Perceptrons came from Frank Rosenblatt's 1958 paper (linear classifier)")
     text("1970s: multi-layer perceptrons (neural networks)")
 
@@ -336,7 +338,7 @@ def multi_layer_perceptron():
     result = train_model(model, training_data)  # @stepover
     plot(result)
 
-    text("Summary: x -[linear][relu]-> hidden -[linear]-> logits")
+    text("Summary: x -[linear][relu]→ hidden -[linear]→ logits")
 
 
 def relu(x: torch.Tensor) -> torch.Tensor:
@@ -378,7 +380,7 @@ def deep_neural_networks():
 
     # Model
     torch.manual_seed(2)
-    model = DNN(input_dim=input_dim, hidden_dim=5, num_classes=num_classes)  # @inspect model
+    model = DeepNeuralNetwork(input_dim=input_dim, hidden_dim=5, num_classes=num_classes)  # @inspect model
     logits = model(training_data[0].x)  # @inspect logits
 
     # Train
@@ -411,15 +413,17 @@ def vanishing_exploding_gradient_problem():
     text("The problem occurs for matrices too (want eigenvalues of w to be close to 1).")
 
 
-class DNN(nn.Module):
+class DeepNeuralNetwork(nn.Module):
     def __init__(self, input_dim: int, hidden_dim: int, num_classes: int):  # @inspect input_dim hidden_dim num_classes
         super().__init__()
-        self.layer1 = MultiLayerPerceptron(input_dim, hidden_dim, hidden_dim)
-        self.layer2 = MultiLayerPerceptron(hidden_dim, hidden_dim, num_classes)
+        self.w1 = nn.Linear(input_dim, hidden_dim)
+        self.w2 = nn.Linear(hidden_dim, hidden_dim)
+        self.w3 = nn.Linear(hidden_dim, num_classes)
     
     def forward(self, x):  # @inspect x
-        x = self.layer1(x)
-        x = self.layer2(x)
+        x = relu(self.w1(x))
+        x = relu(self.w2(x))
+        x = self.w3(x)
         return x
 
     def asdict(self):
@@ -461,14 +465,14 @@ def residual_connections():
 class DNNWithResidual(nn.Module):
     def __init__(self, input_dim: int, hidden_dim: int, num_classes: int):  # @inspect input_dim hidden_dim num_classes
         super().__init__()
-        self.layer1 = nn.Linear(input_dim, hidden_dim)
-        self.layer2 = nn.Linear(hidden_dim, hidden_dim)
-        self.layer3 = nn.Linear(hidden_dim, num_classes)
+        self.w1 = nn.Linear(input_dim, hidden_dim)
+        self.w2 = nn.Linear(hidden_dim, hidden_dim)
+        self.w3 = nn.Linear(hidden_dim, num_classes)
     
     def forward(self, x):  # @inspect x
-        x = self.layer1(x)  # @inspect x
-        x = x + self.layer2(x)  # Add residual connection @inspect x
-        x = self.layer3(x)  # @inspect x
+        x = relu(self.w1(x))  # @inspect x
+        x = x + relu(self.w2(x))  # @inspect x
+        x = self.w3(x)  # @inspect x
         return x
 
     def asdict(self):
@@ -482,8 +486,8 @@ def layer_normalization():
     text("Here's the basic idea:")
     def layernorm(x):
         mean = x.mean()  # @inspect mean
-        std = x.std()  # @inspect std
-        y = (x - mean) / std  # @inspect y
+        var = x.var()  # @inspect var
+        y = (x - mean) / torch.sqrt(var)  # @inspect y
         return y
     x = torch.tensor([1., 2, 3])  # @inspect x
     y = layernorm(x)  # @inspect y
@@ -534,7 +538,7 @@ def initialization():
     y = x @ w  # @inspect y
     text(f"Now each element of `y` is constant: {y[0]}.")
 
-    text("Up to a constant, this is Xavier initialization. "), link(title="[paper]", url="https://proceedings.mlr.press/v9/glorot10a/glorot10a.pdf"), link(title="[stackexchange]", url="https://ai.stackexchange.com/questions/30491/is-there-a-proper-initialization-technique-for-the-weight-matrices-in-multi-head")
+    text("Up to a constant, this is Xavier initialization. "), link(title="[Glorot and Bengio 2010]", url="https://proceedings.mlr.press/v9/glorot10a/glorot10a.pdf"), link(title="[stackexchange]", url="https://ai.stackexchange.com/questions/30491/is-there-a-proper-initialization-technique-for-the-weight-matrices-in-multi-head")
 
     text("To be extra safe, we truncate the normal distribution to [-3, 3] to avoid any chance of outliers.")
     w = nn.Parameter(nn.init.trunc_normal_(torch.empty(input_dim, output_dim), std=1 / np.sqrt(input_dim), a=-3, b=3))
@@ -554,13 +558,13 @@ def optimizers():
     batch_size = 2
     indices = torch.randint(0, grads.shape[0], (batch_size,))  # @inspect indices
     stochastic_grads = grads[indices]  # @inspect stochastic_grads
-    stochastic_grad = torch.mean(stochastic_grads, axis=0)  # @inspect stochastic_grad
+    expected_grad = torch.mean(stochastic_grads, axis=0)  # @inspect expected_grad
 
-    text("In practice, we permute the training examples each epoch and take consecutive chunks.")
+    text("In practice, we permute the training examples each epoch and take consecutive chunks.")  # @inspect grad indices stochastic_grads stochastic_grad
     random_perm = torch.randperm(grads.shape[0]) # @inspect random_perm
     batches = [random_perm[i:i + batch_size] for i in range(0, len(random_perm), batch_size)] # @inspect batches
     stochastic_grads = torch.stack([torch.mean(grads[indices], axis=0) for indices in batches])  # @inspect stochastic_grads
-    stochastic_grad = torch.mean(stochastic_grads, axis=0)  # @inspect stochastic_grad
+    expected_grad = torch.mean(stochastic_grads, axis=0)  # @inspect expected_grad
 
     text("Fancier optimizer: use Adam instead of SGD.")
 
