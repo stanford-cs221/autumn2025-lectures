@@ -32,3 +32,11 @@ To run locally:
 ### Wed Oct 1: learning iii (lecture 4)
 
 - [deep_learning](https://stanford-cs221.github.io/autumn2025-lectures/?trace=deep_learning)
+
+### Mon Oct 6: search i (lecture 5)
+
+- [search](https://stanford-cs221.github.io/autumn2025-lectures/?trace=search)
+
+### Wed Oct 8: search ii (lecture 6)
+
+- [ucs_astar](https://stanford-cs221.github.io/autumn2025-lectures/?trace=ucs_astar)

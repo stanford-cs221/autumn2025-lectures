@@ -10,4 +10,5 @@ dependencies = [
     "graphviz>=0.21",
     "jaxtyping>=0.3.2",
     "tiktoken>=0.11.0",
+    "transformers>=4.57.0",
 ]

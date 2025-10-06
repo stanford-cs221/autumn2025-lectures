@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <link href="http://arxiv.org/api/query?search_query%3D%26id_list%3D2407.21787%26start%3D0%26max_results%3D10" rel="self" type="application/atom+xml"/>
+  <title type="html">ArXiv Query: search_query=&amp;id_list=2407.21787&amp;start=0&amp;max_results=10</title>
+  <id>http://arxiv.org/api/gUbqwM9Q3pydbZOW0hISJP9Ggm4</id>
+  <updated>2025-10-05T00:00:00-04:00</updated>
+  <opensearch:totalResults xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">1</opensearch:totalResults>
+  <opensearch:startIndex xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">0</opensearch:startIndex>
+  <opensearch:itemsPerPage xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">10</opensearch:itemsPerPage>
+  <entry>
+    <id>http://arxiv.org/abs/2407.21787v3</id>
+    <updated>2024-12-30T19:03:24Z</updated>
+    <published>2024-07-31T17:57:25Z</published>
+    <title>Large Language Monkeys: Scaling Inference Compute with Repeated Sampling</title>
+    <summary>  Scaling the amount of compute used to train language models has dramatically
+improved their capabilities. However, when it comes to inference, we often
+limit models to making only one attempt at a problem. Here, we explore
+inference compute as another axis for scaling, using the simple technique of
+repeatedly sampling candidate solutions from a model. Across multiple tasks and
+models, we observe that coverage -- the fraction of problems that are solved by
+any generated sample -- scales with the number of samples over four orders of
+magnitude. Interestingly, the relationship between coverage and the number of
+samples is often log-linear and can be modelled with an exponentiated power
+law, suggesting the existence of inference-time scaling laws. In domains like
+coding and formal proofs, where answers can be automatically verified, these
+increases in coverage directly translate into improved performance. When we
+apply repeated sampling to SWE-bench Lite, the fraction of issues solved with
+DeepSeek-Coder-V2-Instruct increases from 15.9% with one sample to 56% with 250
+samples, outperforming the single-sample state-of-the-art of 43%. In domains
+without automatic verifiers, we find that common methods for picking from a
+sample collection (majority voting and reward models) plateau beyond several
+hundred samples and fail to fully scale with the sample budget.
+</summary>
+    <author>
+      <name>Bradley Brown</name>
+    </author>
+    <author>
+      <name>Jordan Juravsky</name>
+    </author>
+    <author>
+      <name>Ryan Ehrlich</name>
+    </author>
+    <author>
+      <name>Ronald Clark</name>
+    </author>
+    <author>
+      <name>Quoc V. Le</name>
+    </author>
+    <author>
+      <name>Christopher Ré</name>
+    </author>
+    <author>
+      <name>Azalia Mirhoseini</name>
+    </author>
+    <link href="http://arxiv.org/abs/2407.21787v3" rel="alternate" type="text/html"/>
+    <link title="pdf" href="http://arxiv.org/pdf/2407.21787v3" rel="related" type="application/pdf"/>
+    <arxiv:primary_category xmlns:arxiv="http://arxiv.org/schemas/atom" term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+  </entry>
+</feed>
