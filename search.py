@@ -63,7 +63,7 @@ def main():
     text("Summary")
     text("- Search problem: formally defines the problem (state, actions, costs, etc.)")
     text("- Objective: find a solution (sequence of actions) that minimizes the total cost.")
-    text("- Backtracking search: find exact solution, but takes exponential time.")
+    text("- Exhaustive search: find exact solution, but takes exponential time.")
     text("- Dynamic programming: find exact solution, exponentially faster (if the number of states is small).")
     text("- Best-of-n: find approximate solution by throwing `n` darts")
     text("- Beam search: find approximate solution by keeping track of `beam_width` partial solutions.")
@@ -329,7 +329,7 @@ def introduce_dynamic_programming():
     text("Dynamic programming = exhaustive search + caching")
     text("Also known as *memoization*.")
 
-    text("Recall that backtracking search explores some states more than once.")
+    text("Recall that exhaustive search explores some states more than once.")
     text("Dynamic programming: if already saw a state, don't explore it again.")
 
     problem = TravelSearchProblem(num_locs=10)  # @stepover
@@ -510,7 +510,7 @@ def beam_search(problem: SearchProblem, beam_width: int, max_steps: int) -> tupl
         new_candidates = []  # @inspect new_candidates
         for candidate in candidates:
             state = candidate.steps[-1].state if candidate.steps else problem.start_state()  # @inspect state @stepover
-            if problem.is_end(state):  # If we've alreacy reached the end, just keep @stepover
+            if problem.is_end(state):  # If we've already reached the end, just keep @stepover
                 new_candidates.append(candidate)  # @inspect new_candidates
             else:
                 # Try all possible actions from `state`
@@ -521,6 +521,9 @@ def beam_search(problem: SearchProblem, beam_width: int, max_steps: int) -> tupl
         # Take the `beam_width` best candidates (lowest cost)
         new_candidates.sort(key=lambda x: x.cost)  # Sort @stepover @inspect new_candidates @clear successor state
         candidates = new_candidates[:beam_width]  # Prune @inspect candidates @clear new_candidates
+
+    # Keep only candidates that are done
+    candidates = [candidate for candidate in candidates if problem.is_end(candidate.steps[-1].state)]
 
     return candidates[0], num_explored
 
