@@ -498,9 +498,9 @@ def closed_form_solution():
     text("Intuition: favor states that are closer to E")
 
     text("Run UCS and A*")
-    solution, num_explored = uniform_cost_search(relaxed_problem)  # @inspect solution num_explored @stepover
-    solution, num_explored = astar_search(relaxed_problem, heuristic=future_cost_relaxed)  # @inspect solution num_explored @stepover
-    text("Note that A* doesn't provide a win here.")
+    solution, num_explored = uniform_cost_search(problem)  # @inspect solution num_explored @stepover
+    solution, num_explored = astar_search(problem, heuristic=future_cost_relaxed)  # @inspect solution num_explored @stepover
+    text("Note that A* does not provide a benefit in this case.")
 
 
 def search_fewer_states():

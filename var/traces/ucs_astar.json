@@ -1,6 +1,6 @@
 {
   "files": {
-    "ucs_astar.py": "from edtrace import text, link, image, note\nfrom search import SearchProblem, Step, Solution, dynamic_programming, LimitedTravelSearchProblem, TravelSearchProblem, TravelState\nfrom dataclasses import dataclass\nfrom graphviz import Digraph\nfrom typing import Any, Callable\nimport heapq\n\nHeuristic = Callable[[Any], float]\n\ndef main():\n    text(\"Last time: we need search to solve complex problems (thinking, reasoning)\")\n    image(\"images/walk-tram.png\", width=400)\n    text(\"- Search problem: formal definition\")\n    problem = TravelSearchProblem(num_locs=10)\n    state = problem.start_state()  # @inspect state\n    successors = problem.successors(state)  # @inspect successors\n    is_end = problem.is_end(successors[0].state)  # @inspect is_end\n    text(\"- Objective: find a solution (sequence of actions) that minimizes the total cost.\")  # @clear state successors is_end\n    text(\"- Exact algorithms: exhaustive search, dynamic programming (caching)\")\n    text(\"- Approximate algorithms: best-of-n, beam search\")\n\n    text(\"This time: exact algorithms that allow for cycles\")\n    text(\"- Uniform-cost search (UCS)\")\n    text(\"- A* search: UCS with a heuristic function\")\n\n    ucs()\n    astar()\n    astar_relaxations()\n\n    text(\"Summary\")\n    text(\"- UCS and A* are two exact algorithms that allow for cycles (but non-negative costs)\")\n    text(\"- Key: order states by increasing past cost\")\n    text(\"- Can't do better than UCS in general\")\n    text(\"- A* allows you to incorporate domain knowledge via heuristics to speed up search\")\n    text(\"- Heuristics: future cost of some relaxed problem (lowering costs in a structured way)\")\n\n    text(\"Next time: what happens when actions have non-deterministic outcomes (e.g., rolling dice)?\")\n\n\nclass DiamondSearchProblem(SearchProblem):\n    def __init__(self):\n        # state -> state -> cost\n        self.graph = {\n            \"A\": {\"B\": 1, \"C\": 100},\n            \"B\": {\"A\": 1, \"C\": 1, \"D\": 100},\n            \"C\": {\"A\": 100, \"B\": 1, \"D\": 1},\n            \"D\": {\"B\": 100, \"C\": 1},\n        }\n\n    def start_state(self) -> str:\n        return \"A\"\n    \n    def successors(self, state: str) -> list[Step]:\n        return [\n            Step(action=new_state, cost=cost, state=new_state) \\\n            for new_state, cost in self.graph[state].items()\n        ]\n    \n\n    def is_end(self, state: str) -> bool:\n        return state == \"D\"\n\n\nclass GridSearchProblem(SearchProblem):\n    def __init__(self, *rows: list[str]):\n        # Remove spaces (which are just for readability)\n        self.rows = [row.replace(\" \", \"\") for row in rows]\n\n    def start_state(self) -> str:\n        for r in range(self.num_rows):\n            for c in range(self.num_cols):\n                if self.rows[r][c] == \"S\":\n                    return (r, c)\n        raise ValueError(\"No start state found\")\n\n    def is_valid(self, state: tuple[int, int]) -> bool:\n        \"\"\"Check if a state is valid.\"\"\"\n        r, c = state\n        return 0 <= r < self.num_rows and \\\n               0 <= c < self.num_cols and \\\n               self.rows[r][c] != \"#\"\n    \n    def successors(self, state: tuple[int, int]) -> list[Step]:\n        \"\"\"Return the successors of a state (up, down, left, right).\"\"\"\n        r, c = state\n        successors = []\n        if self.is_valid((r + 1, c)):\n            successors.append(Step(action=\"down\", cost=1, state=(r + 1, c)))\n        if self.is_valid((r - 1, c)):\n            successors.append(Step(action=\"up\", cost=1, state=(r - 1, c)))\n        if self.is_valid((r, c + 1)):\n            successors.append(Step(action=\"right\", cost=1, state=(r, c + 1)))\n        if self.is_valid((r, c - 1)):\n            successors.append(Step(action=\"left\", cost=1, state=(r, c - 1)))\n        return successors\n\n    def is_end(self, state: tuple[int, int]) -> bool:\n        \"\"\"Check if a state is an end state.\"\"\"\n        r, c = state\n        return self.rows[r][c] == \"E\"\n\n    @property\n    def num_rows(self) -> int:\n        return len(self.rows)\n    \n    @property\n    def num_cols(self) -> int:\n        return len(self.rows[0])\n\n\ndef ucs():\n    ucs_motivation()\n    ucs_examples()\n    ucs_correctness()\n\n    text(\"Summary of uniform cost search (UCS)\")\n    text(\"- Computes past costs for each state in non-decreasing order.\")\n    text(\"- Uses a priority queue to efficiently find the state with the lowest priority.\")\n    text(\"- Guaranteed to compute the minimum cost solution if non-negative costs.\")\n\n\ndef ucs_motivation():\n    text(\"Two key concepts in search:\")\n    text(\"- **Future cost**: minimum cost solution from `state` to an end state.\")\n    text(\"- **Past cost**: minimum cost solution from the start state to `state`.\")\n    image(\"images/past-future.png\", width=600)\n\n    text(\"In dynamic programming, we compute the future cost for each state.\")\n    text(\"Note `future_cost(state)` depends on `future_cost(state')` and thus must be computed after it.\")\n    text(\"So FutureCost(state) are computed from the end states to the start state (like in backpropagation).\")\n    text(\"Assumption: there are no cycles.\")\n\n    text(\"Now suppose that there are cycles (special case: undirected edges).\")\n    image(\"images/diamond-example.png\", width=300)\n    text(\"Which do we compute first, B or C?\")\n    text(\"In general, in what order do we process the states?\")\n\n    text(\"**Uniform Cost Search (UCS)** [Dijkstra, 1956]\")\n    text(\"Assumption: all costs are non-negative.\")\n    text(\"Two differences from dynamic programming:\")\n    text(\"- Compute **past costs** for each state (instead of future costs).\")\n    text(\"- Process states **in order of increasing past cost** (instead of topological order).\")\n\n    text(\"High-level strategy:\")\n    image(\"images/ucs-strategy.png\", width=400)\n    text(\"- **Explored**: states we've found the minimum cost path to\")\n    text(\"- **Frontier**: states we've seen, still trying to figure out how the best way to get there\") \n    text(\"- **Unexplored**: states we haven't seen yet\")\n\n\n@dataclass(frozen=True)\nclass Backpointer:\n    \"\"\"For a state, record how we got to it.\"\"\"\n    prev_state: Any   # Which state we came from\n    action: Any       # Action we took from `prev_state`\n    cost: float       # Cost of that action\n\n\ndef uniform_cost_search(problem: SearchProblem) -> tuple[Solution | None, int]:\n    \"\"\"\n    Run Uniform Cost Search (UCS) on the specified search `problem`.\n    Return the solution (sequence of steps) and the number of states explored.\n    \"\"\"\n    # Frontier: states we've seen, still trying to figure out how the best way to get there\n    # Priority represents the minimum cost to get there\n    frontier = PriorityQueue()  # @stepover @inspect frontier\n\n    # For each state we've reached, backpointer tells us how we got there\n    backpointers: dict[Any, Backpointer] = {}  # @inspect backpointers\n    num_explored = 0  # @inspect num_explored\n\n    # Add the start state\n    start_state = problem.start_state()  # @stepover\n    frontier.update(start_state, 0.0)  # @stepover @inspect frontier\n\n    while True:\n        # Remove the state from the frontier with the lowest priority (theorem: priority = past_cost).\n        state, past_cost = frontier.remove_min()  # @inspect state past_cost frontier @stepover\n        if state is None and past_cost is None:\n            return None, num_explored  # Found no solution\n\n        num_explored += 1  # @inspect num_explored\n\n        # Check if we've reached an end state; if so, extract solution.\n        if problem.is_end(state):  # @stepover\n            # Walk back the backpointers to get the actions\n            steps = []  # @inspect steps @clear successor\n            while state != start_state:\n                backpointer = backpointers[state]\n                steps.insert(0, Step(backpointer.action, backpointer.cost, state))  # Prepend @inspect steps\n                state = backpointer.prev_state  # Go back @inspect state\n            return Solution(steps=steps), num_explored\n\n        # Expand from `state`, updating the frontier with each `new_state`\n        for successor in problem.successors(state):  # @inspect successor @stepover\n            if frontier.update(successor.state, past_cost + successor.cost):  # @stepover @inspect frontier\n                # We found better way to get to `successor.state` --> update backpointer!\n                backpointers[successor.state] = Backpointer(prev_state=state, action=successor.action, cost=successor.cost)  # @inspect backpointers\n\n\nclass PriorityQueue:\n    \"\"\"Data structure for supporting uniform cost search.\"\"\"\n    def __init__(self):\n        self.DONE = -100000\n        self.heap = []\n        self.priorities = {}  # Map from state to priority\n\n    def update(self, state: Any, new_priority: float) -> bool:\n        \"\"\"\n        Insert `state` into the heap with priority `new_priority` if `state`\n        isn't in the heap or `new_priority` is smaller than the existing\n        priority.  Return whether the priority queue was updated.\n        \"\"\"\n        old_priority = self.priorities.get(state)\n        if old_priority is None or new_priority < old_priority:\n            self.priorities[state] = new_priority\n            heapq.heappush(self.heap, (new_priority, state))\n            return True\n        return False\n\n    def remove_min(self):\n        \"\"\"Return (state with minimum priority, priority) or (None, None) if empty.\"\"\"\n        while len(self.heap) > 0:\n            priority, state = heapq.heappop(self.heap)\n            if self.priorities[state] == self.DONE:\n                # Outdated priority, skip\n                continue\n            self.priorities[state] = self.DONE\n            return state, priority\n\n        # Nothing left...\n        return None, None\n\n    def asdict(self) -> dict[Any, float]:\n        \"\"\"Return the priorities without the DONE ones.\"\"\"\n        return dict((state, priority) for state, priority in self.priorities.items() if priority != self.DONE)\n\n\ndef ucs_examples():\n    text(\"Consider the following simple search problem.\")\n    problem = DiamondSearchProblem()\n    image(draw_graph(problem).render(\"var/diamond_graph\", format=\"png\"), width=200)  # @stepover\n\n    successors = problem.successors(\"A\")  # @inspect successors\n\n    text(\"Let's run UCS on this example.\")  # @clear successors\n    solution, num_explored = uniform_cost_search(problem)  # @inspect solution num_explored\n\n    text(\"Let's consider another search problem:\")  # @clear solution\n    text(\"- States are points on a grid (start at S, end at E)\")\n    text(\"- Actions: up, down, left, right\")\n    text(\"- Cost: 1 for each action\")\n    problem = GridSearchProblem(  # @stepover\n        # 0 1 2 3 4\n        \" S . . . .\", # 0\n        \" # # # . #\", # 1\n        \" . . . . .\", # 2\n        \" . # # # #\", # 3\n        \" . . . . E\", # 4\n    )\n    image(draw_graph(problem).render(\"var/grid_graph\", format=\"png\"), width=100)  # @stepover\n\n    state = problem.start_state()  # @inspect state @stepover\n    successors = problem.successors(state)  # @inspect successors @stepover\n    is_end = problem.is_end(successors[0].state)  # @inspect is_end @stepover\n\n    text(\"Let's run UCS on this example.\")  # @clear state successors is_end\n    solution, num_explored = uniform_cost_search(problem)  # @inspect solution num_explored @stepover\n\n    text(\"Here is a much larger example where each pixel is a state:\")\n    link(\"https://www.youtube.com/watch?v=z6lUnb9ktkE\", title=\"[UCS video]\")\n\n\ndef draw_graph(problem: SearchProblem) -> Digraph:\n    \"\"\"Traverse a search problem and return a graphviz graph.\"\"\"\n    dot = Digraph()\n    visited = set()\n    # Traverse the states (nodes) in the search problem\n    def recurse(state: Any):\n        if state in visited:\n            return\n        visited.add(state)\n        if problem.is_end(state):\n            dot.node(str(state), shape=\"doublecircle\")\n        else:\n            dot.node(str(state), shape=\"circle\")\n            for step in problem.successors(state):\n                dot.edge(str(state), str(step.state), label=f\"{step.action}:{step.cost}\")\n                recurse(step.state)\n\n    recurse(problem.start_state())\n    return dot\n\ndef ucs_correctness():\n    text(\"We now prove that UCS is guaranteed to compute the minimum cost solution.\")\n    text(\"Assumption: all costs are non-negative.\")\n\n    image(\"images/ucs-strategy.png\", width=300)\n    text(\"**Theorem:**\")\n    text(\"- Suppose UCS moves a state s from the frontier to the explored set.\")\n    text(\"- Then priority(s) = PastCost(s).\")\n\n    text(\"Let's prove by induction.\")\n    text(\"Base case: priority(start) = PastCost(start) = 0.\")\n\n    image(\"images/ucs-proof.png\", width=300)\n    text(\"Inductive case: assume priority(s) = PastCost(s) for all s in explored.\")\n    text(\"- Suppose we remove s from the frontier, corresponding to blue path.\")\n    text(\"- Consider any alternative red path to s that goes through t (in explored) and u (in frontier).\")\n    text(\"- Want to show cost(red) >= cost(blue).\")\n    text(\"cost(red)\")\n    text(\"\u2265 PastCost(t) + Cost(t, u) [PastCost(t) is minimum cost to t, u to s is non-negative]\")\n    text(\"= priority(t) + Cost(t, u) [inductive hypothesis]\")\n    text(\"\u2265 priority(u) [t is explored, used to update priority(u)]\")\n    text(\"\u2265 priority(s) [s has minimum priority from frontier]\")\n    text(\"= cost(blue) [by definition]\")\n\n\ndef astar():\n    text(\"UCS in action: \"), link(\"https://www.youtube.com/watch?v=z6lUnb9ktkE\", title=\"[UCS video]\")\n    text(\"A* in action: \"), link(\"https://www.youtube.com/watch?v=huJEgJ82360\", title=\"[A* video]\")\n\n    text(\"UCS orders states by increasing past cost (which has no knowledge of the end state).\")\n    text(\"We would also like to consider the cost from state to an end state.\")\n    text(\"Ideal: explore in order of PastCost(s) + FutureCost(s)\")\n    text(\"A*: explore in order of PastCost(s) + h(s) for some **heuristic** h(s)\")\n    text(\"h(s) is an approximation of FutureCost(s)\")\n\n    text(\"**A* algorithm** [Hart/Nilsson/Raphael 1968]: run UCS with modified costs:\")\n    text(\"Cost'(s, a) = Cost(s, a) + [h(Succ(s, a)) - h(s)]\")\n    text(\"Intuition: add a penalty for how much action takes us away from the end state\")\n\n    text(\"Let's consider a simple example:\")\n    problem = LineSearchProblem()\n    image(draw_graph(problem).render(\"var/line_graph\", format=\"png\"), width=100)  # @stepover\n    state = problem.start_state()  # @inspect state @stepover\n    successors = problem.successors(state)  # @inspect successors\n    is_end = problem.is_end(successors[0].state)  # @inspect is_end\n\n    text(\"Let's run UCS on this example.\")  # @clear state successors is_end\n    solution, num_explored = uniform_cost_search(problem)  # @inspect solution num_explored @stepover\n\n    text(\"Let's run A* on this example.\")  # @clear solution num_explored\n    def line_heuristic(state: int) -> float:\n        return 2 - state\n    cost = line_heuristic(2)  # @inspect cost  @stepover\n    cost = line_heuristic(0)  # @inspect cost @stepover\n    cost = line_heuristic(-2)  # @inspect cost @stepover\n\n    modified_problem = ModifiedSearchProblem(problem, heuristic=line_heuristic)  # @stepover @clear cost\n    successors = modified_problem.successors(0)  # @inspect successors\n    text(\"Note that the heuristic makes us favor going to the right.\")\n\n    solution = astar_search(problem, heuristic=line_heuristic)  # @inspect solution\n\n    text(\"Will any heuristic work?\")\n    text(\"No.\")\n    image(\"images/astar-counterexample.png\", width=400)\n\n    text(\"**Consistency**: h is consistent when\")\n    text(\"Cost(s, a) + h(Succ(s, a)) - h(s) is non-negative.\")\n    text(\"h(end) = 0.\")\n    text(\"UCS can't work with negative costs.\")\n\n    text(\"Proposition (correctness): A* is correct if h is consistent.\")\n\n    text(\"Proposition (efficiency): A* explores all states statisfying\")\n    text(\"PastCost(s) <= PastCost(start) - h(s)\")\n    text(\"Proof: A* explores all s such that PastCost(s) + h(s) <= PastCost(end)\")\n    text(\"- If h(s) = 0, then A* = UCS.\")\n    text(\"- If h(s) = FutureCost(s), then A* explores only nodes on minimum cost path\")\n    text(\"- Usually h(s) is somewhere in between.\")\n\n    text(\"Definition (admissibility): h is admissible when h(s) <= FutureCost(s)\")\n    text(\"In other words: h always underestimates the cost\")\n    text(\"Consistency implies admissibility.\")\n\n\nclass LineSearchProblem(SearchProblem):\n    def start_state(self) -> int:\n        return 0\n\n    def successors(self, state: int) -> list[Step]:\n        successors = []\n        if state >= -2:\n            successors.append(Step(action=\"left\", cost=1, state=state - 1))\n        if state <= 2:\n            successors.append(Step(action=\"right\", cost=1, state=state + 1))\n        return successors\n    \n    def is_end(self, state: int) -> bool:\n        return state == 2\n\n\ndef astar_search(problem: SearchProblem, heuristic: Heuristic) -> tuple[Solution | None, int]:\n    \"\"\"Just wrap the problem and return the solution.\"\"\"\n    modified_problem = ModifiedSearchProblem(problem, heuristic)  # @stepover\n    modified_solution, num_explored = uniform_cost_search(modified_problem)  # @stepover @inspect modified_solution num_explored\n\n    # The actions are correct but the costs are still the modified costs!\n    # Need to get the original costs from the modified solution.\n    state = problem.start_state()  # @inspect state @stepover\n    steps = []  # @inspect steps\n    for step in modified_solution.steps:  # step: state ----> step.state @inspect step\n        modified_cost = step.cost  # @inspect modified_cost\n        # Recall: modified_cost = original_cost + heuristic(step.state) - heuristic(state)\n        original_cost = modified_cost - heuristic(step.state) + heuristic(state)  # @inspect original_cost @stepover\n        steps.append(Step(step.action, original_cost, step.state))  # @inspect steps\n        state = step.state\n    solution = Solution(steps=steps)\n    return solution, num_explored\n\n\nclass ModifiedSearchProblem(SearchProblem):\n    \"\"\"A modified search problem where the costs are based on the `heuristic`.\"\"\"\n    def __init__(self, problem: SearchProblem, heuristic: Heuristic):\n        self.problem = problem\n        self.heuristic = heuristic\n    \n    def start_state(self) -> Any:\n        return self.problem.start_state()\n\n    def successors(self, state: Any) -> list[Step]:\n        \"\"\"Return the successors of `state`.\"\"\"\n        successors = []\n        for successor in self.problem.successors(state):  # @inspect successor @stepover\n            # Modify the cost using the heuristic\n            modified_cost = successor.cost + self.heuristic(successor.state) - self.heuristic(state)  # @inspect modified_cost @stepover\n            successors.append(Step(successor.action, modified_cost, successor.state))\n        return successors\n    \n    def is_end(self, state: Any) -> bool:\n        return self.problem.is_end(state)\n\n\ndef astar_relaxations():\n    text(\"So far:A* = UCS with a modified cost based on a heuristic function h\")\n    text(\"h(s) needs to be consistent for A* to be correct\")\n    text(\"How do we choose h?\")\n\n    text(\"Key principle: **relaxation**\")\n    text(\"Ideally, h(s) = FutureCost(s), but that's just as hard as solving the original problem.\")\n    text(\"So let's relax the problem to make it easier.\")\n\n    text(\"Winning recipe:\")\n    text(\"- Define a relaxed problem by getting rid of some constraints.\")\n    text(\"- Compute FutureCost_relaxed(s) to be the future cost of state s under the relaxed problem.\")\n    text(\"- Run A* using heuristic h(s) = FutureCost_relaxed(s).\")\n\n    text(\"Here are some ways in which the relaxed problem is easier.\")\n    closed_form_solution()\n    search_fewer_states()\n    independent_subproblems()\n    unifying_principle()\n    combining_heuristics()\n\n\ndef closed_form_solution():\n    text(\"Recall the grid problem of going from S to E without going through walls (#).\")\n\n    problem = GridSearchProblem(  # @stepover\n        # 0 1 2 3 4\n        \" S . . . .\", # 0\n        \" # # # . #\", # 1\n        \" . . . . .\", # 2\n        \" . # # # #\", # 3\n        \" . . . . E\", # 4\n    )\n\n    text(\"In the relaxed problem, just remove all the walls!\")\n    relaxed_problem = GridSearchProblem(  # @stepover\n        # 0 1 2 3 4\n        \" S . . . .\", # 0\n        \" . . . . .\", # 1\n        \" . . . . .\", # 2\n        \" . . . . .\", # 3\n        \" . . . . E\", # 4\n    )\n    text(\"The future cost of a state (r, c) under the relaxed problem has a closed form solution.\")\n\n    def future_cost_relaxed(state: tuple[int, int]) -> float:\n        end_r = relaxed_problem.num_rows - 1  # @stepover  @inspect end_r\n        end_c = relaxed_problem.num_cols - 1  # @stepover  @inspect end_c\n        # Manhattan distance between (r, c) and (end_r, end_c)\n        r, c = state  # @inspect r c\n        dist = abs(end_r - r) + abs(end_c - c)  # @inspect dist\n        return dist\n\n    cost = future_cost_relaxed(state=(0, 0))  # @inspect cost\n    cost = future_cost_relaxed(state=(0, 1))  # Closer @inspect cost @stepover\n    cost = future_cost_relaxed(state=(2, 4))  # Seems so close! @inspect cost @stepover\n    cost = future_cost_relaxed(state=(3, 0))  # Seems farther (heuristic is imperfect)! @inspect cost @stepover\n    text(\"Intuition: favor states that are closer to E\")\n\n    text(\"Run UCS and A*\")\n    solution, num_explored = uniform_cost_search(relaxed_problem)  # @inspect solution num_explored @stepover\n    solution, num_explored = astar_search(relaxed_problem, heuristic=future_cost_relaxed)  # @inspect solution num_explored @stepover\n    text(\"Note that A* explores slightly fewer states than UCS (not a big win here).\")\n\n\ndef search_fewer_states():\n    text(\"Recall the limited travel problem:\")\n    text(\"- Travel from 1 to n via walking (i \u2192 i+1) or tram (i \u2192 2*i)\")\n    text(\"- Can take tram only `tickets` times\")\n    problem = LimitedTravelSearchProblem(num_locs=10, starting_tickets=3)\n\n    text(\"Relaxed problem: tram is free again!\")\n    relaxed_problem = TravelSearchProblem(num_locs=10)\n\n    text(\"To define the heuristic, we need to compute future costs of the relaxed problem.\")\n    _, num_explored_relaxed, future_costs_relaxed = dynamic_programming(relaxed_problem)  # @stepover @inspect num_explored_relaxed relaxed_future_costs\n    def heuristic(state: TravelState) -> float:\n        # Note: problem states are (loc, tickets) but relaxed problem states are just loc\n        state_relaxed = state.loc\n        return future_costs_relaxed[state_relaxed].cost\n\n    cost = heuristic(TravelState(loc=4, tickets=3))  # @inspect cost\n\n    text(\"Let's compare UCS and A*\")\n    solution, num_explored = uniform_cost_search(problem)  # @inspect solution num_explored @stepover\n    solution, num_explored = astar_search(problem, heuristic=heuristic)  # @inspect solution num_explored @stepover\n    \n    text(\"For accounting purposes, need to include the cost of solving the relaxed problem!\")\n    num_explored += num_explored_relaxed  # @inspect num_explored\n\n    text(\"Note: dynamic programming cannot deal with cycles\")\n    text(\"If we have cycles, what do we do?\")\n    text(\"Solution:\")\n    text(\"- Define a reversed relaxed problem (A \u2192 B becomes B \u2192 A)\")\n    text(\"- Past costs in the reversed relaxed problem = future costs in the relaxed problem\")\n    text(\"- Run UCS on the reserved relaxed problem to compute future costs in the relaxed problem\")\n\n    text(\"Summary:\")\n    text(\"- Still have to run search on the relaxed problems\")\n    text(\"- But the relaxed problems have fewer constraints and therefore fewer states\")\n    text(\"- Thus they are faster to solve than the original problem\")\n\n\ndef independent_subproblems():\n   text(\"Motivating example: solving the 8 puzzle\")\n   image(\"images/8-puzzle.png\", width=400) \n\n   text(\"Original problem: tiles cannot overlap\")\n   text(\"Relaxed problem: tiles **can** overlap\")\n   text(\"As a result, this breaks up into 8 **independent** subproblems\")\n   text(\"...and in this case, each subproblem can be solved in closed form.\")\n   #                 1   2   3   4   5   6   7   8  # tile\n   heuristic_value = 1 + 1 + 3 + 1 + 1 + 1 + 1 + 3  # how far it has to move @inspect heuristic_value\n\n\ndef unifying_principle():\n    text(\"Examples of relaxed problems so far:\")\n    text(\"- Knock down walls\")\n    text(\"- Free tram\")\n    text(\"- Tiles can overlap\")\n\n    text(\"These are all examples of removing constraints from the original problem.\")\n    text(\"Removing constraints means reducing the cost of actions from infinity to a finite value.\")\n\n    text(\"A more general principle: **reducing costs**\")\n\n    text(\"Definition: A **relaxation** of a search problem is a modified problem where\")\n    text(\"- States, actions, successors are the same\")\n    text(\"- Cost_relaxed(s, a) <= Cost(s, a)\")\n    \n    text(\"Theorem: Let h(s) be the future cost of a relaxed problem. Then h is a consistent heuristic.\")\n    text(\"Proof:\")\n    text(\"h(s)\")\n    text(\"<= Cost_relaxed(s, a) + h(Succ(s, a))  [triangle inequality]\")\n    text(\"<= Cost(s, a) + h(Succ(s, a)) [definition of relaxation]\")\n\n    text(\"Of course, a relaxed problem isn't automatically easier to solve!\")\n\n    text(\"Costs are reduced in a **structured** way so that we can then:\")\n    text(\"- Reduce the number of states\")\n    text(\"- Get closed form solutions\")\n    text(\"- Break up into independent subproblems\")\n\n\ndef combining_heuristics():\n    text(\"We can use domain knowledge to come up with different relaxations\")\n    text(\"- h1(s): future cost if we knock down walls\")\n    text(\"- h2(s): future cost if we can ride a free tram\")\n\n    text(\"Which one do you pick?\")\n    text(\"Answer: you don't have to - you can use all of them!\")\n\n    text(\"Theorem:\")\n    text(\"- Suppose h1(s) and h2(s) are two consistent heuristics.\")\n    text(\"- Then h(s) = max(h1(s), h2(s)) is a consistent heuristic.\")\n\n    text(\"Proof:\")\n    text(\"h(s)\")\n    text(\"= max(h1(s), h2(s)) [definition of h]\")\n    text(\"<= max(Cost(s, a) + h1(Succ(s, a)), h2(Cost(s, a)) + h2(Succ(s, a))) [because h1 and h2 are consistent]\")\n    text(\"= Cost(s, a) + max(h1(Succ(s, a)), h2(Succ(s, a))) [pull out constant]\")\n    text(\"= Cost(s, a) + h(Succ(s, a)) [definition of h]\")\n    text(\"Therefore, h is consistent.\")\n\n\nif __name__ == \"__main__\":\n    main()\n"
+    "ucs_astar.py": "from edtrace import text, link, image, note\nfrom search import SearchProblem, Step, Solution, dynamic_programming, LimitedTravelSearchProblem, TravelSearchProblem, TravelState\nfrom dataclasses import dataclass\nfrom graphviz import Digraph\nfrom typing import Any, Callable\nimport heapq\n\nHeuristic = Callable[[Any], float]\n\ndef main():\n    text(\"Last time: we need search to solve complex problems (thinking, reasoning)\")\n    image(\"images/walk-tram.png\", width=400)\n    text(\"- Search problem: formal definition\")\n    problem = TravelSearchProblem(num_locs=10)\n    state = problem.start_state()  # @inspect state\n    successors = problem.successors(state)  # @inspect successors\n    is_end = problem.is_end(successors[0].state)  # @inspect is_end\n    text(\"- Objective: find a solution (sequence of actions) that minimizes the total cost.\")  # @clear state successors is_end\n    text(\"- Exact algorithms: exhaustive search, dynamic programming (caching)\")\n    text(\"- Approximate algorithms: best-of-n, beam search\")\n\n    text(\"This time: exact algorithms that allow for cycles\")\n    text(\"- Uniform-cost search (UCS)\")\n    text(\"- A* search: UCS with a heuristic function\")\n\n    ucs()\n    astar()\n    astar_relaxations()\n\n    text(\"Summary\")\n    text(\"- UCS and A* are two exact algorithms that allow for cycles (but non-negative costs)\")\n    text(\"- Key: order states by increasing past cost\")\n    text(\"- Can't do better than UCS in general\")\n    text(\"- A* allows you to incorporate domain knowledge via heuristics to speed up search\")\n    text(\"- Heuristics: future cost of some relaxed problem (lowering costs in a structured way)\")\n\n    text(\"Next time: what happens when actions have non-deterministic outcomes (e.g., rolling dice)?\")\n\n\nclass DiamondSearchProblem(SearchProblem):\n    def __init__(self):\n        # state -> state -> cost\n        self.graph = {\n            \"A\": {\"B\": 1, \"C\": 100},\n            \"B\": {\"A\": 1, \"C\": 1, \"D\": 100},\n            \"C\": {\"A\": 100, \"B\": 1, \"D\": 1},\n            \"D\": {\"B\": 100, \"C\": 1},\n        }\n\n    def start_state(self) -> str:\n        return \"A\"\n    \n    def successors(self, state: str) -> list[Step]:\n        return [\n            Step(action=new_state, cost=cost, state=new_state) \\\n            for new_state, cost in self.graph[state].items()\n        ]\n    \n\n    def is_end(self, state: str) -> bool:\n        return state == \"D\"\n\n\nclass GridSearchProblem(SearchProblem):\n    def __init__(self, *rows: list[str]):\n        # Remove spaces (which are just for readability)\n        self.rows = [row.replace(\" \", \"\") for row in rows]\n\n    def start_state(self) -> str:\n        for r in range(self.num_rows):\n            for c in range(self.num_cols):\n                if self.rows[r][c] == \"S\":\n                    return (r, c)\n        raise ValueError(\"No start state found\")\n\n    def is_valid(self, state: tuple[int, int]) -> bool:\n        \"\"\"Check if a state is valid.\"\"\"\n        r, c = state\n        return 0 <= r < self.num_rows and \\\n               0 <= c < self.num_cols and \\\n               self.rows[r][c] != \"#\"\n    \n    def successors(self, state: tuple[int, int]) -> list[Step]:\n        \"\"\"Return the successors of a state (up, down, left, right).\"\"\"\n        r, c = state\n        successors = []\n        if self.is_valid((r + 1, c)):\n            successors.append(Step(action=\"down\", cost=1, state=(r + 1, c)))\n        if self.is_valid((r - 1, c)):\n            successors.append(Step(action=\"up\", cost=1, state=(r - 1, c)))\n        if self.is_valid((r, c + 1)):\n            successors.append(Step(action=\"right\", cost=1, state=(r, c + 1)))\n        if self.is_valid((r, c - 1)):\n            successors.append(Step(action=\"left\", cost=1, state=(r, c - 1)))\n        return successors\n\n    def is_end(self, state: tuple[int, int]) -> bool:\n        \"\"\"Check if a state is an end state.\"\"\"\n        r, c = state\n        return self.rows[r][c] == \"E\"\n\n    @property\n    def num_rows(self) -> int:\n        return len(self.rows)\n    \n    @property\n    def num_cols(self) -> int:\n        return len(self.rows[0])\n\n\ndef ucs():\n    ucs_motivation()\n    ucs_examples()\n    ucs_correctness()\n\n    text(\"Summary of uniform cost search (UCS)\")\n    text(\"- Computes past costs for each state in non-decreasing order.\")\n    text(\"- Uses a priority queue to efficiently find the state with the lowest priority.\")\n    text(\"- Guaranteed to compute the minimum cost solution if non-negative costs.\")\n\n\ndef ucs_motivation():\n    text(\"Two key concepts in search:\")\n    text(\"- **Future cost**: minimum cost solution from `state` to an end state.\")\n    text(\"- **Past cost**: minimum cost solution from the start state to `state`.\")\n    image(\"images/past-future.png\", width=600)\n\n    text(\"In dynamic programming, we compute the future cost for each state.\")\n    text(\"Note `future_cost(state)` depends on `future_cost(state')` and thus must be computed after it.\")\n    text(\"So FutureCost(state) are computed from the end states to the start state (like in backpropagation).\")\n    text(\"Assumption: there are no cycles.\")\n\n    text(\"Now suppose that there are cycles (special case: undirected edges).\")\n    image(\"images/diamond-example.png\", width=300)\n    text(\"Which do we compute first, B or C?\")\n    text(\"In general, in what order do we process the states?\")\n\n    text(\"**Uniform Cost Search (UCS)** [Dijkstra, 1956]\")\n    text(\"Assumption: all costs are non-negative.\")\n    text(\"Two differences from dynamic programming:\")\n    text(\"- Compute **past costs** for each state (instead of future costs).\")\n    text(\"- Process states **in order of increasing past cost** (instead of topological order).\")\n\n    text(\"High-level strategy:\")\n    image(\"images/ucs-strategy.png\", width=400)\n    text(\"- **Explored**: states we've found the minimum cost path to\")\n    text(\"- **Frontier**: states we've seen, still trying to figure out how the best way to get there\") \n    text(\"- **Unexplored**: states we haven't seen yet\")\n\n\n@dataclass(frozen=True)\nclass Backpointer:\n    \"\"\"For a state, record how we got to it.\"\"\"\n    prev_state: Any   # Which state we came from\n    action: Any       # Action we took from `prev_state`\n    cost: float       # Cost of that action\n\n\ndef uniform_cost_search(problem: SearchProblem) -> tuple[Solution | None, int]:\n    \"\"\"\n    Run Uniform Cost Search (UCS) on the specified search `problem`.\n    Return the solution (sequence of steps) and the number of states explored.\n    \"\"\"\n    # Frontier: states we've seen, still trying to figure out how the best way to get there\n    # Priority represents the minimum cost to get there\n    frontier = PriorityQueue()  # @stepover @inspect frontier\n\n    # For each state we've reached, backpointer tells us how we got there\n    backpointers: dict[Any, Backpointer] = {}  # @inspect backpointers\n    num_explored = 0  # @inspect num_explored\n\n    # Add the start state\n    start_state = problem.start_state()  # @stepover\n    frontier.update(start_state, 0.0)  # @stepover @inspect frontier\n\n    while True:\n        # Remove the state from the frontier with the lowest priority (theorem: priority = past_cost).\n        state, past_cost = frontier.remove_min()  # @inspect state past_cost frontier @stepover\n        if state is None and past_cost is None:\n            return None, num_explored  # Found no solution\n\n        num_explored += 1  # @inspect num_explored\n\n        # Check if we've reached an end state; if so, extract solution.\n        if problem.is_end(state):  # @stepover\n            # Walk back the backpointers to get the actions\n            steps = []  # @inspect steps @clear successor\n            while state != start_state:\n                backpointer = backpointers[state]\n                steps.insert(0, Step(backpointer.action, backpointer.cost, state))  # Prepend @inspect steps\n                state = backpointer.prev_state  # Go back @inspect state\n            return Solution(steps=steps), num_explored\n\n        # Expand from `state`, updating the frontier with each `new_state`\n        for successor in problem.successors(state):  # @inspect successor @stepover\n            if frontier.update(successor.state, past_cost + successor.cost):  # @stepover @inspect frontier\n                # We found better way to get to `successor.state` --> update backpointer!\n                backpointers[successor.state] = Backpointer(prev_state=state, action=successor.action, cost=successor.cost)  # @inspect backpointers\n\n\nclass PriorityQueue:\n    \"\"\"Data structure for supporting uniform cost search.\"\"\"\n    def __init__(self):\n        self.DONE = -100000\n        self.heap = []\n        self.priorities = {}  # Map from state to priority\n\n    def update(self, state: Any, new_priority: float) -> bool:\n        \"\"\"\n        Insert `state` into the heap with priority `new_priority` if `state`\n        isn't in the heap or `new_priority` is smaller than the existing\n        priority.  Return whether the priority queue was updated.\n        \"\"\"\n        old_priority = self.priorities.get(state)\n        if old_priority is None or new_priority < old_priority:\n            self.priorities[state] = new_priority\n            heapq.heappush(self.heap, (new_priority, state))\n            return True\n        return False\n\n    def remove_min(self):\n        \"\"\"Return (state with minimum priority, priority) or (None, None) if empty.\"\"\"\n        while len(self.heap) > 0:\n            priority, state = heapq.heappop(self.heap)\n            if self.priorities[state] == self.DONE:\n                # Outdated priority, skip\n                continue\n            self.priorities[state] = self.DONE\n            return state, priority\n\n        # Nothing left...\n        return None, None\n\n    def asdict(self) -> dict[Any, float]:\n        \"\"\"Return the priorities without the DONE ones.\"\"\"\n        return dict((state, priority) for state, priority in self.priorities.items() if priority != self.DONE)\n\n\ndef ucs_examples():\n    text(\"Consider the following simple search problem.\")\n    problem = DiamondSearchProblem()\n    image(draw_graph(problem).render(\"var/diamond_graph\", format=\"png\"), width=200)  # @stepover\n\n    successors = problem.successors(\"A\")  # @inspect successors\n\n    text(\"Let's run UCS on this example.\")  # @clear successors\n    solution, num_explored = uniform_cost_search(problem)  # @inspect solution num_explored\n\n    text(\"Let's consider another search problem:\")  # @clear solution\n    text(\"- States are points on a grid (start at S, end at E)\")\n    text(\"- Actions: up, down, left, right\")\n    text(\"- Cost: 1 for each action\")\n    problem = GridSearchProblem(  # @stepover\n        # 0 1 2 3 4\n        \" S . . . .\", # 0\n        \" # # # . #\", # 1\n        \" . . . . .\", # 2\n        \" . # # # #\", # 3\n        \" . . . . E\", # 4\n    )\n    image(draw_graph(problem).render(\"var/grid_graph\", format=\"png\"), width=100)  # @stepover\n\n    state = problem.start_state()  # @inspect state @stepover\n    successors = problem.successors(state)  # @inspect successors @stepover\n    is_end = problem.is_end(successors[0].state)  # @inspect is_end @stepover\n\n    text(\"Let's run UCS on this example.\")  # @clear state successors is_end\n    solution, num_explored = uniform_cost_search(problem)  # @inspect solution num_explored @stepover\n\n    text(\"Here is a much larger example where each pixel is a state:\")\n    link(\"https://www.youtube.com/watch?v=z6lUnb9ktkE\", title=\"[UCS video]\")\n\n\ndef draw_graph(problem: SearchProblem) -> Digraph:\n    \"\"\"Traverse a search problem and return a graphviz graph.\"\"\"\n    dot = Digraph()\n    visited = set()\n    # Traverse the states (nodes) in the search problem\n    def recurse(state: Any):\n        if state in visited:\n            return\n        visited.add(state)\n        if problem.is_end(state):\n            dot.node(str(state), shape=\"doublecircle\")\n        else:\n            dot.node(str(state), shape=\"circle\")\n            for step in problem.successors(state):\n                dot.edge(str(state), str(step.state), label=f\"{step.action}:{step.cost}\")\n                recurse(step.state)\n\n    recurse(problem.start_state())\n    return dot\n\ndef ucs_correctness():\n    text(\"We now prove that UCS is guaranteed to compute the minimum cost solution.\")\n    text(\"Assumption: all costs are non-negative.\")\n\n    image(\"images/ucs-strategy.png\", width=300)\n    text(\"**Theorem:**\")\n    text(\"- Suppose UCS moves a state s from the frontier to the explored set.\")\n    text(\"- Then priority(s) = PastCost(s).\")\n\n    text(\"Let's prove by induction.\")\n    text(\"Base case: priority(start) = PastCost(start) = 0.\")\n\n    image(\"images/ucs-proof.png\", width=300)\n    text(\"Inductive case: assume priority(s) = PastCost(s) for all s in explored.\")\n    text(\"- Suppose we remove s from the frontier, corresponding to blue path.\")\n    text(\"- Consider any alternative red path to s that goes through t (in explored) and u (in frontier).\")\n    text(\"- Want to show cost(red) >= cost(blue).\")\n    text(\"cost(red)\")\n    text(\"\u2265 PastCost(t) + Cost(t, u) [PastCost(t) is minimum cost to t, u to s is non-negative]\")\n    text(\"= priority(t) + Cost(t, u) [inductive hypothesis]\")\n    text(\"\u2265 priority(u) [t is explored, used to update priority(u)]\")\n    text(\"\u2265 priority(s) [s has minimum priority from frontier]\")\n    text(\"= cost(blue) [by definition]\")\n\n\ndef astar():\n    text(\"UCS in action: \"), link(\"https://www.youtube.com/watch?v=z6lUnb9ktkE\", title=\"[UCS video]\")\n    text(\"A* in action: \"), link(\"https://www.youtube.com/watch?v=huJEgJ82360\", title=\"[A* video]\")\n\n    text(\"UCS orders states by increasing past cost (which has no knowledge of the end state).\")\n    text(\"We would also like to consider the cost from state to an end state.\")\n    text(\"Ideal: explore in order of PastCost(s) + FutureCost(s)\")\n    text(\"A*: explore in order of PastCost(s) + h(s) for some **heuristic** h(s)\")\n    text(\"h(s) is an approximation of FutureCost(s)\")\n\n    text(\"**A* algorithm** [Hart/Nilsson/Raphael 1968]: run UCS with modified costs:\")\n    text(\"Cost'(s, a) = Cost(s, a) + [h(Succ(s, a)) - h(s)]\")\n    text(\"Intuition: add a penalty for how much action takes us away from the end state\")\n\n    text(\"Let's consider a simple example:\")\n    problem = LineSearchProblem()\n    image(draw_graph(problem).render(\"var/line_graph\", format=\"png\"), width=100)  # @stepover\n    state = problem.start_state()  # @inspect state @stepover\n    successors = problem.successors(state)  # @inspect successors\n    is_end = problem.is_end(successors[0].state)  # @inspect is_end\n\n    text(\"Let's run UCS on this example.\")  # @clear state successors is_end\n    solution, num_explored = uniform_cost_search(problem)  # @inspect solution num_explored @stepover\n\n    text(\"Let's run A* on this example.\")  # @clear solution num_explored\n    def line_heuristic(state: int) -> float:\n        return 2 - state\n    cost = line_heuristic(2)  # @inspect cost  @stepover\n    cost = line_heuristic(0)  # @inspect cost @stepover\n    cost = line_heuristic(-2)  # @inspect cost @stepover\n\n    modified_problem = ModifiedSearchProblem(problem, heuristic=line_heuristic)  # @stepover @clear cost\n    successors = modified_problem.successors(0)  # @inspect successors\n    text(\"Note that the heuristic makes us favor going to the right.\")\n\n    solution = astar_search(problem, heuristic=line_heuristic)  # @inspect solution\n\n    text(\"Will any heuristic work?\")\n    text(\"No.\")\n    image(\"images/astar-counterexample.png\", width=300)\n    text(\"Here, h(C) = 1000 actively messes things up.\")\n\n    text(\"**Consistency**: a heuristic h is consistent when\")\n    text(\"- Cost(s, a) + h(Succ(s, a)) - h(s) is non-negative (these are the modified costs!).\")\n    text(\"- h(end) = 0.\")\n    text(\"UCS does not work with negative costs.\")\n\n    text(\"Proposition (correctness): A* is correct if h is consistent.\")\n    text(\"Proof:\")\n    text(\"- Consider any path from the start state to the end state.\")\n    text(\"- The sum of the modified costs is the sum of the original costs - h(start).\")\n    text(\"- Reason: telescoping sums\")\n\n    text(\"Proposition (efficiency): A* explores all states statisfying\")\n    text(\"PastCost(s) <= PastCost(end) - h(s)\")\n    text(\"Proof: A* explores all s such that PastCost(s) + h(s) <= PastCost(end)\")\n    text(\"- If h(s) = 0, then A* = UCS.\")\n    text(\"- If h(s) = FutureCost(s), then A* explores only nodes on minimum cost path.\")\n    text(\"- Usually h(s) is somewhere in between.\")\n\n    text(\"Definition (admissibility): h is admissible when h(s) <= FutureCost(s)\")\n    text(\"In other words: h always underestimates the cost\")\n    text(\"Consistency implies admissibility.\")\n\n\nclass LineSearchProblem(SearchProblem):\n    def start_state(self) -> int:\n        return 0\n\n    def successors(self, state: int) -> list[Step]:\n        successors = []\n        if state >= -2:\n            successors.append(Step(action=\"left\", cost=1, state=state - 1))\n        if state <= 2:\n            successors.append(Step(action=\"right\", cost=1, state=state + 1))\n        return successors\n    \n    def is_end(self, state: int) -> bool:\n        return state == 2\n\n\ndef astar_search(problem: SearchProblem, heuristic: Heuristic) -> tuple[Solution | None, int]:\n    \"\"\"Just wrap the problem and return the solution.\"\"\"\n    modified_problem = ModifiedSearchProblem(problem, heuristic)  # @stepover\n    modified_solution, num_explored = uniform_cost_search(modified_problem)  # @stepover @inspect modified_solution num_explored\n\n    # The actions are correct but the costs are still the modified costs!\n    # Need to get the original costs from the modified solution.\n    state = problem.start_state()  # @inspect state @stepover\n    steps = []  # @inspect steps\n    for step in modified_solution.steps:  # step: state ----> step.state @inspect step\n        modified_cost = step.cost  # @inspect modified_cost\n        # Recall: modified_cost = original_cost + heuristic(step.state) - heuristic(state)\n        original_cost = modified_cost - heuristic(step.state) + heuristic(state)  # @inspect original_cost @stepover\n        steps.append(Step(step.action, original_cost, step.state))  # @inspect steps\n        state = step.state\n    solution = Solution(steps=steps)\n    return solution, num_explored\n\n\nclass ModifiedSearchProblem(SearchProblem):\n    \"\"\"A modified search problem where the costs are based on the `heuristic`.\"\"\"\n    def __init__(self, problem: SearchProblem, heuristic: Heuristic):\n        self.problem = problem\n        self.heuristic = heuristic\n    \n    def start_state(self) -> Any:\n        return self.problem.start_state()\n\n    def successors(self, state: Any) -> list[Step]:\n        \"\"\"Return the successors of `state`.\"\"\"\n        successors = []\n        for successor in self.problem.successors(state):  # @inspect successor @stepover\n            # Modify the cost using the heuristic\n            modified_cost = successor.cost + self.heuristic(successor.state) - self.heuristic(state)  # @inspect modified_cost @stepover\n            successors.append(Step(successor.action, modified_cost, successor.state))\n        return successors\n    \n    def is_end(self, state: Any) -> bool:\n        return self.problem.is_end(state)\n\n\ndef astar_relaxations():\n    text(\"So far: A* = UCS with a modified cost based on a heuristic function h\")\n    text(\"h(s) needs to be consistent for A* to be correct\")\n    text(\"How do we choose h?\")\n\n    text(\"Key principle: **relaxation**\")\n    text(\"Ideally, h(s) = FutureCost(s), but that's just as hard as solving the original problem.\")\n    text(\"So let's relax the problem to make it easier.\")\n\n    text(\"Winning recipe:\")\n    text(\"- Define a relaxed problem by getting rid of some constraints.\")\n    text(\"- Compute FutureCost_relaxed(s) to be the future cost of state s under the relaxed problem.\")\n    text(\"- Run A* using heuristic h(s) = FutureCost_relaxed(s).\")\n\n    text(\"Here are some ways in which the relaxed problem is easier.\")\n    closed_form_solution()\n    search_fewer_states()\n    independent_subproblems()\n    unifying_principle()\n    combining_heuristics()\n\n\ndef closed_form_solution():\n    text(\"Recall the grid problem of going from S to E without going through walls (#).\")\n\n    problem = GridSearchProblem(  # @stepover\n        # 0 1 2 3 4\n        \" S . . . .\", # 0\n        \" # # # . #\", # 1\n        \" . . . . .\", # 2\n        \" . # # # #\", # 3\n        \" . . . . E\", # 4\n    )\n\n    text(\"In the relaxed problem, just remove all the walls!\")\n    relaxed_problem = GridSearchProblem(  # @stepover\n        # 0 1 2 3 4\n        \" S . . . .\", # 0\n        \" . . . . .\", # 1\n        \" . . . . .\", # 2\n        \" . . . . .\", # 3\n        \" . . . . E\", # 4\n    )\n    text(\"The future cost of a state (r, c) under the relaxed problem has a closed form solution.\")\n\n    def future_cost_relaxed(state: tuple[int, int]) -> float:\n        end_r = relaxed_problem.num_rows - 1  # @stepover  @inspect end_r\n        end_c = relaxed_problem.num_cols - 1  # @stepover  @inspect end_c\n        # Manhattan distance between (r, c) and (end_r, end_c)\n        r, c = state  # @inspect r c\n        dist = abs(end_r - r) + abs(end_c - c)  # @inspect dist\n        return dist\n\n    cost = future_cost_relaxed(state=(0, 0))  # @inspect cost\n    cost = future_cost_relaxed(state=(0, 1))  # Closer @inspect cost @stepover\n    cost = future_cost_relaxed(state=(2, 4))  # Seems so close! @inspect cost @stepover\n    cost = future_cost_relaxed(state=(3, 0))  # Seems farther (heuristic is imperfect)! @inspect cost @stepover\n    text(\"Intuition: favor states that are closer to E\")\n\n    text(\"Run UCS and A*\")\n    solution, num_explored = uniform_cost_search(problem)  # @inspect solution num_explored @stepover\n    solution, num_explored = astar_search(problem, heuristic=future_cost_relaxed)  # @inspect solution num_explored @stepover\n    text(\"Note that A* does not provide a benefit in this case.\")\n\n\ndef search_fewer_states():\n    text(\"Recall the limited travel problem:\")\n    text(\"- Travel from 1 to n via walking (i \u2192 i+1) or tram (i \u2192 2*i)\")\n    text(\"- Can take tram only `tickets` times\")\n    problem = LimitedTravelSearchProblem(num_locs=10, starting_tickets=3)\n\n    text(\"Relaxed problem: tram is free again!\")\n    relaxed_problem = TravelSearchProblem(num_locs=10)\n\n    text(\"To define the heuristic, we need to compute future costs of the relaxed problem.\")\n    _, num_explored_relaxed, future_costs_relaxed = dynamic_programming(relaxed_problem)  # @stepover @inspect num_explored_relaxed relaxed_future_costs\n    def heuristic(state: TravelState) -> float:\n        # Note: problem states are (loc, tickets) but relaxed problem states are just loc\n        state_relaxed = state.loc\n        return future_costs_relaxed[state_relaxed].cost\n\n    cost = heuristic(TravelState(loc=4, tickets=3))  # @inspect cost\n\n    text(\"Let's compare UCS and A*\")\n    solution, num_explored = uniform_cost_search(problem)  # @inspect solution num_explored @stepover\n    solution, num_explored = astar_search(problem, heuristic=heuristic)  # @inspect solution num_explored @stepover\n    \n    text(\"For accounting purposes, need to include the cost of solving the relaxed problem!\")\n    num_explored += num_explored_relaxed  # @inspect num_explored\n\n    text(\"Note: dynamic programming cannot deal with cycles\")\n    text(\"If we have cycles, what do we do?\")\n    text(\"Solution:\")\n    text(\"- Define a reversed relaxed problem (A \u2192 B becomes B \u2192 A)\")\n    text(\"- Past costs in the reversed relaxed problem = future costs in the relaxed problem\")\n    text(\"- Run UCS on the reserved relaxed problem to compute future costs in the relaxed problem\")\n\n    text(\"Summary:\")\n    text(\"- Still have to run search on the relaxed problems\")\n    text(\"- But the relaxed problems have fewer constraints and therefore fewer states\")\n    text(\"- Thus they are faster to solve than the original problem\")\n\n\ndef independent_subproblems():\n   text(\"Motivating example: solving the 8 puzzle\")\n   image(\"images/8-puzzle.png\", width=400) \n\n   text(\"Original problem: tiles cannot overlap\")\n   text(\"Relaxed problem: tiles **can** overlap\")\n   text(\"As a result, this breaks up into 8 **independent** subproblems\")\n   text(\"...and in this case, each subproblem can be solved in closed form.\")\n   #                 1   2   3   4   5   6   7   8  # tile\n   heuristic_value = 1 + 1 + 3 + 1 + 1 + 1 + 1 + 3  # how far it has to move @inspect heuristic_value\n\n\ndef unifying_principle():\n    text(\"Examples of relaxed problems so far:\")\n    text(\"- Knock down walls\")\n    text(\"- Free tram\")\n    text(\"- Tiles can overlap\")\n\n    text(\"These are all examples of removing constraints from the original problem.\")\n    text(\"Removing constraints means reducing the cost of actions from infinity to a finite value.\")\n\n    text(\"A more general principle: **reducing costs**\")\n\n    text(\"Definition: A **relaxation** of a search problem is a modified problem where\")\n    text(\"- States, actions, successors are the same\")\n    text(\"- Cost_relaxed(s, a) <= Cost(s, a)\")\n    \n    text(\"Theorem: Let h(s) be the future cost of a relaxed problem. Then h is a consistent heuristic.\")\n    text(\"Proof:\")\n    text(\"h(s)\")\n    text(\"<= Cost_relaxed(s, a) + h(Succ(s, a))  [triangle inequality]\")\n    text(\"<= Cost(s, a) + h(Succ(s, a)) [definition of relaxation]\")\n\n    text(\"Of course, a relaxed problem isn't automatically easier to solve!\")\n\n    text(\"Costs are reduced in a **structured** way so that we can then:\")\n    text(\"- Reduce the number of states\")\n    text(\"- Get closed form solutions\")\n    text(\"- Break up into independent subproblems\")\n\n\ndef combining_heuristics():\n    text(\"We can use domain knowledge to come up with different relaxations\")\n    text(\"- h1(s): future cost if we knock down walls\")\n    text(\"- h2(s): future cost if we can ride a free tram\")\n\n    text(\"Which one do you pick?\")\n    text(\"Answer: you don't have to - you can use all of them!\")\n\n    text(\"Theorem:\")\n    text(\"- Suppose h1(s) and h2(s) are two consistent heuristics.\")\n    text(\"- Then h(s) = max(h1(s), h2(s)) is a consistent heuristic.\")\n\n    text(\"Proof:\")\n    text(\"h(s)\")\n    text(\"= max(h1(s), h2(s)) [definition of h]\")\n    text(\"<= max(Cost(s, a) + h1(Succ(s, a)), h2(Cost(s, a)) + h2(Succ(s, a))) [because h1 and h2 are consistent]\")\n    text(\"= Cost(s, a) + max(h1(Succ(s, a)), h2(Succ(s, a))) [pull out constant]\")\n    text(\"= Cost(s, a) + h(Succ(s, a)) [definition of h]\")\n    text(\"Therefore, h is consistent.\")\n\n\nif __name__ == \"__main__\":\n    main()\n"
   },
   "hidden_line_numbers": {
     "ucs_astar.py": []
@@ -7410,7 +7410,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 383,
+          "line_number": 388,
           "function_name": "successors",
           "code": "def successors(self, state: int) -> list[Step]:"
         }
@@ -7434,7 +7434,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 384,
+          "line_number": 389,
           "function_name": "successors",
           "code": "successors = []"
         }
@@ -7458,7 +7458,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 385,
+          "line_number": 390,
           "function_name": "successors",
           "code": "if state >= -2:"
         }
@@ -7482,7 +7482,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 386,
+          "line_number": 391,
           "function_name": "successors",
           "code": "successors.append(Step(action=\"left\", cost=1, state=state - 1))"
         }
@@ -7506,7 +7506,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 387,
+          "line_number": 392,
           "function_name": "successors",
           "code": "if state <= 2:"
         }
@@ -7530,7 +7530,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 388,
+          "line_number": 393,
           "function_name": "successors",
           "code": "successors.append(Step(action=\"right\", cost=1, state=state + 1))"
         }
@@ -7554,7 +7554,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 389,
+          "line_number": 394,
           "function_name": "successors",
           "code": "return successors"
         }
@@ -7672,7 +7672,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 391,
+          "line_number": 396,
           "function_name": "is_end",
           "code": "def is_end(self, state: int) -> bool:"
         }
@@ -7696,7 +7696,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 392,
+          "line_number": 397,
           "function_name": "is_end",
           "code": "return state == 2"
         }
@@ -8030,7 +8030,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 423,
+          "line_number": 428,
           "function_name": "successors",
           "code": "def successors(self, state: Any) -> list[Step]:"
         }
@@ -8054,7 +8054,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 425,
+          "line_number": 430,
           "function_name": "successors",
           "code": "successors = []"
         }
@@ -8078,7 +8078,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 426,
+          "line_number": 431,
           "function_name": "successors",
           "code": "for successor in self.problem.successors(state):  # @inspect successor @stepover"
         }
@@ -8128,7 +8128,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 428,
+          "line_number": 433,
           "function_name": "successors",
           "code": "modified_cost = successor.cost + self.heuristic(successor.state) - self.heuristic(state)  # @inspect modified_cost @stepover"
         }
@@ -8159,7 +8159,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 429,
+          "line_number": 434,
           "function_name": "successors",
           "code": "successors.append(Step(successor.action, modified_cost, successor.state))"
         }
@@ -8183,7 +8183,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 426,
+          "line_number": 431,
           "function_name": "successors",
           "code": "for successor in self.problem.successors(state):  # @inspect successor @stepover"
         }
@@ -8233,7 +8233,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 428,
+          "line_number": 433,
           "function_name": "successors",
           "code": "modified_cost = successor.cost + self.heuristic(successor.state) - self.heuristic(state)  # @inspect modified_cost @stepover"
         }
@@ -8264,7 +8264,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 429,
+          "line_number": 434,
           "function_name": "successors",
           "code": "successors.append(Step(successor.action, modified_cost, successor.state))"
         }
@@ -8288,7 +8288,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 426,
+          "line_number": 431,
           "function_name": "successors",
           "code": "for successor in self.problem.successors(state):  # @inspect successor @stepover"
         }
@@ -8338,7 +8338,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 430,
+          "line_number": 435,
           "function_name": "successors",
           "code": "return successors"
         }
@@ -8482,7 +8482,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 395,
+          "line_number": 400,
           "function_name": "astar_search",
           "code": "def astar_search(problem: SearchProblem, heuristic: Heuristic) -> tuple[Solution | None, int]:"
         }
@@ -8506,7 +8506,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 397,
+          "line_number": 402,
           "function_name": "astar_search",
           "code": "modified_problem = ModifiedSearchProblem(problem, heuristic)  # @stepover"
         }
@@ -8530,7 +8530,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 398,
+          "line_number": 403,
           "function_name": "astar_search",
           "code": "modified_solution, num_explored = uniform_cost_search(modified_problem)  # @stepover @inspect modified_solution num_explored"
         }
@@ -8631,7 +8631,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 402,
+          "line_number": 407,
           "function_name": "astar_search",
           "code": "state = problem.start_state()  # @inspect state @stepover"
         }
@@ -8662,7 +8662,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 403,
+          "line_number": 408,
           "function_name": "astar_search",
           "code": "steps = []  # @inspect steps"
         }
@@ -8693,7 +8693,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 404,
+          "line_number": 409,
           "function_name": "astar_search",
           "code": "for step in modified_solution.steps:  # step: state ----> step.state @inspect step"
         }
@@ -8743,7 +8743,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 405,
+          "line_number": 410,
           "function_name": "astar_search",
           "code": "modified_cost = step.cost  # @inspect modified_cost"
         }
@@ -8774,7 +8774,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 407,
+          "line_number": 412,
           "function_name": "astar_search",
           "code": "original_cost = modified_cost - heuristic(step.state) + heuristic(state)  # @inspect original_cost @stepover"
         }
@@ -8805,7 +8805,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 408,
+          "line_number": 413,
           "function_name": "astar_search",
           "code": "steps.append(Step(step.action, original_cost, step.state))  # @inspect steps"
         }
@@ -8862,7 +8862,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 409,
+          "line_number": 414,
           "function_name": "astar_search",
           "code": "state = step.state"
         }
@@ -8886,7 +8886,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 404,
+          "line_number": 409,
           "function_name": "astar_search",
           "code": "for step in modified_solution.steps:  # step: state ----> step.state @inspect step"
         }
@@ -8936,7 +8936,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 405,
+          "line_number": 410,
           "function_name": "astar_search",
           "code": "modified_cost = step.cost  # @inspect modified_cost"
         }
@@ -8967,7 +8967,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 407,
+          "line_number": 412,
           "function_name": "astar_search",
           "code": "original_cost = modified_cost - heuristic(step.state) + heuristic(state)  # @inspect original_cost @stepover"
         }
@@ -8991,67 +8991,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 407,
-          "function_name": "astar_search",
-          "code": "original_cost = modified_cost - heuristic(step.state) + heuristic(state)  # @inspect original_cost @stepover"
-        },
-        {
-          "path": "ucs_astar.py",
-          "line_number": 344,
-          "function_name": "line_heuristic",
-          "code": "def line_heuristic(state: int) -> float:"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "ucs_astar.py",
-          "line_number": 27,
-          "function_name": "main",
-          "code": "astar()"
-        },
-        {
-          "path": "ucs_astar.py",
-          "line_number": 354,
-          "function_name": "astar",
-          "code": "solution = astar_search(problem, heuristic=line_heuristic)  # @inspect solution"
-        },
-        {
-          "path": "ucs_astar.py",
-          "line_number": 407,
-          "function_name": "astar_search",
-          "code": "original_cost = modified_cost - heuristic(step.state) + heuristic(state)  # @inspect original_cost @stepover"
-        },
-        {
-          "path": "ucs_astar.py",
-          "line_number": 345,
-          "function_name": "line_heuristic",
-          "code": "return 2 - state"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "ucs_astar.py",
-          "line_number": 27,
-          "function_name": "main",
-          "code": "astar()"
-        },
-        {
-          "path": "ucs_astar.py",
-          "line_number": 354,
-          "function_name": "astar",
-          "code": "solution = astar_search(problem, heuristic=line_heuristic)  # @inspect solution"
-        },
-        {
-          "path": "ucs_astar.py",
-          "line_number": 407,
+          "line_number": 412,
           "function_name": "astar_search",
           "code": "original_cost = modified_cost - heuristic(step.state) + heuristic(state)  # @inspect original_cost @stepover"
         },
@@ -9081,7 +9021,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 407,
+          "line_number": 412,
           "function_name": "astar_search",
           "code": "original_cost = modified_cost - heuristic(step.state) + heuristic(state)  # @inspect original_cost @stepover"
         },
@@ -9111,7 +9051,67 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 407,
+          "line_number": 412,
+          "function_name": "astar_search",
+          "code": "original_cost = modified_cost - heuristic(step.state) + heuristic(state)  # @inspect original_cost @stepover"
+        },
+        {
+          "path": "ucs_astar.py",
+          "line_number": 344,
+          "function_name": "line_heuristic",
+          "code": "def line_heuristic(state: int) -> float:"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "ucs_astar.py",
+          "line_number": 27,
+          "function_name": "main",
+          "code": "astar()"
+        },
+        {
+          "path": "ucs_astar.py",
+          "line_number": 354,
+          "function_name": "astar",
+          "code": "solution = astar_search(problem, heuristic=line_heuristic)  # @inspect solution"
+        },
+        {
+          "path": "ucs_astar.py",
+          "line_number": 412,
+          "function_name": "astar_search",
+          "code": "original_cost = modified_cost - heuristic(step.state) + heuristic(state)  # @inspect original_cost @stepover"
+        },
+        {
+          "path": "ucs_astar.py",
+          "line_number": 345,
+          "function_name": "line_heuristic",
+          "code": "return 2 - state"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "ucs_astar.py",
+          "line_number": 27,
+          "function_name": "main",
+          "code": "astar()"
+        },
+        {
+          "path": "ucs_astar.py",
+          "line_number": 354,
+          "function_name": "astar",
+          "code": "solution = astar_search(problem, heuristic=line_heuristic)  # @inspect solution"
+        },
+        {
+          "path": "ucs_astar.py",
+          "line_number": 412,
           "function_name": "astar_search",
           "code": "original_cost = modified_cost - heuristic(step.state) + heuristic(state)  # @inspect original_cost @stepover"
         }
@@ -9142,7 +9142,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 408,
+          "line_number": 413,
           "function_name": "astar_search",
           "code": "steps.append(Step(step.action, original_cost, step.state))  # @inspect steps"
         }
@@ -9224,7 +9224,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 409,
+          "line_number": 414,
           "function_name": "astar_search",
           "code": "state = step.state"
         }
@@ -9248,7 +9248,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 404,
+          "line_number": 409,
           "function_name": "astar_search",
           "code": "for step in modified_solution.steps:  # step: state ----> step.state @inspect step"
         }
@@ -9298,7 +9298,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 410,
+          "line_number": 415,
           "function_name": "astar_search",
           "code": "solution = Solution(steps=steps)"
         }
@@ -9322,7 +9322,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 411,
+          "line_number": 416,
           "function_name": "astar_search",
           "code": "return solution, num_explored"
         }
@@ -9496,7 +9496,7 @@
           "path": "ucs_astar.py",
           "line_number": 358,
           "function_name": "astar",
-          "code": "image(\"images/astar-counterexample.png\", width=400)"
+          "code": "image(\"images/astar-counterexample.png\", width=300)"
         }
       ],
       "env": {},
@@ -9505,7 +9505,7 @@
           "type": "image",
           "data": "images/astar-counterexample.png",
           "style": {
-            "width": 400
+            "width": 300
           },
           "external_link": null,
           "internal_link": null
@@ -9522,16 +9522,16 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 360,
+          "line_number": 359,
           "function_name": "astar",
-          "code": "text(\"**Consistency**: h is consistent when\")"
+          "code": "text(\"Here, h(C) = 1000 actively messes things up.\")"
         }
       ],
       "env": {},
       "renderings": [
         {
           "type": "markdown",
-          "data": "**Consistency**: h is consistent when",
+          "data": "Here, h(C) = 1000 actively messes things up.",
           "style": {},
           "external_link": null,
           "internal_link": null
@@ -9550,14 +9550,14 @@
           "path": "ucs_astar.py",
           "line_number": 361,
           "function_name": "astar",
-          "code": "text(\"Cost(s, a) + h(Succ(s, a)) - h(s) is non-negative.\")"
+          "code": "text(\"**Consistency**: a heuristic h is consistent when\")"
         }
       ],
       "env": {},
       "renderings": [
         {
           "type": "markdown",
-          "data": "Cost(s, a) + h(Succ(s, a)) - h(s) is non-negative.",
+          "data": "**Consistency**: a heuristic h is consistent when",
           "style": {},
           "external_link": null,
           "internal_link": null
@@ -9576,14 +9576,14 @@
           "path": "ucs_astar.py",
           "line_number": 362,
           "function_name": "astar",
-          "code": "text(\"h(end) = 0.\")"
+          "code": "text(\"- Cost(s, a) + h(Succ(s, a)) - h(s) is non-negative (these are the modified costs!).\")"
         }
       ],
       "env": {},
       "renderings": [
         {
           "type": "markdown",
-          "data": "h(end) = 0.",
+          "data": "- Cost(s, a) + h(Succ(s, a)) - h(s) is non-negative (these are the modified costs!).",
           "style": {},
           "external_link": null,
           "internal_link": null
@@ -9602,14 +9602,14 @@
           "path": "ucs_astar.py",
           "line_number": 363,
           "function_name": "astar",
-          "code": "text(\"UCS can't work with negative costs.\")"
+          "code": "text(\"- h(end) = 0.\")"
         }
       ],
       "env": {},
       "renderings": [
         {
           "type": "markdown",
-          "data": "UCS can't work with negative costs.",
+          "data": "- h(end) = 0.",
           "style": {},
           "external_link": null,
           "internal_link": null
@@ -9626,7 +9626,33 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 365,
+          "line_number": 364,
+          "function_name": "astar",
+          "code": "text(\"UCS does not work with negative costs.\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "UCS does not work with negative costs.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "ucs_astar.py",
+          "line_number": 27,
+          "function_name": "main",
+          "code": "astar()"
+        },
+        {
+          "path": "ucs_astar.py",
+          "line_number": 366,
           "function_name": "astar",
           "code": "text(\"Proposition (correctness): A* is correct if h is consistent.\")"
         }
@@ -9654,6 +9680,110 @@
           "path": "ucs_astar.py",
           "line_number": 367,
           "function_name": "astar",
+          "code": "text(\"Proof:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Proof:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "ucs_astar.py",
+          "line_number": 27,
+          "function_name": "main",
+          "code": "astar()"
+        },
+        {
+          "path": "ucs_astar.py",
+          "line_number": 368,
+          "function_name": "astar",
+          "code": "text(\"- Consider any path from the start state to the end state.\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Consider any path from the start state to the end state.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "ucs_astar.py",
+          "line_number": 27,
+          "function_name": "main",
+          "code": "astar()"
+        },
+        {
+          "path": "ucs_astar.py",
+          "line_number": 369,
+          "function_name": "astar",
+          "code": "text(\"- The sum of the modified costs is the sum of the original costs - h(start).\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- The sum of the modified costs is the sum of the original costs - h(start).",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "ucs_astar.py",
+          "line_number": 27,
+          "function_name": "main",
+          "code": "astar()"
+        },
+        {
+          "path": "ucs_astar.py",
+          "line_number": 370,
+          "function_name": "astar",
+          "code": "text(\"- Reason: telescoping sums\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Reason: telescoping sums",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "ucs_astar.py",
+          "line_number": 27,
+          "function_name": "main",
+          "code": "astar()"
+        },
+        {
+          "path": "ucs_astar.py",
+          "line_number": 372,
+          "function_name": "astar",
           "code": "text(\"Proposition (efficiency): A* explores all states statisfying\")"
         }
       ],
@@ -9678,16 +9808,16 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 368,
+          "line_number": 373,
           "function_name": "astar",
-          "code": "text(\"PastCost(s) <= PastCost(start) - h(s)\")"
+          "code": "text(\"PastCost(s) <= PastCost(end) - h(s)\")"
         }
       ],
       "env": {},
       "renderings": [
         {
           "type": "markdown",
-          "data": "PastCost(s) <= PastCost(start) - h(s)",
+          "data": "PastCost(s) <= PastCost(end) - h(s)",
           "style": {},
           "external_link": null,
           "internal_link": null
@@ -9704,7 +9834,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 369,
+          "line_number": 374,
           "function_name": "astar",
           "code": "text(\"Proof: A* explores all s such that PastCost(s) + h(s) <= PastCost(end)\")"
         }
@@ -9730,7 +9860,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 370,
+          "line_number": 375,
           "function_name": "astar",
           "code": "text(\"- If h(s) = 0, then A* = UCS.\")"
         }
@@ -9756,16 +9886,16 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 371,
+          "line_number": 376,
           "function_name": "astar",
-          "code": "text(\"- If h(s) = FutureCost(s), then A* explores only nodes on minimum cost path\")"
+          "code": "text(\"- If h(s) = FutureCost(s), then A* explores only nodes on minimum cost path.\")"
         }
       ],
       "env": {},
       "renderings": [
         {
           "type": "markdown",
-          "data": "- If h(s) = FutureCost(s), then A* explores only nodes on minimum cost path",
+          "data": "- If h(s) = FutureCost(s), then A* explores only nodes on minimum cost path.",
           "style": {},
           "external_link": null,
           "internal_link": null
@@ -9782,7 +9912,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 372,
+          "line_number": 377,
           "function_name": "astar",
           "code": "text(\"- Usually h(s) is somewhere in between.\")"
         }
@@ -9808,7 +9938,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 374,
+          "line_number": 379,
           "function_name": "astar",
           "code": "text(\"Definition (admissibility): h is admissible when h(s) <= FutureCost(s)\")"
         }
@@ -9834,7 +9964,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 375,
+          "line_number": 380,
           "function_name": "astar",
           "code": "text(\"In other words: h always underestimates the cost\")"
         }
@@ -9860,7 +9990,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 376,
+          "line_number": 381,
           "function_name": "astar",
           "code": "text(\"Consistency implies admissibility.\")"
         }
@@ -9910,7 +10040,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 436,
+          "line_number": 441,
           "function_name": "astar_relaxations",
           "code": "def astar_relaxations():"
         }
@@ -9928,16 +10058,16 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 437,
+          "line_number": 442,
           "function_name": "astar_relaxations",
-          "code": "text(\"So far:A* = UCS with a modified cost based on a heuristic function h\")"
+          "code": "text(\"So far: A* = UCS with a modified cost based on a heuristic function h\")"
         }
       ],
       "env": {},
       "renderings": [
         {
           "type": "markdown",
-          "data": "So far:A* = UCS with a modified cost based on a heuristic function h",
+          "data": "So far: A* = UCS with a modified cost based on a heuristic function h",
           "style": {},
           "external_link": null,
           "internal_link": null
@@ -9954,7 +10084,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 438,
+          "line_number": 443,
           "function_name": "astar_relaxations",
           "code": "text(\"h(s) needs to be consistent for A* to be correct\")"
         }
@@ -9980,7 +10110,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 439,
+          "line_number": 444,
           "function_name": "astar_relaxations",
           "code": "text(\"How do we choose h?\")"
         }
@@ -10006,7 +10136,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 441,
+          "line_number": 446,
           "function_name": "astar_relaxations",
           "code": "text(\"Key principle: **relaxation**\")"
         }
@@ -10032,7 +10162,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 442,
+          "line_number": 447,
           "function_name": "astar_relaxations",
           "code": "text(\"Ideally, h(s) = FutureCost(s), but that's just as hard as solving the original problem.\")"
         }
@@ -10058,7 +10188,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 443,
+          "line_number": 448,
           "function_name": "astar_relaxations",
           "code": "text(\"So let's relax the problem to make it easier.\")"
         }
@@ -10084,7 +10214,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 445,
+          "line_number": 450,
           "function_name": "astar_relaxations",
           "code": "text(\"Winning recipe:\")"
         }
@@ -10110,7 +10240,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 446,
+          "line_number": 451,
           "function_name": "astar_relaxations",
           "code": "text(\"- Define a relaxed problem by getting rid of some constraints.\")"
         }
@@ -10136,7 +10266,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 447,
+          "line_number": 452,
           "function_name": "astar_relaxations",
           "code": "text(\"- Compute FutureCost_relaxed(s) to be the future cost of state s under the relaxed problem.\")"
         }
@@ -10162,7 +10292,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 448,
+          "line_number": 453,
           "function_name": "astar_relaxations",
           "code": "text(\"- Run A* using heuristic h(s) = FutureCost_relaxed(s).\")"
         }
@@ -10188,7 +10318,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 450,
+          "line_number": 455,
           "function_name": "astar_relaxations",
           "code": "text(\"Here are some ways in which the relaxed problem is easier.\")"
         }
@@ -10214,7 +10344,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         }
@@ -10232,13 +10362,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 458,
+          "line_number": 463,
           "function_name": "closed_form_solution",
           "code": "def closed_form_solution():"
         }
@@ -10256,13 +10386,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 459,
+          "line_number": 464,
           "function_name": "closed_form_solution",
           "code": "text(\"Recall the grid problem of going from S to E without going through walls (#).\")"
         }
@@ -10288,13 +10418,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 461,
+          "line_number": 466,
           "function_name": "closed_form_solution",
           "code": "problem = GridSearchProblem(  # @stepover"
         }
@@ -10312,13 +10442,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 463,
+          "line_number": 468,
           "function_name": "closed_form_solution",
           "code": "\" S . . . .\", # 0"
         }
@@ -10336,13 +10466,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 464,
+          "line_number": 469,
           "function_name": "closed_form_solution",
           "code": "\" # # # . #\", # 1"
         }
@@ -10360,13 +10490,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 465,
+          "line_number": 470,
           "function_name": "closed_form_solution",
           "code": "\" . . . . .\", # 2"
         }
@@ -10384,13 +10514,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 466,
+          "line_number": 471,
           "function_name": "closed_form_solution",
           "code": "\" . # # # #\", # 3"
         }
@@ -10408,13 +10538,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 467,
+          "line_number": 472,
           "function_name": "closed_form_solution",
           "code": "\" . . . . E\", # 4"
         }
@@ -10432,13 +10562,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 461,
+          "line_number": 466,
           "function_name": "closed_form_solution",
           "code": "problem = GridSearchProblem(  # @stepover"
         }
@@ -10456,13 +10586,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 461,
+          "line_number": 466,
           "function_name": "closed_form_solution",
           "code": "problem = GridSearchProblem(  # @stepover"
         },
@@ -10486,13 +10616,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 461,
+          "line_number": 466,
           "function_name": "closed_form_solution",
           "code": "problem = GridSearchProblem(  # @stepover"
         },
@@ -10516,13 +10646,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 461,
+          "line_number": 466,
           "function_name": "closed_form_solution",
           "code": "problem = GridSearchProblem(  # @stepover"
         }
@@ -10540,13 +10670,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 470,
+          "line_number": 475,
           "function_name": "closed_form_solution",
           "code": "text(\"In the relaxed problem, just remove all the walls!\")"
         }
@@ -10572,13 +10702,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 471,
+          "line_number": 476,
           "function_name": "closed_form_solution",
           "code": "relaxed_problem = GridSearchProblem(  # @stepover"
         }
@@ -10596,13 +10726,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 473,
+          "line_number": 478,
           "function_name": "closed_form_solution",
           "code": "\" S . . . .\", # 0"
         }
@@ -10620,13 +10750,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 474,
+          "line_number": 479,
           "function_name": "closed_form_solution",
           "code": "\" . . . . .\", # 1"
         }
@@ -10644,13 +10774,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 475,
+          "line_number": 480,
           "function_name": "closed_form_solution",
           "code": "\" . . . . .\", # 2"
         }
@@ -10668,13 +10798,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 476,
+          "line_number": 481,
           "function_name": "closed_form_solution",
           "code": "\" . . . . .\", # 3"
         }
@@ -10692,13 +10822,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 477,
+          "line_number": 482,
           "function_name": "closed_form_solution",
           "code": "\" . . . . E\", # 4"
         }
@@ -10716,13 +10846,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 471,
+          "line_number": 476,
           "function_name": "closed_form_solution",
           "code": "relaxed_problem = GridSearchProblem(  # @stepover"
         }
@@ -10740,13 +10870,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 471,
+          "line_number": 476,
           "function_name": "closed_form_solution",
           "code": "relaxed_problem = GridSearchProblem(  # @stepover"
         },
@@ -10770,13 +10900,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 471,
+          "line_number": 476,
           "function_name": "closed_form_solution",
           "code": "relaxed_problem = GridSearchProblem(  # @stepover"
         },
@@ -10800,13 +10930,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 471,
+          "line_number": 476,
           "function_name": "closed_form_solution",
           "code": "relaxed_problem = GridSearchProblem(  # @stepover"
         }
@@ -10824,13 +10954,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 479,
+          "line_number": 484,
           "function_name": "closed_form_solution",
           "code": "text(\"The future cost of a state (r, c) under the relaxed problem has a closed form solution.\")"
         }
@@ -10856,13 +10986,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 481,
+          "line_number": 486,
           "function_name": "closed_form_solution",
           "code": "def future_cost_relaxed(state: tuple[int, int]) -> float:"
         }
@@ -10880,13 +11010,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 489,
+          "line_number": 494,
           "function_name": "closed_form_solution",
           "code": "cost = future_cost_relaxed(state=(0, 0))  # @inspect cost"
         }
@@ -10904,19 +11034,19 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 489,
+          "line_number": 494,
           "function_name": "closed_form_solution",
           "code": "cost = future_cost_relaxed(state=(0, 0))  # @inspect cost"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 481,
+          "line_number": 486,
           "function_name": "future_cost_relaxed",
           "code": "def future_cost_relaxed(state: tuple[int, int]) -> float:"
         }
@@ -10934,19 +11064,19 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 489,
+          "line_number": 494,
           "function_name": "closed_form_solution",
           "code": "cost = future_cost_relaxed(state=(0, 0))  # @inspect cost"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 482,
+          "line_number": 487,
           "function_name": "future_cost_relaxed",
           "code": "end_r = relaxed_problem.num_rows - 1  # @stepover  @inspect end_r"
         }
@@ -10971,19 +11101,19 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 489,
+          "line_number": 494,
           "function_name": "closed_form_solution",
           "code": "cost = future_cost_relaxed(state=(0, 0))  # @inspect cost"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 483,
+          "line_number": 488,
           "function_name": "future_cost_relaxed",
           "code": "end_c = relaxed_problem.num_cols - 1  # @stepover  @inspect end_c"
         }
@@ -11008,19 +11138,19 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 489,
+          "line_number": 494,
           "function_name": "closed_form_solution",
           "code": "cost = future_cost_relaxed(state=(0, 0))  # @inspect cost"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 485,
+          "line_number": 490,
           "function_name": "future_cost_relaxed",
           "code": "r, c = state  # @inspect r c"
         }
@@ -11051,19 +11181,19 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 489,
+          "line_number": 494,
           "function_name": "closed_form_solution",
           "code": "cost = future_cost_relaxed(state=(0, 0))  # @inspect cost"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 486,
+          "line_number": 491,
           "function_name": "future_cost_relaxed",
           "code": "dist = abs(end_r - r) + abs(end_c - c)  # @inspect dist"
         }
@@ -11088,19 +11218,19 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 489,
+          "line_number": 494,
           "function_name": "closed_form_solution",
           "code": "cost = future_cost_relaxed(state=(0, 0))  # @inspect cost"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 487,
+          "line_number": 492,
           "function_name": "future_cost_relaxed",
           "code": "return dist"
         }
@@ -11118,13 +11248,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 489,
+          "line_number": 494,
           "function_name": "closed_form_solution",
           "code": "cost = future_cost_relaxed(state=(0, 0))  # @inspect cost"
         }
@@ -11149,13 +11279,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 490,
+          "line_number": 495,
           "function_name": "closed_form_solution",
           "code": "cost = future_cost_relaxed(state=(0, 1))  # Closer @inspect cost @stepover"
         }
@@ -11180,13 +11310,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 491,
+          "line_number": 496,
           "function_name": "closed_form_solution",
           "code": "cost = future_cost_relaxed(state=(2, 4))  # Seems so close! @inspect cost @stepover"
         }
@@ -11211,13 +11341,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 492,
+          "line_number": 497,
           "function_name": "closed_form_solution",
           "code": "cost = future_cost_relaxed(state=(3, 0))  # Seems farther (heuristic is imperfect)! @inspect cost @stepover"
         }
@@ -11242,13 +11372,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 493,
+          "line_number": 498,
           "function_name": "closed_form_solution",
           "code": "text(\"Intuition: favor states that are closer to E\")"
         }
@@ -11274,13 +11404,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 495,
+          "line_number": 500,
           "function_name": "closed_form_solution",
           "code": "text(\"Run UCS and A*\")"
         }
@@ -11306,15 +11436,15 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 496,
+          "line_number": 501,
           "function_name": "closed_form_solution",
-          "code": "solution, num_explored = uniform_cost_search(relaxed_problem)  # @inspect solution num_explored @stepover"
+          "code": "solution, num_explored = uniform_cost_search(problem)  # @inspect solution num_explored @stepover"
         }
       ],
       "env": {
@@ -11443,44 +11573,6 @@
                   "contents": {
                     "action": {
                       "type": "str",
-                      "contents": "right",
-                      "dtype": null,
-                      "shape": null
-                    },
-                    "cost": {
-                      "type": "int",
-                      "contents": 1,
-                      "dtype": null,
-                      "shape": null
-                    },
-                    "state": {
-                      "type": "tuple",
-                      "contents": [
-                        {
-                          "type": "int",
-                          "contents": 0,
-                          "dtype": null,
-                          "shape": null
-                        },
-                        {
-                          "type": "int",
-                          "contents": 4,
-                          "dtype": null,
-                          "shape": null
-                        }
-                      ],
-                      "dtype": null,
-                      "shape": null
-                    }
-                  },
-                  "dtype": null,
-                  "shape": null
-                },
-                {
-                  "type": "search.Step",
-                  "contents": {
-                    "action": {
-                      "type": "str",
                       "contents": "down",
                       "dtype": null,
                       "shape": null
@@ -11502,7 +11594,7 @@
                         },
                         {
                           "type": "int",
-                          "contents": 4,
+                          "contents": 3,
                           "dtype": null,
                           "shape": null
                         }
@@ -11540,7 +11632,121 @@
                         },
                         {
                           "type": "int",
-                          "contents": 4,
+                          "contents": 3,
+                          "dtype": null,
+                          "shape": null
+                        }
+                      ],
+                      "dtype": null,
+                      "shape": null
+                    }
+                  },
+                  "dtype": null,
+                  "shape": null
+                },
+                {
+                  "type": "search.Step",
+                  "contents": {
+                    "action": {
+                      "type": "str",
+                      "contents": "left",
+                      "dtype": null,
+                      "shape": null
+                    },
+                    "cost": {
+                      "type": "int",
+                      "contents": 1,
+                      "dtype": null,
+                      "shape": null
+                    },
+                    "state": {
+                      "type": "tuple",
+                      "contents": [
+                        {
+                          "type": "int",
+                          "contents": 2,
+                          "dtype": null,
+                          "shape": null
+                        },
+                        {
+                          "type": "int",
+                          "contents": 2,
+                          "dtype": null,
+                          "shape": null
+                        }
+                      ],
+                      "dtype": null,
+                      "shape": null
+                    }
+                  },
+                  "dtype": null,
+                  "shape": null
+                },
+                {
+                  "type": "search.Step",
+                  "contents": {
+                    "action": {
+                      "type": "str",
+                      "contents": "left",
+                      "dtype": null,
+                      "shape": null
+                    },
+                    "cost": {
+                      "type": "int",
+                      "contents": 1,
+                      "dtype": null,
+                      "shape": null
+                    },
+                    "state": {
+                      "type": "tuple",
+                      "contents": [
+                        {
+                          "type": "int",
+                          "contents": 2,
+                          "dtype": null,
+                          "shape": null
+                        },
+                        {
+                          "type": "int",
+                          "contents": 1,
+                          "dtype": null,
+                          "shape": null
+                        }
+                      ],
+                      "dtype": null,
+                      "shape": null
+                    }
+                  },
+                  "dtype": null,
+                  "shape": null
+                },
+                {
+                  "type": "search.Step",
+                  "contents": {
+                    "action": {
+                      "type": "str",
+                      "contents": "left",
+                      "dtype": null,
+                      "shape": null
+                    },
+                    "cost": {
+                      "type": "int",
+                      "contents": 1,
+                      "dtype": null,
+                      "shape": null
+                    },
+                    "state": {
+                      "type": "tuple",
+                      "contents": [
+                        {
+                          "type": "int",
+                          "contents": 2,
+                          "dtype": null,
+                          "shape": null
+                        },
+                        {
+                          "type": "int",
+                          "contents": 0,
                           "dtype": null,
                           "shape": null
                         }
@@ -11578,7 +11784,7 @@
                         },
                         {
                           "type": "int",
-                          "contents": 4,
+                          "contents": 0,
                           "dtype": null,
                           "shape": null
                         }
@@ -11596,6 +11802,158 @@
                     "action": {
                       "type": "str",
                       "contents": "down",
+                      "dtype": null,
+                      "shape": null
+                    },
+                    "cost": {
+                      "type": "int",
+                      "contents": 1,
+                      "dtype": null,
+                      "shape": null
+                    },
+                    "state": {
+                      "type": "tuple",
+                      "contents": [
+                        {
+                          "type": "int",
+                          "contents": 4,
+                          "dtype": null,
+                          "shape": null
+                        },
+                        {
+                          "type": "int",
+                          "contents": 0,
+                          "dtype": null,
+                          "shape": null
+                        }
+                      ],
+                      "dtype": null,
+                      "shape": null
+                    }
+                  },
+                  "dtype": null,
+                  "shape": null
+                },
+                {
+                  "type": "search.Step",
+                  "contents": {
+                    "action": {
+                      "type": "str",
+                      "contents": "right",
+                      "dtype": null,
+                      "shape": null
+                    },
+                    "cost": {
+                      "type": "int",
+                      "contents": 1,
+                      "dtype": null,
+                      "shape": null
+                    },
+                    "state": {
+                      "type": "tuple",
+                      "contents": [
+                        {
+                          "type": "int",
+                          "contents": 4,
+                          "dtype": null,
+                          "shape": null
+                        },
+                        {
+                          "type": "int",
+                          "contents": 1,
+                          "dtype": null,
+                          "shape": null
+                        }
+                      ],
+                      "dtype": null,
+                      "shape": null
+                    }
+                  },
+                  "dtype": null,
+                  "shape": null
+                },
+                {
+                  "type": "search.Step",
+                  "contents": {
+                    "action": {
+                      "type": "str",
+                      "contents": "right",
+                      "dtype": null,
+                      "shape": null
+                    },
+                    "cost": {
+                      "type": "int",
+                      "contents": 1,
+                      "dtype": null,
+                      "shape": null
+                    },
+                    "state": {
+                      "type": "tuple",
+                      "contents": [
+                        {
+                          "type": "int",
+                          "contents": 4,
+                          "dtype": null,
+                          "shape": null
+                        },
+                        {
+                          "type": "int",
+                          "contents": 2,
+                          "dtype": null,
+                          "shape": null
+                        }
+                      ],
+                      "dtype": null,
+                      "shape": null
+                    }
+                  },
+                  "dtype": null,
+                  "shape": null
+                },
+                {
+                  "type": "search.Step",
+                  "contents": {
+                    "action": {
+                      "type": "str",
+                      "contents": "right",
+                      "dtype": null,
+                      "shape": null
+                    },
+                    "cost": {
+                      "type": "int",
+                      "contents": 1,
+                      "dtype": null,
+                      "shape": null
+                    },
+                    "state": {
+                      "type": "tuple",
+                      "contents": [
+                        {
+                          "type": "int",
+                          "contents": 4,
+                          "dtype": null,
+                          "shape": null
+                        },
+                        {
+                          "type": "int",
+                          "contents": 3,
+                          "dtype": null,
+                          "shape": null
+                        }
+                      ],
+                      "dtype": null,
+                      "shape": null
+                    }
+                  },
+                  "dtype": null,
+                  "shape": null
+                },
+                {
+                  "type": "search.Step",
+                  "contents": {
+                    "action": {
+                      "type": "str",
+                      "contents": "right",
                       "dtype": null,
                       "shape": null
                     },
@@ -11634,7 +11992,7 @@
             },
             "cost": {
               "type": "int",
-              "contents": 8,
+              "contents": 14,
               "dtype": null,
               "shape": null
             }
@@ -11644,7 +12002,7 @@
         },
         "num_explored": {
           "type": "int",
-          "contents": 25,
+          "contents": 17,
           "dtype": null,
           "shape": null
         }
@@ -11661,15 +12019,15 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 497,
+          "line_number": 502,
           "function_name": "closed_form_solution",
-          "code": "solution, num_explored = astar_search(relaxed_problem, heuristic=future_cost_relaxed)  # @inspect solution num_explored @stepover"
+          "code": "solution, num_explored = astar_search(problem, heuristic=future_cost_relaxed)  # @inspect solution num_explored @stepover"
         }
       ],
       "env": {
@@ -11798,44 +12156,6 @@
                   "contents": {
                     "action": {
                       "type": "str",
-                      "contents": "right",
-                      "dtype": null,
-                      "shape": null
-                    },
-                    "cost": {
-                      "type": "int",
-                      "contents": 1,
-                      "dtype": null,
-                      "shape": null
-                    },
-                    "state": {
-                      "type": "tuple",
-                      "contents": [
-                        {
-                          "type": "int",
-                          "contents": 0,
-                          "dtype": null,
-                          "shape": null
-                        },
-                        {
-                          "type": "int",
-                          "contents": 4,
-                          "dtype": null,
-                          "shape": null
-                        }
-                      ],
-                      "dtype": null,
-                      "shape": null
-                    }
-                  },
-                  "dtype": null,
-                  "shape": null
-                },
-                {
-                  "type": "search.Step",
-                  "contents": {
-                    "action": {
-                      "type": "str",
                       "contents": "down",
                       "dtype": null,
                       "shape": null
@@ -11857,7 +12177,7 @@
                         },
                         {
                           "type": "int",
-                          "contents": 4,
+                          "contents": 3,
                           "dtype": null,
                           "shape": null
                         }
@@ -11895,7 +12215,121 @@
                         },
                         {
                           "type": "int",
-                          "contents": 4,
+                          "contents": 3,
+                          "dtype": null,
+                          "shape": null
+                        }
+                      ],
+                      "dtype": null,
+                      "shape": null
+                    }
+                  },
+                  "dtype": null,
+                  "shape": null
+                },
+                {
+                  "type": "search.Step",
+                  "contents": {
+                    "action": {
+                      "type": "str",
+                      "contents": "left",
+                      "dtype": null,
+                      "shape": null
+                    },
+                    "cost": {
+                      "type": "int",
+                      "contents": 1,
+                      "dtype": null,
+                      "shape": null
+                    },
+                    "state": {
+                      "type": "tuple",
+                      "contents": [
+                        {
+                          "type": "int",
+                          "contents": 2,
+                          "dtype": null,
+                          "shape": null
+                        },
+                        {
+                          "type": "int",
+                          "contents": 2,
+                          "dtype": null,
+                          "shape": null
+                        }
+                      ],
+                      "dtype": null,
+                      "shape": null
+                    }
+                  },
+                  "dtype": null,
+                  "shape": null
+                },
+                {
+                  "type": "search.Step",
+                  "contents": {
+                    "action": {
+                      "type": "str",
+                      "contents": "left",
+                      "dtype": null,
+                      "shape": null
+                    },
+                    "cost": {
+                      "type": "int",
+                      "contents": 1,
+                      "dtype": null,
+                      "shape": null
+                    },
+                    "state": {
+                      "type": "tuple",
+                      "contents": [
+                        {
+                          "type": "int",
+                          "contents": 2,
+                          "dtype": null,
+                          "shape": null
+                        },
+                        {
+                          "type": "int",
+                          "contents": 1,
+                          "dtype": null,
+                          "shape": null
+                        }
+                      ],
+                      "dtype": null,
+                      "shape": null
+                    }
+                  },
+                  "dtype": null,
+                  "shape": null
+                },
+                {
+                  "type": "search.Step",
+                  "contents": {
+                    "action": {
+                      "type": "str",
+                      "contents": "left",
+                      "dtype": null,
+                      "shape": null
+                    },
+                    "cost": {
+                      "type": "int",
+                      "contents": 1,
+                      "dtype": null,
+                      "shape": null
+                    },
+                    "state": {
+                      "type": "tuple",
+                      "contents": [
+                        {
+                          "type": "int",
+                          "contents": 2,
+                          "dtype": null,
+                          "shape": null
+                        },
+                        {
+                          "type": "int",
+                          "contents": 0,
                           "dtype": null,
                           "shape": null
                         }
@@ -11933,7 +12367,7 @@
                         },
                         {
                           "type": "int",
-                          "contents": 4,
+                          "contents": 0,
                           "dtype": null,
                           "shape": null
                         }
@@ -11951,6 +12385,158 @@
                     "action": {
                       "type": "str",
                       "contents": "down",
+                      "dtype": null,
+                      "shape": null
+                    },
+                    "cost": {
+                      "type": "int",
+                      "contents": 1,
+                      "dtype": null,
+                      "shape": null
+                    },
+                    "state": {
+                      "type": "tuple",
+                      "contents": [
+                        {
+                          "type": "int",
+                          "contents": 4,
+                          "dtype": null,
+                          "shape": null
+                        },
+                        {
+                          "type": "int",
+                          "contents": 0,
+                          "dtype": null,
+                          "shape": null
+                        }
+                      ],
+                      "dtype": null,
+                      "shape": null
+                    }
+                  },
+                  "dtype": null,
+                  "shape": null
+                },
+                {
+                  "type": "search.Step",
+                  "contents": {
+                    "action": {
+                      "type": "str",
+                      "contents": "right",
+                      "dtype": null,
+                      "shape": null
+                    },
+                    "cost": {
+                      "type": "int",
+                      "contents": 1,
+                      "dtype": null,
+                      "shape": null
+                    },
+                    "state": {
+                      "type": "tuple",
+                      "contents": [
+                        {
+                          "type": "int",
+                          "contents": 4,
+                          "dtype": null,
+                          "shape": null
+                        },
+                        {
+                          "type": "int",
+                          "contents": 1,
+                          "dtype": null,
+                          "shape": null
+                        }
+                      ],
+                      "dtype": null,
+                      "shape": null
+                    }
+                  },
+                  "dtype": null,
+                  "shape": null
+                },
+                {
+                  "type": "search.Step",
+                  "contents": {
+                    "action": {
+                      "type": "str",
+                      "contents": "right",
+                      "dtype": null,
+                      "shape": null
+                    },
+                    "cost": {
+                      "type": "int",
+                      "contents": 1,
+                      "dtype": null,
+                      "shape": null
+                    },
+                    "state": {
+                      "type": "tuple",
+                      "contents": [
+                        {
+                          "type": "int",
+                          "contents": 4,
+                          "dtype": null,
+                          "shape": null
+                        },
+                        {
+                          "type": "int",
+                          "contents": 2,
+                          "dtype": null,
+                          "shape": null
+                        }
+                      ],
+                      "dtype": null,
+                      "shape": null
+                    }
+                  },
+                  "dtype": null,
+                  "shape": null
+                },
+                {
+                  "type": "search.Step",
+                  "contents": {
+                    "action": {
+                      "type": "str",
+                      "contents": "right",
+                      "dtype": null,
+                      "shape": null
+                    },
+                    "cost": {
+                      "type": "int",
+                      "contents": 1,
+                      "dtype": null,
+                      "shape": null
+                    },
+                    "state": {
+                      "type": "tuple",
+                      "contents": [
+                        {
+                          "type": "int",
+                          "contents": 4,
+                          "dtype": null,
+                          "shape": null
+                        },
+                        {
+                          "type": "int",
+                          "contents": 3,
+                          "dtype": null,
+                          "shape": null
+                        }
+                      ],
+                      "dtype": null,
+                      "shape": null
+                    }
+                  },
+                  "dtype": null,
+                  "shape": null
+                },
+                {
+                  "type": "search.Step",
+                  "contents": {
+                    "action": {
+                      "type": "str",
+                      "contents": "right",
                       "dtype": null,
                       "shape": null
                     },
@@ -11989,7 +12575,7 @@
             },
             "cost": {
               "type": "int",
-              "contents": 8,
+              "contents": 14,
               "dtype": null,
               "shape": null
             }
@@ -11999,7 +12585,7 @@
         },
         "num_explored": {
           "type": "int",
-          "contents": 25,
+          "contents": 17,
           "dtype": null,
           "shape": null
         }
@@ -12016,22 +12602,22 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 498,
+          "line_number": 503,
           "function_name": "closed_form_solution",
-          "code": "text(\"Note that A* explores slightly fewer states than UCS (not a big win here).\")"
+          "code": "text(\"Note that A* does not provide a benefit in this case.\")"
         }
       ],
       "env": {},
       "renderings": [
         {
           "type": "markdown",
-          "data": "Note that A* explores slightly fewer states than UCS (not a big win here).",
+          "data": "Note that A* does not provide a benefit in this case.",
           "style": {},
           "external_link": null,
           "internal_link": null
@@ -12048,7 +12634,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 451,
+          "line_number": 456,
           "function_name": "astar_relaxations",
           "code": "closed_form_solution()"
         }
@@ -12066,7 +12652,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 452,
+          "line_number": 457,
           "function_name": "astar_relaxations",
           "code": "search_fewer_states()"
         }
@@ -12084,13 +12670,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 452,
+          "line_number": 457,
           "function_name": "astar_relaxations",
           "code": "search_fewer_states()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 501,
+          "line_number": 506,
           "function_name": "search_fewer_states",
           "code": "def search_fewer_states():"
         }
@@ -12108,13 +12694,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 452,
+          "line_number": 457,
           "function_name": "astar_relaxations",
           "code": "search_fewer_states()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 502,
+          "line_number": 507,
           "function_name": "search_fewer_states",
           "code": "text(\"Recall the limited travel problem:\")"
         }
@@ -12140,13 +12726,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 452,
+          "line_number": 457,
           "function_name": "astar_relaxations",
           "code": "search_fewer_states()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 503,
+          "line_number": 508,
           "function_name": "search_fewer_states",
           "code": "text(\"- Travel from 1 to n via walking (i \u2192 i+1) or tram (i \u2192 2*i)\")"
         }
@@ -12172,13 +12758,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 452,
+          "line_number": 457,
           "function_name": "astar_relaxations",
           "code": "search_fewer_states()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 504,
+          "line_number": 509,
           "function_name": "search_fewer_states",
           "code": "text(\"- Can take tram only `tickets` times\")"
         }
@@ -12204,13 +12790,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 452,
+          "line_number": 457,
           "function_name": "astar_relaxations",
           "code": "search_fewer_states()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 505,
+          "line_number": 510,
           "function_name": "search_fewer_states",
           "code": "problem = LimitedTravelSearchProblem(num_locs=10, starting_tickets=3)"
         }
@@ -12228,13 +12814,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 452,
+          "line_number": 457,
           "function_name": "astar_relaxations",
           "code": "search_fewer_states()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 507,
+          "line_number": 512,
           "function_name": "search_fewer_states",
           "code": "text(\"Relaxed problem: tram is free again!\")"
         }
@@ -12260,13 +12846,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 452,
+          "line_number": 457,
           "function_name": "astar_relaxations",
           "code": "search_fewer_states()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 508,
+          "line_number": 513,
           "function_name": "search_fewer_states",
           "code": "relaxed_problem = TravelSearchProblem(num_locs=10)"
         }
@@ -12284,13 +12870,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 452,
+          "line_number": 457,
           "function_name": "astar_relaxations",
           "code": "search_fewer_states()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 510,
+          "line_number": 515,
           "function_name": "search_fewer_states",
           "code": "text(\"To define the heuristic, we need to compute future costs of the relaxed problem.\")"
         }
@@ -12316,13 +12902,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 452,
+          "line_number": 457,
           "function_name": "astar_relaxations",
           "code": "search_fewer_states()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 511,
+          "line_number": 516,
           "function_name": "search_fewer_states",
           "code": "_, num_explored_relaxed, future_costs_relaxed = dynamic_programming(relaxed_problem)  # @stepover @inspect num_explored_relaxed relaxed_future_costs"
         }
@@ -12347,13 +12933,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 452,
+          "line_number": 457,
           "function_name": "astar_relaxations",
           "code": "search_fewer_states()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 512,
+          "line_number": 517,
           "function_name": "search_fewer_states",
           "code": "def heuristic(state: TravelState) -> float:"
         }
@@ -12371,13 +12957,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 452,
+          "line_number": 457,
           "function_name": "astar_relaxations",
           "code": "search_fewer_states()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 517,
+          "line_number": 522,
           "function_name": "search_fewer_states",
           "code": "cost = heuristic(TravelState(loc=4, tickets=3))  # @inspect cost"
         }
@@ -12395,19 +12981,19 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 452,
+          "line_number": 457,
           "function_name": "astar_relaxations",
           "code": "search_fewer_states()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 517,
+          "line_number": 522,
           "function_name": "search_fewer_states",
           "code": "cost = heuristic(TravelState(loc=4, tickets=3))  # @inspect cost"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 512,
+          "line_number": 517,
           "function_name": "heuristic",
           "code": "def heuristic(state: TravelState) -> float:"
         }
@@ -12425,19 +13011,19 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 452,
+          "line_number": 457,
           "function_name": "astar_relaxations",
           "code": "search_fewer_states()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 517,
+          "line_number": 522,
           "function_name": "search_fewer_states",
           "code": "cost = heuristic(TravelState(loc=4, tickets=3))  # @inspect cost"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 514,
+          "line_number": 519,
           "function_name": "heuristic",
           "code": "state_relaxed = state.loc"
         }
@@ -12455,19 +13041,19 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 452,
+          "line_number": 457,
           "function_name": "astar_relaxations",
           "code": "search_fewer_states()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 517,
+          "line_number": 522,
           "function_name": "search_fewer_states",
           "code": "cost = heuristic(TravelState(loc=4, tickets=3))  # @inspect cost"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 515,
+          "line_number": 520,
           "function_name": "heuristic",
           "code": "return future_costs_relaxed[state_relaxed].cost"
         }
@@ -12485,13 +13071,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 452,
+          "line_number": 457,
           "function_name": "astar_relaxations",
           "code": "search_fewer_states()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 517,
+          "line_number": 522,
           "function_name": "search_fewer_states",
           "code": "cost = heuristic(TravelState(loc=4, tickets=3))  # @inspect cost"
         }
@@ -12516,13 +13102,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 452,
+          "line_number": 457,
           "function_name": "astar_relaxations",
           "code": "search_fewer_states()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 519,
+          "line_number": 524,
           "function_name": "search_fewer_states",
           "code": "text(\"Let's compare UCS and A*\")"
         }
@@ -12548,13 +13134,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 452,
+          "line_number": 457,
           "function_name": "astar_relaxations",
           "code": "search_fewer_states()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 520,
+          "line_number": 525,
           "function_name": "search_fewer_states",
           "code": "solution, num_explored = uniform_cost_search(problem)  # @inspect solution num_explored @stepover"
         }
@@ -12751,13 +13337,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 452,
+          "line_number": 457,
           "function_name": "astar_relaxations",
           "code": "search_fewer_states()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 521,
+          "line_number": 526,
           "function_name": "search_fewer_states",
           "code": "solution, num_explored = astar_search(problem, heuristic=heuristic)  # @inspect solution num_explored @stepover"
         }
@@ -12954,13 +13540,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 452,
+          "line_number": 457,
           "function_name": "astar_relaxations",
           "code": "search_fewer_states()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 523,
+          "line_number": 528,
           "function_name": "search_fewer_states",
           "code": "text(\"For accounting purposes, need to include the cost of solving the relaxed problem!\")"
         }
@@ -12986,13 +13572,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 452,
+          "line_number": 457,
           "function_name": "astar_relaxations",
           "code": "search_fewer_states()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 524,
+          "line_number": 529,
           "function_name": "search_fewer_states",
           "code": "num_explored += num_explored_relaxed  # @inspect num_explored"
         }
@@ -13017,13 +13603,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 452,
+          "line_number": 457,
           "function_name": "astar_relaxations",
           "code": "search_fewer_states()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 526,
+          "line_number": 531,
           "function_name": "search_fewer_states",
           "code": "text(\"Note: dynamic programming cannot deal with cycles\")"
         }
@@ -13049,13 +13635,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 452,
+          "line_number": 457,
           "function_name": "astar_relaxations",
           "code": "search_fewer_states()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 527,
+          "line_number": 532,
           "function_name": "search_fewer_states",
           "code": "text(\"If we have cycles, what do we do?\")"
         }
@@ -13081,13 +13667,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 452,
+          "line_number": 457,
           "function_name": "astar_relaxations",
           "code": "search_fewer_states()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 528,
+          "line_number": 533,
           "function_name": "search_fewer_states",
           "code": "text(\"Solution:\")"
         }
@@ -13113,13 +13699,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 452,
+          "line_number": 457,
           "function_name": "astar_relaxations",
           "code": "search_fewer_states()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 529,
+          "line_number": 534,
           "function_name": "search_fewer_states",
           "code": "text(\"- Define a reversed relaxed problem (A \u2192 B becomes B \u2192 A)\")"
         }
@@ -13145,13 +13731,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 452,
+          "line_number": 457,
           "function_name": "astar_relaxations",
           "code": "search_fewer_states()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 530,
+          "line_number": 535,
           "function_name": "search_fewer_states",
           "code": "text(\"- Past costs in the reversed relaxed problem = future costs in the relaxed problem\")"
         }
@@ -13177,13 +13763,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 452,
+          "line_number": 457,
           "function_name": "astar_relaxations",
           "code": "search_fewer_states()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 531,
+          "line_number": 536,
           "function_name": "search_fewer_states",
           "code": "text(\"- Run UCS on the reserved relaxed problem to compute future costs in the relaxed problem\")"
         }
@@ -13209,13 +13795,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 452,
+          "line_number": 457,
           "function_name": "astar_relaxations",
           "code": "search_fewer_states()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 533,
+          "line_number": 538,
           "function_name": "search_fewer_states",
           "code": "text(\"Summary:\")"
         }
@@ -13241,13 +13827,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 452,
+          "line_number": 457,
           "function_name": "astar_relaxations",
           "code": "search_fewer_states()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 534,
+          "line_number": 539,
           "function_name": "search_fewer_states",
           "code": "text(\"- Still have to run search on the relaxed problems\")"
         }
@@ -13273,13 +13859,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 452,
+          "line_number": 457,
           "function_name": "astar_relaxations",
           "code": "search_fewer_states()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 535,
+          "line_number": 540,
           "function_name": "search_fewer_states",
           "code": "text(\"- But the relaxed problems have fewer constraints and therefore fewer states\")"
         }
@@ -13305,13 +13891,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 452,
+          "line_number": 457,
           "function_name": "astar_relaxations",
           "code": "search_fewer_states()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 536,
+          "line_number": 541,
           "function_name": "search_fewer_states",
           "code": "text(\"- Thus they are faster to solve than the original problem\")"
         }
@@ -13337,7 +13923,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 452,
+          "line_number": 457,
           "function_name": "astar_relaxations",
           "code": "search_fewer_states()"
         }
@@ -13355,7 +13941,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 453,
+          "line_number": 458,
           "function_name": "astar_relaxations",
           "code": "independent_subproblems()"
         }
@@ -13373,13 +13959,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 453,
+          "line_number": 458,
           "function_name": "astar_relaxations",
           "code": "independent_subproblems()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 539,
+          "line_number": 544,
           "function_name": "independent_subproblems",
           "code": "def independent_subproblems():"
         }
@@ -13397,13 +13983,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 453,
+          "line_number": 458,
           "function_name": "astar_relaxations",
           "code": "independent_subproblems()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 540,
+          "line_number": 545,
           "function_name": "independent_subproblems",
           "code": "text(\"Motivating example: solving the 8 puzzle\")"
         }
@@ -13429,13 +14015,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 453,
+          "line_number": 458,
           "function_name": "astar_relaxations",
           "code": "independent_subproblems()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 541,
+          "line_number": 546,
           "function_name": "independent_subproblems",
           "code": "image(\"images/8-puzzle.png\", width=400)"
         }
@@ -13463,13 +14049,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 453,
+          "line_number": 458,
           "function_name": "astar_relaxations",
           "code": "independent_subproblems()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 543,
+          "line_number": 548,
           "function_name": "independent_subproblems",
           "code": "text(\"Original problem: tiles cannot overlap\")"
         }
@@ -13495,13 +14081,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 453,
+          "line_number": 458,
           "function_name": "astar_relaxations",
           "code": "independent_subproblems()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 544,
+          "line_number": 549,
           "function_name": "independent_subproblems",
           "code": "text(\"Relaxed problem: tiles **can** overlap\")"
         }
@@ -13527,13 +14113,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 453,
+          "line_number": 458,
           "function_name": "astar_relaxations",
           "code": "independent_subproblems()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 545,
+          "line_number": 550,
           "function_name": "independent_subproblems",
           "code": "text(\"As a result, this breaks up into 8 **independent** subproblems\")"
         }
@@ -13559,13 +14145,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 453,
+          "line_number": 458,
           "function_name": "astar_relaxations",
           "code": "independent_subproblems()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 546,
+          "line_number": 551,
           "function_name": "independent_subproblems",
           "code": "text(\"...and in this case, each subproblem can be solved in closed form.\")"
         }
@@ -13591,13 +14177,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 453,
+          "line_number": 458,
           "function_name": "astar_relaxations",
           "code": "independent_subproblems()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 548,
+          "line_number": 553,
           "function_name": "independent_subproblems",
           "code": "heuristic_value = 1 + 1 + 3 + 1 + 1 + 1 + 1 + 3  # how far it has to move @inspect heuristic_value"
         }
@@ -13622,7 +14208,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 453,
+          "line_number": 458,
           "function_name": "astar_relaxations",
           "code": "independent_subproblems()"
         }
@@ -13640,7 +14226,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 454,
+          "line_number": 459,
           "function_name": "astar_relaxations",
           "code": "unifying_principle()"
         }
@@ -13658,13 +14244,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 454,
+          "line_number": 459,
           "function_name": "astar_relaxations",
           "code": "unifying_principle()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 551,
+          "line_number": 556,
           "function_name": "unifying_principle",
           "code": "def unifying_principle():"
         }
@@ -13682,13 +14268,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 454,
+          "line_number": 459,
           "function_name": "astar_relaxations",
           "code": "unifying_principle()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 552,
+          "line_number": 557,
           "function_name": "unifying_principle",
           "code": "text(\"Examples of relaxed problems so far:\")"
         }
@@ -13714,13 +14300,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 454,
+          "line_number": 459,
           "function_name": "astar_relaxations",
           "code": "unifying_principle()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 553,
+          "line_number": 558,
           "function_name": "unifying_principle",
           "code": "text(\"- Knock down walls\")"
         }
@@ -13746,13 +14332,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 454,
+          "line_number": 459,
           "function_name": "astar_relaxations",
           "code": "unifying_principle()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 554,
+          "line_number": 559,
           "function_name": "unifying_principle",
           "code": "text(\"- Free tram\")"
         }
@@ -13778,13 +14364,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 454,
+          "line_number": 459,
           "function_name": "astar_relaxations",
           "code": "unifying_principle()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 555,
+          "line_number": 560,
           "function_name": "unifying_principle",
           "code": "text(\"- Tiles can overlap\")"
         }
@@ -13810,13 +14396,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 454,
+          "line_number": 459,
           "function_name": "astar_relaxations",
           "code": "unifying_principle()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 557,
+          "line_number": 562,
           "function_name": "unifying_principle",
           "code": "text(\"These are all examples of removing constraints from the original problem.\")"
         }
@@ -13842,13 +14428,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 454,
+          "line_number": 459,
           "function_name": "astar_relaxations",
           "code": "unifying_principle()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 558,
+          "line_number": 563,
           "function_name": "unifying_principle",
           "code": "text(\"Removing constraints means reducing the cost of actions from infinity to a finite value.\")"
         }
@@ -13874,13 +14460,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 454,
+          "line_number": 459,
           "function_name": "astar_relaxations",
           "code": "unifying_principle()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 560,
+          "line_number": 565,
           "function_name": "unifying_principle",
           "code": "text(\"A more general principle: **reducing costs**\")"
         }
@@ -13906,13 +14492,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 454,
+          "line_number": 459,
           "function_name": "astar_relaxations",
           "code": "unifying_principle()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 562,
+          "line_number": 567,
           "function_name": "unifying_principle",
           "code": "text(\"Definition: A **relaxation** of a search problem is a modified problem where\")"
         }
@@ -13938,13 +14524,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 454,
+          "line_number": 459,
           "function_name": "astar_relaxations",
           "code": "unifying_principle()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 563,
+          "line_number": 568,
           "function_name": "unifying_principle",
           "code": "text(\"- States, actions, successors are the same\")"
         }
@@ -13970,13 +14556,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 454,
+          "line_number": 459,
           "function_name": "astar_relaxations",
           "code": "unifying_principle()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 564,
+          "line_number": 569,
           "function_name": "unifying_principle",
           "code": "text(\"- Cost_relaxed(s, a) <= Cost(s, a)\")"
         }
@@ -14002,13 +14588,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 454,
+          "line_number": 459,
           "function_name": "astar_relaxations",
           "code": "unifying_principle()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 566,
+          "line_number": 571,
           "function_name": "unifying_principle",
           "code": "text(\"Theorem: Let h(s) be the future cost of a relaxed problem. Then h is a consistent heuristic.\")"
         }
@@ -14034,13 +14620,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 454,
+          "line_number": 459,
           "function_name": "astar_relaxations",
           "code": "unifying_principle()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 567,
+          "line_number": 572,
           "function_name": "unifying_principle",
           "code": "text(\"Proof:\")"
         }
@@ -14066,13 +14652,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 454,
+          "line_number": 459,
           "function_name": "astar_relaxations",
           "code": "unifying_principle()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 568,
+          "line_number": 573,
           "function_name": "unifying_principle",
           "code": "text(\"h(s)\")"
         }
@@ -14098,13 +14684,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 454,
+          "line_number": 459,
           "function_name": "astar_relaxations",
           "code": "unifying_principle()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 569,
+          "line_number": 574,
           "function_name": "unifying_principle",
           "code": "text(\"<= Cost_relaxed(s, a) + h(Succ(s, a))  [triangle inequality]\")"
         }
@@ -14130,13 +14716,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 454,
+          "line_number": 459,
           "function_name": "astar_relaxations",
           "code": "unifying_principle()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 570,
+          "line_number": 575,
           "function_name": "unifying_principle",
           "code": "text(\"<= Cost(s, a) + h(Succ(s, a)) [definition of relaxation]\")"
         }
@@ -14162,13 +14748,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 454,
+          "line_number": 459,
           "function_name": "astar_relaxations",
           "code": "unifying_principle()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 572,
+          "line_number": 577,
           "function_name": "unifying_principle",
           "code": "text(\"Of course, a relaxed problem isn't automatically easier to solve!\")"
         }
@@ -14194,13 +14780,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 454,
+          "line_number": 459,
           "function_name": "astar_relaxations",
           "code": "unifying_principle()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 574,
+          "line_number": 579,
           "function_name": "unifying_principle",
           "code": "text(\"Costs are reduced in a **structured** way so that we can then:\")"
         }
@@ -14226,13 +14812,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 454,
+          "line_number": 459,
           "function_name": "astar_relaxations",
           "code": "unifying_principle()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 575,
+          "line_number": 580,
           "function_name": "unifying_principle",
           "code": "text(\"- Reduce the number of states\")"
         }
@@ -14258,13 +14844,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 454,
+          "line_number": 459,
           "function_name": "astar_relaxations",
           "code": "unifying_principle()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 576,
+          "line_number": 581,
           "function_name": "unifying_principle",
           "code": "text(\"- Get closed form solutions\")"
         }
@@ -14290,13 +14876,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 454,
+          "line_number": 459,
           "function_name": "astar_relaxations",
           "code": "unifying_principle()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 577,
+          "line_number": 582,
           "function_name": "unifying_principle",
           "code": "text(\"- Break up into independent subproblems\")"
         }
@@ -14322,7 +14908,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 454,
+          "line_number": 459,
           "function_name": "astar_relaxations",
           "code": "unifying_principle()"
         }
@@ -14340,7 +14926,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 455,
+          "line_number": 460,
           "function_name": "astar_relaxations",
           "code": "combining_heuristics()"
         }
@@ -14358,13 +14944,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 455,
+          "line_number": 460,
           "function_name": "astar_relaxations",
           "code": "combining_heuristics()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 580,
+          "line_number": 585,
           "function_name": "combining_heuristics",
           "code": "def combining_heuristics():"
         }
@@ -14382,13 +14968,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 455,
+          "line_number": 460,
           "function_name": "astar_relaxations",
           "code": "combining_heuristics()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 581,
+          "line_number": 586,
           "function_name": "combining_heuristics",
           "code": "text(\"We can use domain knowledge to come up with different relaxations\")"
         }
@@ -14414,13 +15000,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 455,
+          "line_number": 460,
           "function_name": "astar_relaxations",
           "code": "combining_heuristics()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 582,
+          "line_number": 587,
           "function_name": "combining_heuristics",
           "code": "text(\"- h1(s): future cost if we knock down walls\")"
         }
@@ -14446,13 +15032,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 455,
+          "line_number": 460,
           "function_name": "astar_relaxations",
           "code": "combining_heuristics()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 583,
+          "line_number": 588,
           "function_name": "combining_heuristics",
           "code": "text(\"- h2(s): future cost if we can ride a free tram\")"
         }
@@ -14478,13 +15064,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 455,
+          "line_number": 460,
           "function_name": "astar_relaxations",
           "code": "combining_heuristics()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 585,
+          "line_number": 590,
           "function_name": "combining_heuristics",
           "code": "text(\"Which one do you pick?\")"
         }
@@ -14510,13 +15096,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 455,
+          "line_number": 460,
           "function_name": "astar_relaxations",
           "code": "combining_heuristics()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 586,
+          "line_number": 591,
           "function_name": "combining_heuristics",
           "code": "text(\"Answer: you don't have to - you can use all of them!\")"
         }
@@ -14542,13 +15128,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 455,
+          "line_number": 460,
           "function_name": "astar_relaxations",
           "code": "combining_heuristics()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 588,
+          "line_number": 593,
           "function_name": "combining_heuristics",
           "code": "text(\"Theorem:\")"
         }
@@ -14574,13 +15160,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 455,
+          "line_number": 460,
           "function_name": "astar_relaxations",
           "code": "combining_heuristics()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 589,
+          "line_number": 594,
           "function_name": "combining_heuristics",
           "code": "text(\"- Suppose h1(s) and h2(s) are two consistent heuristics.\")"
         }
@@ -14606,13 +15192,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 455,
+          "line_number": 460,
           "function_name": "astar_relaxations",
           "code": "combining_heuristics()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 590,
+          "line_number": 595,
           "function_name": "combining_heuristics",
           "code": "text(\"- Then h(s) = max(h1(s), h2(s)) is a consistent heuristic.\")"
         }
@@ -14638,13 +15224,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 455,
+          "line_number": 460,
           "function_name": "astar_relaxations",
           "code": "combining_heuristics()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 592,
+          "line_number": 597,
           "function_name": "combining_heuristics",
           "code": "text(\"Proof:\")"
         }
@@ -14670,13 +15256,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 455,
+          "line_number": 460,
           "function_name": "astar_relaxations",
           "code": "combining_heuristics()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 593,
+          "line_number": 598,
           "function_name": "combining_heuristics",
           "code": "text(\"h(s)\")"
         }
@@ -14702,13 +15288,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 455,
+          "line_number": 460,
           "function_name": "astar_relaxations",
           "code": "combining_heuristics()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 594,
+          "line_number": 599,
           "function_name": "combining_heuristics",
           "code": "text(\"= max(h1(s), h2(s)) [definition of h]\")"
         }
@@ -14734,13 +15320,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 455,
+          "line_number": 460,
           "function_name": "astar_relaxations",
           "code": "combining_heuristics()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 595,
+          "line_number": 600,
           "function_name": "combining_heuristics",
           "code": "text(\"<= max(Cost(s, a) + h1(Succ(s, a)), h2(Cost(s, a)) + h2(Succ(s, a))) [because h1 and h2 are consistent]\")"
         }
@@ -14766,13 +15352,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 455,
+          "line_number": 460,
           "function_name": "astar_relaxations",
           "code": "combining_heuristics()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 596,
+          "line_number": 601,
           "function_name": "combining_heuristics",
           "code": "text(\"= Cost(s, a) + max(h1(Succ(s, a)), h2(Succ(s, a))) [pull out constant]\")"
         }
@@ -14798,13 +15384,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 455,
+          "line_number": 460,
           "function_name": "astar_relaxations",
           "code": "combining_heuristics()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 597,
+          "line_number": 602,
           "function_name": "combining_heuristics",
           "code": "text(\"= Cost(s, a) + h(Succ(s, a)) [definition of h]\")"
         }
@@ -14830,13 +15416,13 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 455,
+          "line_number": 460,
           "function_name": "astar_relaxations",
           "code": "combining_heuristics()"
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 598,
+          "line_number": 603,
           "function_name": "combining_heuristics",
           "code": "text(\"Therefore, h is consistent.\")"
         }
@@ -14862,7 +15448,7 @@
         },
         {
           "path": "ucs_astar.py",
-          "line_number": 455,
+          "line_number": 460,
           "function_name": "astar_relaxations",
           "code": "combining_heuristics()"
         }
