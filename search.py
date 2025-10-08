@@ -193,6 +193,10 @@ class TravelState:
     loc: int
     tickets: int
 
+    def __lt__(self, other: 'TravelState') -> bool:
+        # This can be arbitrary - only used because we put it in the priority queue
+        return self.loc < other.loc
+
 
 class LimitedTravelSearchProblem(SearchProblem):
     def __init__(self, num_locs: int, starting_tickets: int):
@@ -257,7 +261,7 @@ def introduce_exhaustive_search():
     problem = TravelSearchProblem(num_locs=4)  # @stepover
     
     solution, num_explored = exhaustive_search(problem)  # @inspect solution num_explored
-    text("Notice that the number of states explored (13) is larger than the number of states (5).")
+    text("Notice that the number of states explored (9) is larger than the number of states (4).")
     text("...this means we're exploring some states more than once.")
     text("We'll come back to this point later.")
 
@@ -333,16 +337,16 @@ def introduce_dynamic_programming():
     text("Dynamic programming: if already saw a state, don't explore it again.")
 
     problem = TravelSearchProblem(num_locs=10)  # @stepover
-    solution, num_explored = dynamic_programming(problem)  # @inspect solution num_explored
+    solution, num_explored, _ = dynamic_programming(problem)  # @inspect solution num_explored
     text("Note that the number of states explored (10) = number of states (10).")
 
     text("We can try larger problems:")
     problem = TravelSearchProblem(num_locs=17)  # @stepover
-    solution, num_explored = dynamic_programming(problem)  # @inspect solution num_explored @stepover
+    solution, num_explored, _ = dynamic_programming(problem)  # @inspect solution num_explored @stepover
 
     text("Even larger!")
     problem = TravelSearchProblem(num_locs=100)  # @stepover
-    solution, num_explored = dynamic_programming(problem)  # @inspect solution num_explored @stepover
+    solution, num_explored, _ = dynamic_programming(problem)  # @inspect solution num_explored @stepover
 
     text("When can you even use dynamic programming?")  # @clear solution num_explored
     text("- In general, memory is more precious than time. Can always run program for longer, but memory doesn't grow.")
@@ -357,7 +361,7 @@ def introduce_dynamic_programming():
     text("- Use when number of states fits in memory and lots of ways to go between same states")
 
 
-def dynamic_programming(problem: SearchProblem) -> tuple[Solution | None, int]:
+def dynamic_programming(problem: SearchProblem) -> tuple[Solution | None, int, dict[Any, Solution]]:
     """Perform dynamic programming on `problem` to find the minimum cost solution."""
     # Keep track of how many states we've explored (time complexity)
     num_explored = 0  # @inspect num_explored
@@ -397,7 +401,7 @@ def dynamic_programming(problem: SearchProblem) -> tuple[Solution | None, int]:
 
     state = problem.start_state()  # @inspect state @stepover
     solution = future_solution(state)  # @inspect cache solution num_explored
-    return solution, num_explored
+    return solution, num_explored, cache
 
 
 def introduce_best_of_n():
