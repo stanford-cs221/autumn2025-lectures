@@ -1,0 +1,14 @@
+digraph {
+	A [shape=circle]
+	A -> B [label="B:1"]
+	B [shape=circle]
+	B -> A [label="A:1"]
+	B -> C [label="C:1"]
+	C [shape=circle]
+	C -> A [label="A:100"]
+	C -> B [label="B:1"]
+	C -> D [label="D:1"]
+	D [shape=doublecircle]
+	B -> D [label="D:100"]
+	A -> C [label="C:100"]
+}

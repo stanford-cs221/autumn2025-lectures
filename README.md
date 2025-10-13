@@ -40,3 +40,11 @@ To run locally:
 ### Wed Oct 8: search ii (lecture 6)
 
 - [ucs_astar](https://stanford-cs221.github.io/autumn2025-lectures/?trace=ucs_astar)
+
+### Mon Oct 13: Markov decision processes (lecture 7)
+
+- [mdp](https://stanford-cs221.github.io/autumn2025-lectures/?trace=mdp)
+
+### Wed Oct 15: reinforcement learning (lecture 8)
+
+- [rl](https://stanford-cs221.github.io/autumn2025-lectures/?trace=rl): under construction

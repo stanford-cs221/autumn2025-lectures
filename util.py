@@ -29,3 +29,29 @@ def make_plot(title: str,
     chart = functools.reduce(lambda c1, c2: c1 + c2, to_show)
     return chart.to_dict()
 
+
+class Vocabulary:
+    """Maps strings to integers."""
+    def __init__(self):
+        self.index_to_string: list[str] = []
+        self.string_to_index: dict[str, int] = {}
+
+    def get_index(self, string: str) -> int:  # @inspect string
+        index = self.string_to_index.get(string)  # @inspect index
+        if index is None:  # New string
+            index = len(self.index_to_string)  # @inspect index
+            self.index_to_string.append(string)
+            self.string_to_index[string] = index
+        return index
+
+    def get_string(self, index: int) -> str:
+        return self.index_to_string[index]
+
+    def __len__(self):
+        return len(self.index_to_string)
+
+    def asdict(self):
+        return {
+            "index_to_string": self.index_to_string,
+            "string_to_index": self.string_to_index,
+        }
