@@ -183,12 +183,15 @@ def introduce_policies():
 
     # Only need one rollout since walking is deterministic
     walk_value = monte_carlo_policy_evaluation(mdp, always_walk_policy, num_rollouts=1)  # @inspect walk_value
-    estimated_tram_value = monte_carlo_policy_evaluation(mdp, partial(tram_if_possible_policy, mdp), num_rollouts=20)  # @inspect estimated_tram_value @stepover
+    tram_value = monte_carlo_policy_evaluation(mdp, partial(tram_if_possible_policy, mdp), num_rollouts=20)  # @inspect tram_value
 
-    text("Let's try the dice game:")  # @clear rollout walk_value estimated_tram_value
+    text("Let's try the dice game:")  # @clear rollout walk_value tram_value
     mdp = DiceGameMDP()  # @stepover
     quit_value = monte_carlo_policy_evaluation(mdp, always_quit_policy, num_rollouts=1)  # @inspect quit_value
     stay_value = monte_carlo_policy_evaluation(mdp, always_stay_policy, num_rollouts=20)  # @inspect stay_value
+
+    text("Note that these values are estimates!")
+    text("Can we compute them exactly?")
     
 
 def always_stay_policy(state: int) -> str:
@@ -279,9 +282,9 @@ def introduce_policy_evaluation():
     text("1. Trying to reach all the states (number of steps)")
     text("2. Distance decreases exponentially")
 
-    text("Let's try the dice game:")
+    text("Let's try the dice game:")  # @clear tram_value result
     mdp = DiceGameMDP()  # @stepover
-    result = policy_evaluation(mdp, always_stay_policy)  # @inspect result.values
+    result = policy_evaluation(mdp, always_stay_policy)  # @inspect result
     plot(make_distance_plot("policy evaluation", result.distances))  # @stepover
 
     text("Summary:")
@@ -303,8 +306,9 @@ def introduce_q_values():
     text("Let's consider our flaky tram MDP example again.")
     mdp = FlakyTramMDP(num_locs=10, failure_prob=0.4)  # @stepover
 
-    text("We start with an initial set of values corresponding to terminating")
+    text("We start with an initial set of values corresponding to terminating:")
     values = get_initial_values(mdp)  # @inspect values @stepover
+    text("Note that the values are 0 for end states and -100 otherwise (signaling invalid).")
 
     text("Let's warmup with computing the Q-value for just one state.")
     # Choose a state (arbitrarily)
@@ -530,17 +534,17 @@ def value_iteration(mdp: MDP, max_iters: int = 100, tolerance: float = 1e-5) -> 
     return ValueIterationResult(values=values, pi=pi, distances=distances)
 
 
-def value_iteration_for_state(mdp: MDP, state: Any, values: dict[Any, float]) -> tuple[float, Any]:
+def value_iteration_for_state(mdp: MDP, state: Any, values: dict[Any, float]) -> tuple[float, Any]:  # @inspect state values
     """Compute optimal value V`*`(state) and optimal policy π`*`(state)."""
     # V^* = max_a Q(s, a, V^*)
     # For each action, compute its Q-value
-    actions = []
-    q_values = []
+    actions = []  # @inspect actions
+    q_values = []  # @inspect q_values
 
     # Look at all actions from state
-    for action, successors in get_action_successors(mdp, state).items():  # @stepover
-        actions.append(action)
-        q_values.append(compute_q_value(successors, mdp.discount(), values))  # @stepover
+    for action, successors in get_action_successors(mdp, state).items():  # @stepover @inspect action successors
+        actions.append(action)  # @inspect actions
+        q_values.append(compute_q_value(successors, mdp.discount(), values))  # @stepover @inspect q_values
 
     # Take the best action
     value = np.max(q_values)  # @inspect value
