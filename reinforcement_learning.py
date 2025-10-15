@@ -1,13 +1,10 @@
-from edtrace import text, link, image, note, plot
+from edtrace import text, image
 from typing import Any
-from dataclasses import dataclass
 from collections import defaultdict
 import numpy as np
 from functools import partial
-from graphviz import Digraph
 from typing import Callable
-from mdp import FlakyTramMDP, DiceGameMDP, policy_evaluation, value_iteration, tram_if_possible_policy, generate_rollout, MDP, Step, draw_graph, Rollout
-from util import Vocabulary, make_plot
+from mdp import FlakyTramMDP, policy_evaluation, value_iteration, tram_if_possible_policy, generate_rollout, MDP, Step, draw_graph, Rollout
 
 Policy = Callable[[Any], Any]
 
