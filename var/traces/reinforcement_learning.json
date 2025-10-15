@@ -1,6 +1,6 @@
 {
   "files": {
-    "reinforcement_learning.py": "from edtrace import text, link, image, note, plot\nfrom typing import Any\nfrom dataclasses import dataclass\nfrom collections import defaultdict\nimport numpy as np\nfrom functools import partial\nfrom graphviz import Digraph\nfrom typing import Callable\nfrom mdp import FlakyTramMDP, DiceGameMDP, policy_evaluation, value_iteration, tram_if_possible_policy, generate_rollout, MDP, Step, draw_graph, Rollout\nfrom util import Vocabulary, make_plot\n\nPolicy = Callable[[Any], Any]\n\nLEADERBOARD = {}  # method -> value\n\ndef update_leaderboard(method: str, value: float) -> dict[str, float]:\n    LEADERBOARD[method] = value\n    return LEADERBOARD\n\n\ndef main():\n    text(\"Last time: **Markov decision processes**\")\n    review_mdp()\n\n    text(\"This time: **reinforcement learning**\")\n    introduce_rl()\n    introduce_model_based()\n    introduce_model_free_monte_carlo()\n    introduce_sarsa()\n    introduce_q_learning()\n\n    text(\"Summary:\")\n    text(\"- Reinforcement learning: learn the optimal policy from interacting with the environment\")\n    text(\"- Agent (RL algorithm): `get_action` and `incorporate_feedback`\")\n    text(\"- Model-based value iteration: estimate the MDP then compute the optimal policy\")\n    text(\"- Model-free Monte Carlo: estimate Q-values directly from rollouts (on-policy)\")\n    text(\"- SARSA: estimate Q-values of the current policy as you rollout (on-policy, bootstrapping)\")\n    text(\"- Q-learning: estimate Q-values of the optimal policy (off-policy, bootstrapping)\")\n\n    text(\"Next time: how do we deal with huge state spaces?\")\n\n\ndef review_mdp():\n    text(\"MDP: start state, successors (action, probability, reward, next state), is_end, discount\")\n\n    # MDP\n    mdp = FlakyTramMDP(num_locs=10, failure_prob=0.4)  # @stepover\n    state = mdp.start_state()  # @inspect state\n    successors = mdp.successors(state)  # @inspect successors\n    is_end = mdp.is_end(successors[0].state)  # @inspect is_end\n    image(draw_graph(mdp).render(\"var/flaky_tram_graph\", format=\"png\"), width=400)  # @stepover\n\n    # Policy\n    text(\"Policy: maps state to action\") # @clear successors is_end\n    policy = partial(tram_if_possible_policy, mdp)\n    action = policy(state)  # @inspect action\n\n    # Value of policy\n    rollout = generate_rollout(mdp, policy)  # @inspect rollout @clear action\n    text(\"Value of policy: expected utility of policy\") # @clear rollout\n    text(\"Policy evaluation: computes value of a given policy\")\n    result = policy_evaluation(mdp, policy)  # @inspect result\n\n    # Optimizing the policy\n    text(\"Value iteration: computes value of the optimal policy\")\n    result = value_iteration(mdp)  # @inspect result\n\n    review_recurrences()\n\n    text(\"But can we find the optimal policy if we don't know the MDP?\")\n\n\ndef review_recurrences():\n    text(\"Policy evaluation recurrence:\")\n    image(\"images/policy_evaluation_recurrence.png\", width=400)\n\n    text(\"Value V_\u03c0(s): value of following policy \u03c0 from state s\")\n    text(\"V_\u03c0(s) = Q_\u03c0(s, \u03c0(s))\")\n\n    text(\"Q-value Q_\u03c0(s, a): value of taking action a in state s, and then following policy \u03c0\")\n    text(\"Q_\u03c0(s, a) = \u03a3_s' T(s, a, s') (R(s, a, s') + \u03b3 V_\u03c0(s'))\")\n\n    text(\"Value iteration recurrence:\")\n    image(\"images/value_iteration_recurrence.png\", width=400)\n\n    text(\"Optimal V-value V`*`(s): value of following the optimal policy from state s\")\n    text(\"V`*`(s) = max_a Q`*`(s, a)\")\n\n    text(\"Optimal Q-value Q`*`(s, a): value of taking action a in state s, and then following the optimal policy\")\n    text(\"Q`*`(s, a) = \u03a3_s' T(s, a, s') (R(s, a, s') + \u03b3 V`*`(s'))\")\n\n    text(\"Optimal policy: take the action with the highest Q-value\")\n    text(\"\u03c0`*`(s) = argmax_a Q`*`(s, a)\")\n\n\ndef introduce_rl():\n    text(\"Reinforcement learning setting:\")\n    image(\"images/rl-framework.png\", width=400)\n    text(\"Repeat:\")\n    text(\"- **Agent** produces action\")\n    text(\"- **Environment** produces reward and observation\")\n\n    text(\"Intuitively:\")\n    text(\"- A good agent should try various actions to find ones that lead to good rewards.\")\n    text(\"- Then it should *learn* to keep doing those actions (those actions are *reinforced*).\")\n\n    text(\"Reinforcement learning really is the metaphor for life.\")\n    text(\"In MDPs, we don't know what outcomes will be, but at least know their probabilities...\")\n    text(\"in RL, we don't even know what the probabilities will be - that's real life!\")\n\n    text(\"In this lecture, assume the environment is backed by an MDP and the observation is the next state.\")\n    text(\"(In real life, you only observe part of the state (partially observable MDPs.)\")\n\n    text(\"Let us define an environment (MDP):\")\n    mdp = FlakyTramMDP(num_locs=10, failure_prob=0.4)  # @stepover\n    np.random.seed(1)\n    text(\"...and an agent (RL algorithm):\")\n    policy = partial(tram_if_possible_policy, mdp)  # Note this is a randomized policy!\n    rl = StaticAgent(policy=policy)\n    rl.get_action(state=1)\n    rl.incorporate_feedback(state=1, action=\"walk\", reward=-1, next_state=2, is_end=False)\n\n    text(\"Now let's simulate the agent and the environment (generating rollouts).\")\n    value = simulate(mdp, rl, num_trials=10)  # @inspect value\n    LEADERBOARD[\"tram_if_possible_policy\"] = value  # @inspect leaderboard\n    text(\"Simulation yields some estimated value (expected utility).\")\n    text(\"The agent (RL algorithm) doesn't do anything with the feedback.\")\n\n    text(\"Difference between policy and agent:\")\n    text(\"- Policy: maps state to action, doesn't change over time (static)\")\n    text(\"- Agent (RL algorithm): maps state to action, can change over time (dynamic)\")\n\n    text(\"Intuition: RL algorithm uses the feedback to improve its internal policy.\")\n    text(\"How should we perform this update?\")\n\n\nclass RLAlgorithm:\n    \"\"\"\n    Abstract class for an RL algorithm, which does two things:\n    1. Sends actions to the environment\n    2. Incorporates feedback from the environment\n    \"\"\"\n    def get_action(self, state: Any) -> Any:\n        raise NotImplementedError\n\n    def incorporate_feedback(self, state: Any, action: Any, reward: Any, next_state: Any, is_end: bool) -> None:\n        raise NotImplementedError\n\n\nclass StaticAgent(RLAlgorithm):\n    def __init__(self, policy: Policy):\n        self.policy = policy\n\n    def get_action(self, state: Any) -> Any:\n        return self.policy(state)\n\n    def incorporate_feedback(self, state: Any, action: Any, reward: Any, next_state: Any, is_end: bool) -> None:\n        # Do nothing\n        pass\n\n\ndef simulate(mdp: MDP, rl: RLAlgorithm, num_trials: int) -> float:\n    \"\"\"\n    Runs the RL algorithm on the MDP.\n    Return the mean utility of the rollouts.\n    \"\"\"\n    utilities = []  # @inspect utilities\n\n    # Repeat multiple times\n    for trial in range(num_trials):\n        # Environment state\n        state = mdp.start_state()  # @inspect state\n\n        steps = []  # @inspect steps\n        while not mdp.is_end(state):  # @stepover\n            # Agent sends action to environment\n            action = rl.get_action(state)  # @inspect action @stepover\n\n            # Environment sends reward and next state to agent\n            step = sample_transition(mdp, state, action)  # @inspect step @stepover\n            rl.incorporate_feedback(state, action, step.reward, step.state, mdp.is_end(step.state)) # @stepover\n            steps.append(step)  # @inspect steps\n            state = step.state  # @inspect state\n\n        # Compute utility of this rollout\n        rollout = Rollout(steps=steps, discount=mdp.discount())  # @inspect rollout @clear steps state action step\n        utilities.append(rollout.utility)  # @inspect utilities\n\n    mean_utility = np.mean(utilities).item()  # @inspect mean_utility\n    return mean_utility\n\n\ndef sample_transition(mdp: MDP, state: Any, action: Any) -> Step:  # @inspect state action\n    \"\"\"\n    Samples a transition from the MDP: samples s' with probability T(s, a, s').\n    Returns:\n    - reward: the reward for the transition\n    - next_state: the next state\n    - is_end: whether the next state is an end state\n    \"\"\"\n    # Get successors given (state, action)\n    successors = [successor for successor in mdp.successors(state) if successor.action == action]  # @inspect successors\n    if len(successors) == 0:\n        raise ValueError(f\"No successors found for state {state} and action {action}\")\n\n    # Sample a successor based on its probabilities\n    probs = [successor.prob for successor in successors]  # @inspect probs\n    choice = np.random.choice(len(successors), p=probs)  # @inspect choice\n    step = successors[choice]  # @inspect step\n    return step\n\n\ndef walk_tram_policy(num_locs: int, state: Any) -> Any:\n    \"\"\"Chooses a random valid action.\"\"\"\n    if 2 * state <= num_locs:\n        # Can take the tram\n        return np.random.choice([\"walk\", \"tram\"]).item()\n    else:\n        # Can only walk\n        return \"walk\"\n\n\ndef introduce_model_based():\n    text(\"What makes RL hard:\")\n    text(\"- We don't know the MDP.\")\n    text(\"- Otherwise, we can use value iteration to compute the optimal policy.\")\n    text(\"Idea: estimate (learn) the MDP from feedback!\")\n\n    text(\"**Model-based value iteration**:\")\n    text(\"1. Exploration: estimate the MDP using an exploration policy (random).\")\n    text(\"2. Compute the optimal policy of the estimated MDP.\")\n    text(\"3. Exploitation: follow this policy.\")\n\n    text(\"Let's define our familiar flaky tram MDP:\")\n    mdp = FlakyTramMDP(num_locs=10, failure_prob=0.4)  # @stepover\n    np.random.seed(1)\n\n    text(\"Define an exploration policy that chooses a random valid action:\")\n    exploration_policy = partial(walk_tram_policy, mdp.num_locs)\n    try_out_exploration_policy(exploration_policy)\n    \n    # Define the agent (RL algorithm)\n    rl = ModelBasedValueIteration(exploration_policy=exploration_policy, discount=1)\n    try_out_model_based_value_iteration(rl)\n\n    text(\"Stage 1: explore using the exploration policy to estimate the MDP.\")\n    value = simulate(mdp, rl, num_trials=10)  # @inspect value @stepover\n    leaderboard = update_leaderboard(\"model_based_value_iteration.explore\", value)  # @inspect leaderboard @stepover\n    compare_mdps(mdp, rl.mdp)\n\n    text(\"Stage 2: compute the optimal policy of the estimated MDP and follow that.\")\n    rl.run_value_iteration()  # @inspect rl.exploitation_policy\n    compare_policies(value_iteration(mdp), rl.exploitation_policy)\n\n    text(\"Stage 3: run using this estimated policy.\")\n    value = simulate(mdp, rl, num_trials=10)  # @inspect value @stepover\n    leaderboard = update_leaderboard(\"model_based_value_iteration.exploit\", value)  # @inspect leaderboard @stepover\n\n    text(\"Notes:\")\n    text(\"- The utility of the exploration phase is suboptimal, but we're learning!\")\n    text(\"- In practice, we don't need to restrict to two phases\")\n    text(\"- Always continue refining the estimated MDP\")\n    text(\"- Gradually move the policy from full exploration to full exploitation\")\n\n    text(\"Summary:\")\n    text(\"- Model-based RL: estimate the MDP from feedback (explore)\")\n    text(\"- Once have estimated MDP, use value iteration to compute the optimal policy (of estimated MDP)\")\n    text(\"- Once have estimated policy, exploit!\")\n\n    text(\"Can we estimate the optimal policy more directly?\")\n    \n    \nclass ModelBasedValueIteration(RLAlgorithm):\n    \"\"\"\n    Model-based RL algorithm that uses value iteration to estimate the MDP.\n    There are two stages:\n    - explore: follow the `exploration_policy` and estimate the MDP\n    - exploit: use the estimated MDP to choose actions\n    \"\"\"\n    def __init__(self, exploration_policy: Policy, discount: float):\n        self.exploration_policy = exploration_policy\n        self.exploitation_policy = None\n        self.mdp = EstimatedMDP(discount=discount)\n\n    def run_value_iteration(self):\n        # Run value iteration to compute the optimal policy for the estimated MDP\n        result = value_iteration(self.mdp)  # @inspect result @stepover\n        # Use this policy for exploitation\n        self.exploitation_policy = result.pi\n\n    def get_action(self, state: Any) -> Any:\n        # Either follow the exploration policy or the exploitation policy\n        if self.exploitation_policy is None:\n            return self.exploration_policy(state)\n        else:\n            return self.exploitation_policy[state]\n\n    def incorporate_feedback(self, state: Any, action: Any, reward: Any, next_state: Any, is_end: bool) -> None:\n        # Update the estimated MDP with the feedback\n        self.mdp.incorporate_feedback(state, action, reward, next_state, is_end)  # @inspect self.mdp\n\n\nclass EstimatedMDP(MDP):\n    \"\"\"An MDP whose start state, rewards, transitions, is_end is learned from feedback during RL.\"\"\"\n    def __init__(self, discount: float):\n        self.start_state_ = None\n        self.rewards = defaultdict(float)  # (state, action, state') -> reward\n        self.transitions = defaultdict(lambda : defaultdict(lambda : defaultdict(int)))  # state -> action -> state' -> count\n        self.end_states = set()\n        self.discount_ = discount\n\n    def start_state(self) -> Any:\n        return self.start_state_\n    \n    def successors(self, state: Any) -> list[Step]:\n        \"\"\"Compute successors based on the transition counts and rewards.\"\"\"\n        successors = []  # @inspect successors\n        # For each action...\n        for action, next_state_counts in self.transitions[state].items():  # @inspect action next_state_counts\n            total_count = sum(next_state_counts.values())  # @inspect total_count\n            # For each next state...\n            for next_state, count in next_state_counts.items():\n                # Compute the transition probability, reward\n                prob = count / total_count\n                reward = self.rewards[(state, action, next_state)]\n                step = Step(action=action, prob=prob, reward=reward, state=next_state)\n                successors.append(step)  # @inspect successors\n\n        return successors\n    \n    def is_end(self, state: Any) -> bool:\n        return state in self.end_states\n\n    def discount(self) -> float:\n        return self.discount_\n\n    def incorporate_feedback(self, state: Any, action: Any, reward: Any, next_state: Any, is_end: bool) -> None:\n        \"\"\"Update the MDP based on the feedback.\"\"\"\n        if self.start_state_ is None:\n            self.start_state_ = state\n\n        self.rewards[(state, action, next_state)] = reward\n        self.transitions[state][action][next_state] += 1\n\n        if is_end:\n            self.end_states.add(next_state)\n\n    def asdict(self) -> dict[str, Any]:\n        return {\n            \"start_state_\": self.start_state_,\n            \"rewards\": self.rewards,\n            \"transition_counts\": self.transitions,\n            \"end_states\": list(self.end_states),\n        }\n\n\ndef try_out_model_based_value_iteration(rl: ModelBasedValueIteration):\n    action = rl.get_action(state=1)  # @inspect action\n    rl.incorporate_feedback(state=1, action=\"walk\", reward=-1, next_state=2, is_end=False)\n    \ndef try_out_exploration_policy(exploration_policy: Policy):\n    text(\"The exploration policy tries all valid actions.\")\n    action = exploration_policy(state=1)  # @inspect action\n    action = exploration_policy(state=1)  # @inspect action @stepover\n    action = exploration_policy(state=1)  # @inspect action @stepover\n    action = exploration_policy(state=6)  # @inspect action\n\n\ndef compare_mdps(true_mdp: MDP, estimated_mdp: MDP):\n    text(\"Let's look at the internals of the estimated MDP.\")  # @inspect estimated_mdp\n\n    text(\"Let us compare the true MDP and the estimated MDP.\")\n    true_start_state = true_mdp.start_state()  # @inspect true_start_state\n    estimated_start_state = estimated_mdp.start_state()  # @inspect estimated_start_state\n\n    true_successors = true_mdp.successors(state=1)  # @inspect true_successors\n    estimated_successors = estimated_mdp.successors(state=1)  # @inspect estimated_successors\n\n    true_is_end = true_mdp.is_end(state=9)  # @inspect true_is_end\n    estimated_is_end = estimated_mdp.is_end(state=9)  # @inspect estimated_is_end\n\n    text(\"The more the agent explores, estimated MDP \u2192 true MDP\")\n    text(\"...assuming the exploration policy tries all valid actions.\")\n\n\ndef compare_policies(optimal_policy: dict[Any, Any], estimated_policy: dict[Any, Any]):\n    text(\"We compare:\")\n    text(\"- Optimal policy: the optimal policy for the true MDP (unknown to the agent)\")  # @inspect optimal_policy\n    text(\"- Estimated policy: the optimal policy for the estimated MDP (known to the agent)\")  # @inspect estimated_policy\n\n    text(\"Note the two are similar but not quite the same.\")\n    text(\"The more the agent explores, estimated policy \u2192 optimal policy.\")\n\n\ndef introduce_model_free_monte_carlo():\n    text(\"Previously: model-based value iteration:\")\n    text(\"1. Estimate the MDP first.\")\n    text(\"2. Use value iteration to compute the optimal policy of the estimated MDP.\")\n    \n    image(\"images/value_iteration_recurrence.png\", width=400)\n    text(\"Optimal policy: \u03c0`*`(s) = argmax_a Q`*`(s, a)\")\n    text(\"where Q`*`(s, a) = \u03a3_s' T(s, a, s') (R(s, a, s') + \u03b3 V`*`(s'))\")\n    text(\"Can we estimate Q`*`(s, a) directly?\")\n\n    text(\"Yes!\")\n    text(\"Key idea: just rollout the policy and average the utilities!\")\n\n    example_utility_calculation()\n\n    text(\"Which policy should we use to rollout?\")\n    text(\"- For model-based value iteration, we had a purely random exploration policy (for phase 1).\")\n    text(\"- Let's do something a bit more sophisticated: **epsilon-greedy**.\")\n    text(\"- With probability epsilon, choose a random action according to the exploration policy.\")\n    text(\"- With probability 1 - epsilon, choose the best action according to the current estimated Q-values.\")\n\n    text(\"Now let's define Model-free Monte Carlo:\")\n    mdp = FlakyTramMDP(num_locs=10, failure_prob=0.4)  # @stepover\n    np.random.seed(1)\n\n    exploration_policy = partial(walk_tram_policy, mdp.num_locs)\n    rl = ModelFreeMonteCarlo(exploration_policy=exploration_policy, epsilon=0.4, discount=1)\n\n    try_out_model_free_monte_carlo(rl)\n\n    text(\"Let's run it for real now!\")\n    value = simulate(mdp, rl, num_trials=20)  # @inspect value @stepover\n    leaderboard = update_leaderboard(\"model_free_monte_carlo\", value)  # @inspect leaderboard @stepover\n\n    text(\"Summary:\")\n    text(\"- Model-free Monte Carlo: estimate Q-values of the current policy\")\n    text(\"- Directly uses rollouts, bypassing estimating the MDP\")\n    text(\"- Use epsilon-greedy policy to balance exploration and exploitation\")\n\n    text(\"Problem: in life, you only get one rollout.\")\n    text(\"Can we update the Q-values before the rollout is over?\")\n\n\ndef example_utility_calculation():\n    text(\"The utility at each step is the discounted sum of rewards from that point on.\")\n    rollout = [\n        Step(action=\"walk\", prob=1, reward=-1, state=2),\n        Step(action=\"tram\", prob=1, reward=-2, state=2),\n        Step(action=\"tram\", prob=1, reward=-2, state=4),\n    ]\n    discount = 1\n    utilities = [  # @inspect utilities\n        -1 + (discount * -2) + (discount**2 * -2),  # step 0 utility\n        -2 + (discount * -2),                       # step 1 utility\n        -2 + (discount * 0),                        # step 2 utility\n    ]\n\n    text(\"There is a nice recurrence relation between the utilities:\")\n    assert utilities[0] == rollout[0].reward + (discount * utilities[1])\n    assert utilities[1] == rollout[1].reward + (discount * utilities[2])\n\nclass ModelFreeMonteCarlo(RLAlgorithm):\n    def __init__(self, exploration_policy: Policy, epsilon: float, discount: float):\n        self.exploration_policy = exploration_policy\n        self.epsilon = epsilon\n        self.discount = discount\n\n        # Statistics that define the Q-values: Q(s, a) = sum_utilities[s][a] / counts[s][a]\n        self.sum_utilities = defaultdict(lambda : defaultdict(float))  # state -> action -> sum of utility from (state, action)\n        self.counts = defaultdict(lambda : defaultdict(int))  # state -> action -> visitation count\n\n        # Keep track of the current rollout\n        self.start_state = None\n        self.rollout: list[Step] = []\n\n    def get_action(self, state: Any) -> Any:\n        if len(self.counts[state]) == 0:\n            # If no actions have been tried yet, choose a random action\n            return self.exploration_policy(state)  # @stepover\n\n        # Do epsilon-greedy\n        if np.random.random() < self.epsilon:\n            # With probability epsilon, choose a random action according to the exploration policy\n            return self.exploration_policy(state)  # @stepover\n        else:\n            # Otherwise, choose the best action according to the Q-values\n            return self.pi(state)\n\n        return action\n\n    def pi(self, state: Any) -> Any:\n        \"\"\"Return the policy corresponding to the current Q-values.\"\"\"\n        actions = list(self.counts[state].keys())  # @inspect actions\n        q_values = [self.Q(state, action) for action in actions]  # @inspect q_values\n        action = actions[np.argmax(q_values).item()]  # @inspect action\n        return action\n\n\n    def Q(self, state: Any, action: Any) -> float:\n        \"\"\"Compute the estimated Q-values Q(state, action) using the running sums and counts.\"\"\"\n        sum_utility = self.sum_utilities[state][action]  # @inspect sum_utility\n        count = self.counts[state][action]  # @inspect count\n        value = sum_utility / count  # @inspect value\n        return value\n\n    def incorporate_feedback(self, state: Any, action: Any, reward: Any, next_state: Any, is_end: bool) -> None:  # @inspect state action reward next_state is_end\n        # Add this piece of feedback (state, action, reward, next_state) to the history\n        if self.start_state is None:\n            self.start_state = state\n        self.rollout.append(Step(action=action, prob=1, reward=reward, state=next_state))  # @inspect self.rollout\n\n        # At the end of the episode, update the statistics needed for computing Q-values\n        if is_end:\n            utilities = [0] * (len(self.rollout) + 1)  # @inspect utilities\n            # Walk backwards and compute the utilities for each step\n            for i, step in reversed(list(enumerate(self.rollout))):  # @inspect i step\n                # Compute utility of step i\n                # state [0] action reward state [1] action reward state [2] action reward state\n                state = self.start_state if i == 0 else self.rollout[i - 1].state  # @inspect state\n                utilities[i] = step.reward + self.discount * utilities[i + 1]  # @inspect utilities\n\n                # Update the running sums\n                self.sum_utilities[state][step.action] += utilities[i]  # @inspect self.sum_utilities\n                self.counts[state][step.action] += 1  # @inspect self.counts\n\n            # Reset history\n            self.start_state = None\n            self.rollout = []\n\n\ndef try_out_model_free_monte_carlo(rl: ModelFreeMonteCarlo):\n    action = rl.get_action(state=1)  # @inspect action\n\n    # Manually simulate some feedback\n    rl.incorporate_feedback(state=1, action=\"walk\", reward=-1, next_state=2, is_end=False)\n    rl.incorporate_feedback(state=2, action=\"tram\", reward=-2, next_state=2, is_end=False)\n    rl.incorporate_feedback(state=2, action=\"tram\", reward=-2, next_state=4, is_end=True)\n\n    action = rl.get_action(state=1)  # @inspect action\n    action = rl.get_action(state=1)  # @inspect action\n    action = rl.get_action(state=1)  # @inspect action\n    action = rl.get_action(state=1)  # @inspect action\n\n\ndef introduce_sarsa():\n    text(\"Previously: model-free Monte Carlo: estimate Q-values directly from rollouts\")\n    text(\"SARSA: update Q-values as you rollout!\")\n\n    text(\"If we don't rollout completely, how do we get the utility (which requires going towards the end)?\")\n\n    text(\"Key insight: **bootstrapping**!\")\n    text(\"Combine the immediate reward with a model estimate of the future\")\n\n    text(\"Monte Carlo: u = r_0 + \u03b3*r_1 + \u03b3^2*r_2 + ... + \u03b3^n*r_n\")\n    text(\"Bootstrapping (SARSA): u = r_0 + \u03b3*Q_\u03c0(s_1, a_1)\")\n\n    text(\"Perform a gradient update to move Q_\u03c0(s, a) towards u\")\n\n    text(\"Instantiate our favorite flaky tram MDP:\")\n    mdp = FlakyTramMDP(num_locs=10, failure_prob=0.4)  # @stepover\n    np.random.seed(1)\n\n    exploration_policy = partial(walk_tram_policy, mdp.num_locs)\n    rl = SARSA(exploration_policy=exploration_policy, epsilon=0.4, discount=1, learning_rate=0.1)\n\n    try_out_sarsa(rl)\n\n    text(\"Try it out for real!\")\n    value = simulate(mdp, rl, num_trials=20)  # @inspect value @stepover\n    leaderboard = update_leaderboard(\"sarsa\", value)  # @inspect leaderboard @stepover\n\n    text(\"Summary:\")\n    text(\"- SARSA: estimates Q-values of the current policy Q_\u03c0(s, a) as you rollout\")\n    text(\"- Bootstrapping: estimate utility using model estimate of the future\")\n    text(\"- Gradient update: move Q-values towards the estimated utility\")\n\n    text(\"But we are only computing Q-values of the current policy Q_\u03c0(s, a) (**on-policy**).\")\n    text(\"Can we directly estimate Q-values of the optimal policy Q`*`(s, a)?\")\n\n\nclass SARSA(RLAlgorithm):\n    def __init__(self, exploration_policy: Policy, epsilon: float, discount: float, learning_rate: float):\n        self.exploration_policy = exploration_policy\n        self.epsilon = epsilon\n        self.discount = discount\n        self.learning_rate = learning_rate\n        self.Q = defaultdict(lambda : defaultdict(float))  # state -> action -> Q-value\n\n    def get_action(self, state: Any) -> Any:\n        if len(self.Q[state]) == 0:\n            return self.exploration_policy(state)\n        \n        if np.random.random() < self.epsilon:\n            return self.exploration_policy(state)\n        else:\n            return self.pi(state)\n\n    def pi(self, state: Any) -> Any:\n        \"\"\"Return the policy corresponding to the current Q-values.\"\"\"\n        actions = list(self.Q[state].keys())  # @inspect actions\n        if len(actions) == 0:\n            return None\n        q_values = [self.Q[state][action] for action in actions]  # @inspect q_values\n        action = actions[np.argmax(q_values).item()]  # @inspect action\n        return action\n\n    def incorporate_feedback(self, state: Any, action: Any, reward: Any, next_state: Any, is_end: bool) -> None:  # @inspect self.Q state action reward next_state is_end\n        # state \u2192 action reward next_state \u2192 next_action ...\n        # Important: use `get_action` to get on-policy\n        next_action = self.get_action(next_state)  # @inspect next_action\n        utility = reward + self.discount * self.Q[next_state].get(next_action, 0)  # @inspect utility\n        self.Q[state][action] += self.learning_rate * (utility - self.Q[state][action])  # @inspect self.Q\n\n\ndef try_out_sarsa(rl: SARSA):\n    action = rl.get_action(state=1)  # @inspect action\n    \n    rl.incorporate_feedback(state=1, action=\"walk\", reward=-1, next_state=2, is_end=False)\n    rl.incorporate_feedback(state=2, action=\"tram\", reward=-2, next_state=2, is_end=False)\n    rl.incorporate_feedback(state=2, action=\"tram\", reward=-2, next_state=4, is_end=True)\n\n    action = rl.get_action(state=1)  # @inspect action\n\n\ndef introduce_q_learning():\n    text(\"SARSA: estimate Q-values of the current policy Q_\u03c0(s, a)\")\n    text(\"Q-learning: estimate Q-values of the optimal policy Q`*`(s, a)\")\n\n    text(\"But we don't know the optimal policy...\")\n    \n    mdp = FlakyTramMDP(num_locs=10, failure_prob=0.4)  # @stepover\n    np.random.seed(1)\n\n    exploration_policy = partial(walk_tram_policy, mdp.num_locs)\n    rl = QLearning(exploration_policy=exploration_policy, epsilon=0.4, discount=1, learning_rate=0.1)\n\n    try_out_q_learning(rl)\n\n    text(\"Try it out for real!\")\n    value = simulate(mdp, rl, num_trials=20)  # @inspect value @stepover\n    leaderboard = update_leaderboard(\"q_learning\", value)  # @inspect leaderboard @stepover\n\n    text(\"Summary:\")\n    text(\"- Q-learning: estimates Q-values of the optimal policy Q`*`(s, a) (**off-policy**)\")\n    text(\"- Like SARSA, uses bootstrapping and gradient updates\")\n\n\nclass QLearning(SARSA):\n    \"\"\"Q-learning is SARSA, but with an off-policy exploration policy.\"\"\"\n    def incorporate_feedback(self, state: Any, action: Any, reward: Any, next_state: Any, is_end: bool) -> None:  # @inspect self.Q state action reward next_state is_end\n        # state \u2192 action reward next_state \u2192 next_action ...\n        # Important: use `pi` (our estimate of the optimal policy) to get off-policy\n        next_action = self.pi(next_state)  # @inspect next_action\n        utility = reward + self.discount * self.Q[next_state].get(next_action, 0)  # @inspect utility\n        self.Q[state][action] += self.learning_rate * (utility - self.Q[state][action])  # @inspect self.Q\n\n\ndef try_out_q_learning(rl: QLearning):\n    action = rl.get_action(state=1)  # @inspect action\n    \n    rl.incorporate_feedback(state=1, action=\"walk\", reward=-1, next_state=2, is_end=False)\n    rl.incorporate_feedback(state=2, action=\"tram\", reward=-2, next_state=2, is_end=False)\n    rl.incorporate_feedback(state=2, action=\"tram\", reward=-2, next_state=4, is_end=True)\n\n    action = rl.get_action(state=1)  # @inspect action\n    action = rl.get_action(state=1)  # @inspect action\n    action = rl.get_action(state=1)  # @inspect action\n\nif __name__ == \"__main__\":\n    main()\n"
+    "reinforcement_learning.py": "from edtrace import text, link, image, note, plot\nfrom typing import Any\nfrom dataclasses import dataclass\nfrom collections import defaultdict\nimport numpy as np\nfrom functools import partial\nfrom graphviz import Digraph\nfrom typing import Callable\nfrom mdp import FlakyTramMDP, DiceGameMDP, policy_evaluation, value_iteration, tram_if_possible_policy, generate_rollout, MDP, Step, draw_graph, Rollout\nfrom util import Vocabulary, make_plot\n\nPolicy = Callable[[Any], Any]\n\nLEADERBOARD = {}  # method -> value\n\ndef update_leaderboard(method: str, value: float) -> dict[str, float]:\n    LEADERBOARD[method] = value\n    return LEADERBOARD\n\n\ndef main():\n    text(\"Last time: **Markov decision processes**\")\n    review_mdp()\n\n    text(\"This time: **reinforcement learning**\")\n    introduce_rl()\n    introduce_model_based()\n    introduce_model_free_monte_carlo()\n    introduce_sarsa()\n    introduce_q_learning()\n\n    text(\"Summary:\")\n    text(\"- Reinforcement learning: learn the optimal policy from interacting with the environment\")\n    text(\"- Agent (RL algorithm): `get_action` and `incorporate_feedback`\")\n    text(\"- Model-based value iteration: estimate the MDP then compute the optimal policy\")\n    text(\"- Model-free Monte Carlo: estimate Q-values directly from rollouts (on-policy)\")\n    text(\"- SARSA: estimate Q-values of the current policy as you rollout (on-policy, bootstrapping)\")\n    text(\"- Q-learning: estimate Q-values of the optimal policy (off-policy, bootstrapping)\")\n\n    text(\"Next time: how do we deal with huge state spaces?\")\n\n\ndef review_mdp():\n    text(\"MDP: start state, successors (action, probability, reward, next state), is_end, discount\")\n\n    # MDP\n    mdp = FlakyTramMDP(num_locs=10, failure_prob=0.4)  # @stepover\n    state = mdp.start_state()  # @inspect state\n    successors = mdp.successors(state)  # @inspect successors\n    is_end = mdp.is_end(successors[0].state)  # @inspect is_end\n    image(draw_graph(mdp).render(\"var/flaky_tram_graph\", format=\"png\"), width=400)  # @stepover\n\n    # Policy\n    text(\"Policy: maps state to action\") # @clear successors is_end\n    policy = partial(tram_if_possible_policy, mdp)\n    action = policy(state)  # @inspect action\n\n    # Value of policy\n    rollout = generate_rollout(mdp, policy)  # @inspect rollout @clear action\n    text(\"Value of policy: expected utility of policy\") # @clear rollout\n    text(\"Policy evaluation: computes value of a given policy\")\n    result = policy_evaluation(mdp, policy)  # @inspect result\n\n    # Optimizing the policy\n    text(\"Value iteration: computes value of the optimal policy\")\n    result = value_iteration(mdp)  # @inspect result\n\n    review_recurrences()\n\n    text(\"But can we find the optimal policy if we don't know the MDP?\")\n\n\ndef review_recurrences():\n    text(\"Policy evaluation recurrence:\")\n    image(\"images/policy_evaluation_recurrence.png\", width=400)\n\n    text(\"Value V_\u03c0(s): value of following policy \u03c0 from state s\")\n    text(\"V_\u03c0(s) = Q_\u03c0(s, \u03c0(s))\")\n\n    text(\"Q-value Q_\u03c0(s, a): value of taking action a in state s, and then following policy \u03c0\")\n    text(\"Q_\u03c0(s, a) = \u03a3_s' T(s, a, s') (R(s, a, s') + \u03b3 V_\u03c0(s'))\")\n\n    text(\"Value iteration recurrence:\")\n    image(\"images/value_iteration_recurrence.png\", width=400)\n\n    text(\"Optimal V-value V`*`(s): value of following the optimal policy from state s\")\n    text(\"V`*`(s) = max_a Q`*`(s, a)\")\n\n    text(\"Optimal Q-value Q`*`(s, a): value of taking action a in state s, and then following the optimal policy\")\n    text(\"Q`*`(s, a) = \u03a3_s' T(s, a, s') (R(s, a, s') + \u03b3 V`*`(s'))\")\n\n    text(\"Optimal policy: take the action with the highest Q-value\")\n    text(\"\u03c0`*`(s) = argmax_a Q`*`(s, a)\")\n\n\ndef introduce_rl():\n    text(\"Reinforcement learning setting:\")\n    image(\"images/rl-framework.png\", width=400)\n    text(\"Repeat:\")\n    text(\"- **Agent** produces action\")\n    text(\"- **Environment** produces reward and observation\")\n\n    text(\"Intuitively:\")\n    text(\"- A good agent should try various actions to find ones that lead to good rewards.\")\n    text(\"- Then it should *learn* to keep doing those actions (those actions are *reinforced*).\")\n\n    text(\"Reinforcement learning really is the metaphor for life.\")\n    text(\"In MDPs, we don't know what outcomes will be, but at least know their probabilities...\")\n    text(\"in RL, we don't even know what the probabilities will be - that's real life!\")\n\n    text(\"In this lecture, assume the environment is backed by an MDP and the observation is the next state.\")\n    text(\"(In real life, you only observe part of the state (partially observable MDPs.)\")\n\n    text(\"Let us define an environment (MDP):\")\n    mdp = FlakyTramMDP(num_locs=10, failure_prob=0.4)  # @stepover\n    np.random.seed(1)\n    text(\"...and an agent (RL algorithm):\")\n    policy = partial(tram_if_possible_policy, mdp)\n    rl = StaticAgent(policy=policy)\n    rl.get_action(state=1)\n    rl.incorporate_feedback(state=1, action=\"walk\", reward=-1, next_state=2, is_end=False)\n\n    text(\"Now let's simulate the agent and the environment (generating rollouts).\")\n    value = simulate(mdp, rl, num_trials=10)  # @inspect value\n    leaderboard = update_leaderboard(\"tram_if_possible_policy\", value)  # @inspect leaderboard\n    text(\"Simulation yields some estimated value (expected utility).\")\n    text(\"The agent (RL algorithm) doesn't do anything with the feedback.\")\n\n    text(\"Difference between policy and agent:\")\n    text(\"- Policy: maps state to action, doesn't change over time (static)\")\n    text(\"- Agent (RL algorithm): maps state to action, can change over time (dynamic)\")\n\n    text(\"Intuition: RL algorithm uses the feedback to improve its internal policy.\")\n    text(\"How should we perform this update?\")\n\n\nclass RLAlgorithm:\n    \"\"\"\n    Abstract class for an RL algorithm, which does two things:\n    1. Sends actions to the environment\n    2. Incorporates feedback from the environment\n    \"\"\"\n    def get_action(self, state: Any) -> Any:\n        raise NotImplementedError\n\n    def incorporate_feedback(self, state: Any, action: Any, reward: Any, next_state: Any, is_end: bool) -> None:\n        raise NotImplementedError\n\n\nclass StaticAgent(RLAlgorithm):\n    def __init__(self, policy: Policy):\n        self.policy = policy\n\n    def get_action(self, state: Any) -> Any:\n        return self.policy(state)\n\n    def incorporate_feedback(self, state: Any, action: Any, reward: Any, next_state: Any, is_end: bool) -> None:\n        # Do nothing\n        pass\n\n\ndef simulate(mdp: MDP, rl: RLAlgorithm, num_trials: int) -> float:\n    \"\"\"\n    Runs the RL algorithm on the MDP.\n    Return the mean utility of the rollouts.\n    \"\"\"\n    utilities = []  # @inspect utilities\n\n    # Repeat multiple times\n    for trial in range(num_trials):\n        # Environment state\n        state = mdp.start_state()  # @inspect state\n\n        steps = []  # @inspect steps\n        while not mdp.is_end(state):  # @stepover\n            # Agent sends action to environment\n            action = rl.get_action(state)  # @inspect action @stepover\n\n            # Environment sends reward and next state to agent\n            step = sample_transition(mdp, state, action)  # @inspect step @stepover\n            rl.incorporate_feedback(state, action, step.reward, step.state, mdp.is_end(step.state)) # @stepover\n            steps.append(step)  # @inspect steps\n            state = step.state  # @inspect state\n\n        # Compute utility of this rollout\n        rollout = Rollout(steps=steps, discount=mdp.discount())  # @inspect rollout @clear steps state action step\n        utilities.append(rollout.utility)  # @inspect utilities\n\n    mean_utility = np.mean(utilities).item()  # @inspect mean_utility\n    return mean_utility\n\n\ndef sample_transition(mdp: MDP, state: Any, action: Any) -> Step:  # @inspect state action\n    \"\"\"\n    Samples a transition from the MDP: samples s' with probability T(s, a, s').\n    Returns:\n    - reward: the reward for the transition\n    - next_state: the next state\n    - is_end: whether the next state is an end state\n    \"\"\"\n    # Get successors given (state, action)\n    successors = [successor for successor in mdp.successors(state) if successor.action == action]  # @inspect successors\n    if len(successors) == 0:\n        raise ValueError(f\"No successors found for state {state} and action {action}\")\n\n    # Sample a successor based on its probabilities\n    probs = [successor.prob for successor in successors]  # @inspect probs\n    choice = np.random.choice(len(successors), p=probs)  # @inspect choice\n    step = successors[choice]  # @inspect step\n    return step\n\n\ndef walk_tram_policy(num_locs: int, state: Any) -> Any:\n    \"\"\"Chooses a random valid action.\"\"\"\n    if 2 * state <= num_locs:\n        # Can take the tram\n        return np.random.choice([\"walk\", \"tram\"]).item()\n    else:\n        # Can only walk\n        return \"walk\"\n\n\ndef introduce_model_based():\n    text(\"What makes RL hard:\")\n    text(\"- We don't know the MDP.\")\n    text(\"- Otherwise, we can use value iteration to compute the optimal policy.\")\n    text(\"Idea: estimate (learn) the MDP from feedback!\")\n\n    text(\"**Model-based value iteration**:\")\n    text(\"1. Exploration: estimate the MDP using an exploration policy (random).\")\n    text(\"2. Compute the optimal policy of the estimated MDP.\")\n    text(\"3. Exploitation: follow this policy.\")\n\n    text(\"Let's define our familiar flaky tram MDP:\")\n    mdp = FlakyTramMDP(num_locs=10, failure_prob=0.4)  # @stepover\n    np.random.seed(1)\n\n    text(\"Define an exploration policy that chooses a random valid action:\")\n    exploration_policy = partial(walk_tram_policy, mdp.num_locs)\n    try_out_exploration_policy(exploration_policy)\n    \n    # Define the agent (RL algorithm)\n    rl = ModelBasedValueIteration(exploration_policy=exploration_policy, discount=1)\n    try_out_model_based_value_iteration(rl)\n\n    text(\"Stage 1: explore using the exploration policy to estimate the MDP.\")\n    value = simulate(mdp, rl, num_trials=10)  # @inspect value @stepover\n    leaderboard = update_leaderboard(\"model_based_value_iteration.explore\", value)  # @inspect leaderboard @stepover\n    compare_mdps(mdp, rl.mdp)\n\n    text(\"Stage 2: compute the optimal policy of the estimated MDP and follow that.\")\n    rl.run_value_iteration()  # @inspect rl.exploitation_policy\n    compare_policies(value_iteration(mdp), rl.exploitation_policy)\n\n    text(\"Stage 3: run using this estimated policy.\")\n    value = simulate(mdp, rl, num_trials=10)  # @inspect value @stepover\n    leaderboard = update_leaderboard(\"model_based_value_iteration.exploit\", value)  # @inspect leaderboard @stepover\n\n    text(\"Notes:\")\n    text(\"- The utility of the exploration phase is suboptimal, but we're learning!\")\n    text(\"- In practice, we don't need to restrict to two phases\")\n    text(\"- Always continue refining the estimated MDP\")\n    text(\"- Gradually move the policy from full exploration to full exploitation\")\n\n    text(\"Summary:\")\n    text(\"- Model-based RL: estimate the MDP from feedback (explore)\")\n    text(\"- Once have estimated MDP, use value iteration to compute the optimal policy (of estimated MDP)\")\n    text(\"- Once have estimated policy, exploit!\")\n\n    text(\"Can we estimate the optimal policy more directly?\")\n    \n    \nclass ModelBasedValueIteration(RLAlgorithm):\n    \"\"\"\n    Model-based RL algorithm that uses value iteration to estimate the MDP.\n    There are two stages:\n    - explore: follow the `exploration_policy` and estimate the MDP\n    - exploit: use the estimated MDP to choose actions\n    \"\"\"\n    def __init__(self, exploration_policy: Policy, discount: float):\n        self.exploration_policy = exploration_policy\n        self.exploitation_policy = None\n        self.mdp = EstimatedMDP(discount=discount)\n\n    def run_value_iteration(self):\n        # Run value iteration to compute the optimal policy for the estimated MDP\n        result = value_iteration(self.mdp)  # @inspect result @stepover\n        # Use this policy for exploitation\n        self.exploitation_policy = result.pi\n\n    def get_action(self, state: Any) -> Any:\n        # Either follow the exploration policy or the exploitation policy\n        if self.exploitation_policy is None:\n            return self.exploration_policy(state)\n        else:\n            return self.exploitation_policy[state]\n\n    def incorporate_feedback(self, state: Any, action: Any, reward: Any, next_state: Any, is_end: bool) -> None:\n        # Update the estimated MDP with the feedback\n        self.mdp.incorporate_feedback(state, action, reward, next_state, is_end)  # @inspect self.mdp\n\n\nclass EstimatedMDP(MDP):\n    \"\"\"An MDP whose start state, rewards, transitions, is_end is learned from feedback during RL.\"\"\"\n    def __init__(self, discount: float):\n        self.start_state_ = None\n        self.rewards = defaultdict(float)  # (state, action, state') -> reward\n        self.transitions = defaultdict(lambda : defaultdict(lambda : defaultdict(int)))  # state -> action -> state' -> count\n        self.end_states = set()\n        self.discount_ = discount\n\n    def start_state(self) -> Any:\n        return self.start_state_\n    \n    def successors(self, state: Any) -> list[Step]:\n        \"\"\"Compute successors based on the transition counts and rewards.\"\"\"\n        successors = []  # @inspect successors\n        # For each action...\n        for action, next_state_counts in self.transitions[state].items():  # @inspect action next_state_counts\n            total_count = sum(next_state_counts.values())  # @inspect total_count\n            # For each next state...\n            for next_state, count in next_state_counts.items():\n                # Compute the transition probability, reward\n                prob = count / total_count\n                reward = self.rewards[(state, action, next_state)]\n                step = Step(action=action, prob=prob, reward=reward, state=next_state)\n                successors.append(step)  # @inspect successors\n\n        return successors\n    \n    def is_end(self, state: Any) -> bool:\n        return state in self.end_states\n\n    def discount(self) -> float:\n        return self.discount_\n\n    def incorporate_feedback(self, state: Any, action: Any, reward: Any, next_state: Any, is_end: bool) -> None:\n        \"\"\"Update the MDP based on the feedback.\"\"\"\n        if self.start_state_ is None:\n            self.start_state_ = state\n\n        self.rewards[(state, action, next_state)] = reward\n        self.transitions[state][action][next_state] += 1\n\n        if is_end:\n            self.end_states.add(next_state)\n\n    def asdict(self) -> dict[str, Any]:\n        return {\n            \"start_state_\": self.start_state_,\n            \"rewards\": self.rewards,\n            \"transition_counts\": self.transitions,\n            \"end_states\": list(self.end_states),\n        }\n\n\ndef try_out_model_based_value_iteration(rl: ModelBasedValueIteration):\n    action = rl.get_action(state=1)  # @inspect action\n    rl.incorporate_feedback(state=1, action=\"walk\", reward=-1, next_state=2, is_end=False)\n    \ndef try_out_exploration_policy(exploration_policy: Policy):\n    text(\"The exploration policy tries all valid actions.\")\n    action = exploration_policy(state=1)  # @inspect action\n    action = exploration_policy(state=1)  # @inspect action @stepover\n    action = exploration_policy(state=1)  # @inspect action @stepover\n    action = exploration_policy(state=6)  # @inspect action\n\n\ndef compare_mdps(true_mdp: MDP, estimated_mdp: MDP):\n    text(\"Let's look at the internals of the estimated MDP.\")  # @inspect estimated_mdp\n\n    text(\"Let us compare the true MDP and the estimated MDP.\")\n    true_start_state = true_mdp.start_state()  # @inspect true_start_state\n    estimated_start_state = estimated_mdp.start_state()  # @inspect estimated_start_state\n\n    true_successors = true_mdp.successors(state=1)  # @inspect true_successors\n    estimated_successors = estimated_mdp.successors(state=1)  # @inspect estimated_successors\n\n    true_is_end = true_mdp.is_end(state=9)  # @inspect true_is_end\n    estimated_is_end = estimated_mdp.is_end(state=9)  # @inspect estimated_is_end\n\n    text(\"The more the agent explores, estimated MDP \u2192 true MDP\")\n    text(\"...assuming the exploration policy tries all valid actions.\")\n\n\ndef compare_policies(optimal_policy: dict[Any, Any], estimated_policy: dict[Any, Any]):\n    text(\"We compare:\")\n    text(\"- Optimal policy: the optimal policy for the true MDP (unknown to the agent)\")  # @inspect optimal_policy\n    text(\"- Estimated policy: the optimal policy for the estimated MDP (known to the agent)\")  # @inspect estimated_policy\n\n    text(\"Note the two are similar but not quite the same.\")\n    text(\"The more the agent explores, estimated policy \u2192 optimal policy.\")\n\n\ndef introduce_model_free_monte_carlo():\n    text(\"Previously: model-based value iteration:\")\n    text(\"1. Estimate the MDP first.\")\n    text(\"2. Use value iteration to compute the optimal policy of the estimated MDP.\")\n    \n    image(\"images/value_iteration_recurrence.png\", width=400)\n    text(\"Optimal policy: \u03c0`*`(s) = argmax_a Q`*`(s, a)\")\n    text(\"where Q`*`(s, a) = \u03a3_s' T(s, a, s') (R(s, a, s') + \u03b3 V`*`(s'))\")\n    text(\"Can we estimate Q`*`(s, a) directly?\")\n\n    text(\"Yes!\")\n    text(\"Key idea: just rollout the policy and average the utilities!\")\n\n    example_utility_calculation()\n\n    text(\"Which policy should we use to rollout?\")\n    text(\"- For model-based value iteration, we had a purely random exploration policy (for phase 1).\")\n    text(\"- Let's do something a bit more sophisticated: **epsilon-greedy**.\")\n    text(\"- With probability epsilon, choose a random action according to the exploration policy.\")\n    text(\"- With probability 1 - epsilon, choose the best action according to the current estimated Q-values.\")\n\n    text(\"Now let's define Model-free Monte Carlo:\")\n    mdp = FlakyTramMDP(num_locs=10, failure_prob=0.4)  # @stepover\n    np.random.seed(1)\n\n    exploration_policy = partial(walk_tram_policy, mdp.num_locs)\n    rl = ModelFreeMonteCarlo(exploration_policy=exploration_policy, epsilon=0.4, discount=1)\n\n    try_out_model_free_monte_carlo(rl)\n\n    text(\"Let's run it for real now!\")\n    value = simulate(mdp, rl, num_trials=20)  # @inspect value @stepover\n    leaderboard = update_leaderboard(\"model_free_monte_carlo\", value)  # @inspect leaderboard @stepover\n\n    text(\"Summary:\")\n    text(\"- Model-free Monte Carlo: estimate Q-values of the current policy\")\n    text(\"- Directly uses rollouts, bypassing estimating the MDP\")\n    text(\"- Use epsilon-greedy policy to balance exploration and exploitation\")\n\n    text(\"Problem: in life, you only get one rollout.\")\n    text(\"Can we update the Q-values before the rollout is over?\")\n\n\ndef example_utility_calculation():\n    text(\"The utility at each step is the discounted sum of rewards from that point on.\")\n    rollout = [\n        Step(action=\"walk\", prob=1, reward=-1, state=2),\n        Step(action=\"tram\", prob=1, reward=-2, state=2),\n        Step(action=\"tram\", prob=1, reward=-2, state=4),\n    ]\n    discount = 1\n    utilities = [  # @inspect utilities\n        -1 + (discount * -2) + (discount**2 * -2),  # step 0 utility\n        -2 + (discount * -2),                       # step 1 utility\n        -2 + (discount * 0),                        # step 2 utility\n    ]\n\n    text(\"There is a nice recurrence relation between the utilities:\")\n    assert utilities[0] == rollout[0].reward + (discount * utilities[1])\n    assert utilities[1] == rollout[1].reward + (discount * utilities[2])\n\nclass ModelFreeMonteCarlo(RLAlgorithm):\n    def __init__(self, exploration_policy: Policy, epsilon: float, discount: float):\n        self.exploration_policy = exploration_policy\n        self.epsilon = epsilon\n        self.discount = discount\n\n        # Statistics that define the Q-values: Q(s, a) = sum_utilities[s][a] / counts[s][a]\n        self.sum_utilities = defaultdict(lambda : defaultdict(float))  # state -> action -> sum of utility from (state, action)\n        self.counts = defaultdict(lambda : defaultdict(int))  # state -> action -> visitation count\n\n        # Keep track of the current rollout\n        self.start_state = None\n        self.rollout: list[Step] = []\n\n    def get_action(self, state: Any) -> Any:\n        if len(self.counts[state]) == 0:\n            # If no actions have been tried yet, choose a random action\n            return self.exploration_policy(state)  # @stepover\n\n        # Do epsilon-greedy\n        if np.random.random() < self.epsilon:\n            # With probability epsilon, choose a random action according to the exploration policy\n            return self.exploration_policy(state)  # @stepover\n        else:\n            # Otherwise, choose the best action according to the Q-values\n            return self.pi(state)\n\n        return action\n\n    def pi(self, state: Any) -> Any:\n        \"\"\"Return the policy corresponding to the current Q-values.\"\"\"\n        actions = list(self.counts[state].keys())  # @inspect actions\n        q_values = [self.Q(state, action) for action in actions]  # @inspect q_values\n        action = actions[np.argmax(q_values).item()]  # @inspect action\n        return action\n\n\n    def Q(self, state: Any, action: Any) -> float:\n        \"\"\"Compute the estimated Q-values Q(state, action) using the running sums and counts.\"\"\"\n        sum_utility = self.sum_utilities[state][action]  # @inspect sum_utility\n        count = self.counts[state][action]  # @inspect count\n        value = sum_utility / count  # @inspect value\n        return value\n\n    def incorporate_feedback(self, state: Any, action: Any, reward: Any, next_state: Any, is_end: bool) -> None:  # @inspect state action reward next_state is_end\n        # Add this piece of feedback (state, action, reward, next_state) to the history\n        if self.start_state is None:\n            self.start_state = state\n        self.rollout.append(Step(action=action, prob=1, reward=reward, state=next_state))  # @inspect self.rollout\n\n        # At the end of the episode, update the statistics needed for computing Q-values\n        if is_end:\n            utilities = [0] * (len(self.rollout) + 1)  # @inspect utilities\n            # Walk backwards and compute the utilities for each step\n            for i, step in reversed(list(enumerate(self.rollout))):  # @inspect i step\n                # Compute utility of step i\n                # state [0] action reward state [1] action reward state [2] action reward state\n                state = self.start_state if i == 0 else self.rollout[i - 1].state  # @inspect state\n                utilities[i] = step.reward + self.discount * utilities[i + 1]  # @inspect utilities\n\n                # Update the running sums\n                self.sum_utilities[state][step.action] += utilities[i]  # @inspect self.sum_utilities\n                self.counts[state][step.action] += 1  # @inspect self.counts\n\n            # Reset history\n            self.start_state = None\n            self.rollout = []\n\n\ndef try_out_model_free_monte_carlo(rl: ModelFreeMonteCarlo):\n    action = rl.get_action(state=1)  # @inspect action\n\n    # Manually simulate some feedback\n    rl.incorporate_feedback(state=1, action=\"walk\", reward=-1, next_state=2, is_end=False)\n    rl.incorporate_feedback(state=2, action=\"tram\", reward=-2, next_state=2, is_end=False)\n    rl.incorporate_feedback(state=2, action=\"tram\", reward=-2, next_state=4, is_end=True)\n\n    action = rl.get_action(state=1)  # @inspect action\n    action = rl.get_action(state=1)  # @inspect action @stepover\n    action = rl.get_action(state=1)  # @inspect action @stepover\n    action = rl.get_action(state=1)  # @inspect action @stepover\n\n\ndef introduce_sarsa():\n    text(\"Previously: model-free Monte Carlo: estimate Q-values directly from rollouts\")\n    text(\"SARSA: update Q-values as you rollout!\")\n\n    text(\"If we don't rollout completely, how do we get the utility (which requires going towards the end)?\")\n\n    text(\"Key insight: **bootstrapping**!\")\n    text(\"Combine the immediate reward with a model estimate of the future\")\n\n    text(\"Monte Carlo: u = r_0 + \u03b3*r_1 + \u03b3^2*r_2 + ... + \u03b3^n*r_n\")\n    text(\"Bootstrapping (SARSA): u = r_0 + \u03b3*Q_\u03c0(s_1, a_1)\")\n\n    text(\"Perform a gradient update to move Q_\u03c0(s, a) towards u\")\n\n    text(\"Instantiate our favorite flaky tram MDP:\")\n    mdp = FlakyTramMDP(num_locs=10, failure_prob=0.4)  # @stepover\n    np.random.seed(1)\n\n    exploration_policy = partial(walk_tram_policy, mdp.num_locs)\n    rl = SARSA(exploration_policy=exploration_policy, epsilon=0.4, discount=1, learning_rate=0.1)\n\n    try_out_sarsa(rl)\n\n    text(\"Try it out for real!\")\n    value = simulate(mdp, rl, num_trials=20)  # @inspect value @stepover\n    leaderboard = update_leaderboard(\"sarsa\", value)  # @inspect leaderboard @stepover\n\n    text(\"Summary:\")\n    text(\"- SARSA: estimates Q-values of the current policy Q_\u03c0(s, a) as you rollout\")\n    text(\"- Bootstrapping: estimate utility using model estimate of the future\")\n    text(\"- Gradient update: move Q-values towards the estimated utility\")\n\n    text(\"But we are only computing Q-values of the current policy Q_\u03c0(s, a) (**on-policy**).\")\n    text(\"Can we directly estimate Q-values of the optimal policy Q`*`(s, a)?\")\n\n\nclass SARSA(RLAlgorithm):\n    def __init__(self, exploration_policy: Policy, epsilon: float, discount: float, learning_rate: float):\n        self.exploration_policy = exploration_policy\n        self.epsilon = epsilon\n        self.discount = discount\n        self.learning_rate = learning_rate\n        self.Q = defaultdict(lambda : defaultdict(float))  # state -> action -> Q-value\n\n    def get_action(self, state: Any) -> Any:\n        if len(self.Q[state]) == 0:\n            return self.exploration_policy(state) # @stepover\n        \n        if np.random.random() < self.epsilon:\n            return self.exploration_policy(state) # @stepover\n        else:\n            return self.pi(state) # @stepover\n\n    def pi(self, state: Any) -> Any:\n        \"\"\"Return the policy corresponding to the current Q-values.\"\"\"\n        actions = list(self.Q[state].keys())  # @inspect actions\n        if len(actions) == 0:\n            return None\n        q_values = [self.Q[state][action] for action in actions]  # @inspect q_values\n        action = actions[np.argmax(q_values).item()]  # @inspect action\n        return action\n\n    def incorporate_feedback(self, state: Any, action: Any, reward: Any, next_state: Any, is_end: bool) -> None:  # @inspect self.Q state action reward next_state is_end\n        # state \u2192 action reward next_state \u2192 next_action ...\n        # Important: use `self.get_action` (not `self.pi`) to get on-policy\n        next_action = self.get_action(next_state)  # @inspect next_action\n        utility = reward + self.discount * self.Q[next_state].get(next_action, 0)  # @inspect utility\n        self.Q[state][action] += self.learning_rate * (utility - self.Q[state][action])  # @inspect self.Q\n\n\ndef try_out_sarsa(rl: SARSA):\n    action = rl.get_action(state=1)  # @inspect action\n    \n    rl.incorporate_feedback(state=1, action=\"walk\", reward=-1, next_state=2, is_end=False)\n    rl.incorporate_feedback(state=2, action=\"tram\", reward=-2, next_state=2, is_end=False)\n    rl.incorporate_feedback(state=2, action=\"tram\", reward=-2, next_state=4, is_end=True)\n\n    action = rl.get_action(state=1)  # @inspect action\n\n\ndef introduce_q_learning():\n    text(\"SARSA: estimate Q-values of the current policy Q_\u03c0(s, a)\")\n    text(\"Q-learning: estimate Q-values of the optimal policy Q`*`(s, a)\")\n\n    text(\"But we don't know the optimal policy...\")\n    \n    mdp = FlakyTramMDP(num_locs=10, failure_prob=0.4)  # @stepover\n    np.random.seed(1)\n\n    exploration_policy = partial(walk_tram_policy, mdp.num_locs)\n    rl = QLearning(exploration_policy=exploration_policy, epsilon=0.4, discount=1, learning_rate=0.1)\n\n    try_out_q_learning(rl)\n\n    text(\"Try it out for real!\")\n    value = simulate(mdp, rl, num_trials=20)  # @inspect value @stepover\n    leaderboard = update_leaderboard(\"q_learning\", value)  # @inspect leaderboard @stepover\n\n    text(\"Summary:\")\n    text(\"- Q-learning: estimates Q-values of the optimal policy Q`*`(s, a) (**off-policy**)\")\n    text(\"- Like SARSA, uses bootstrapping and gradient updates\")\n\n\nclass QLearning(SARSA):\n    \"\"\"Q-learning is SARSA, but with an off-policy exploration policy.\"\"\"\n    def incorporate_feedback(self, state: Any, action: Any, reward: Any, next_state: Any, is_end: bool) -> None:  # @inspect self.Q state action reward next_state is_end\n        # state \u2192 action reward next_state \u2192 next_action ...\n        # Important: use `self.pi` (not `self.get_action`) to get off-policy\n        next_action = self.pi(next_state)  # @inspect next_action\n        utility = reward + self.discount * self.Q[next_state].get(next_action, 0)  # @inspect utility\n        self.Q[state][action] += self.learning_rate * (utility - self.Q[state][action])  # @inspect self.Q\n\n\ndef try_out_q_learning(rl: QLearning):\n    action = rl.get_action(state=1)  # @inspect action\n    \n    rl.incorporate_feedback(state=1, action=\"walk\", reward=-1, next_state=2, is_end=False)\n    rl.incorporate_feedback(state=2, action=\"tram\", reward=-2, next_state=2, is_end=False)\n    rl.incorporate_feedback(state=2, action=\"tram\", reward=-2, next_state=4, is_end=True)\n\n    action = rl.get_action(state=1)  # @inspect action\n\n\nif __name__ == \"__main__\":\n    main()\n"
   },
   "hidden_line_numbers": {
     "reinforcement_learning.py": []
@@ -476,6 +476,37 @@
                     },
                     "prob": {
                       "type": "float",
+                      "contents": 0.4,
+                      "dtype": null,
+                      "shape": null
+                    },
+                    "reward": {
+                      "type": "int",
+                      "contents": -2,
+                      "dtype": null,
+                      "shape": null
+                    },
+                    "state": {
+                      "type": "int",
+                      "contents": 2,
+                      "dtype": null,
+                      "shape": null
+                    }
+                  },
+                  "dtype": null,
+                  "shape": null
+                },
+                {
+                  "type": "mdp.Step",
+                  "contents": {
+                    "action": {
+                      "type": "str",
+                      "contents": "tram",
+                      "dtype": null,
+                      "shape": null
+                    },
+                    "prob": {
+                      "type": "float",
                       "contents": 0.6,
                       "dtype": null,
                       "shape": null
@@ -632,7 +663,7 @@
             },
             "utility": {
               "type": "int",
-              "contents": -12,
+              "contents": -14,
               "dtype": null,
               "shape": null
             }
@@ -2331,7 +2362,7 @@
           "path": "reinforcement_learning.py",
           "line_number": 118,
           "function_name": "introduce_rl",
-          "code": "policy = partial(tram_if_possible_policy, mdp)  # Note this is a randomized policy!"
+          "code": "policy = partial(tram_if_possible_policy, mdp)"
         }
       ],
       "env": {},
@@ -29573,10 +29604,114 @@
           "path": "reinforcement_learning.py",
           "line_number": 125,
           "function_name": "introduce_rl",
-          "code": "LEADERBOARD[\"tram_if_possible_policy\"] = value  # @inspect leaderboard"
+          "code": "leaderboard = update_leaderboard(\"tram_if_possible_policy\", value)  # @inspect leaderboard"
         }
       ],
       "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "reinforcement_learning.py",
+          "line_number": 26,
+          "function_name": "main",
+          "code": "introduce_rl()"
+        },
+        {
+          "path": "reinforcement_learning.py",
+          "line_number": 125,
+          "function_name": "introduce_rl",
+          "code": "leaderboard = update_leaderboard(\"tram_if_possible_policy\", value)  # @inspect leaderboard"
+        },
+        {
+          "path": "reinforcement_learning.py",
+          "line_number": 16,
+          "function_name": "update_leaderboard",
+          "code": "def update_leaderboard(method: str, value: float) -> dict[str, float]:"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "reinforcement_learning.py",
+          "line_number": 26,
+          "function_name": "main",
+          "code": "introduce_rl()"
+        },
+        {
+          "path": "reinforcement_learning.py",
+          "line_number": 125,
+          "function_name": "introduce_rl",
+          "code": "leaderboard = update_leaderboard(\"tram_if_possible_policy\", value)  # @inspect leaderboard"
+        },
+        {
+          "path": "reinforcement_learning.py",
+          "line_number": 17,
+          "function_name": "update_leaderboard",
+          "code": "LEADERBOARD[method] = value"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "reinforcement_learning.py",
+          "line_number": 26,
+          "function_name": "main",
+          "code": "introduce_rl()"
+        },
+        {
+          "path": "reinforcement_learning.py",
+          "line_number": 125,
+          "function_name": "introduce_rl",
+          "code": "leaderboard = update_leaderboard(\"tram_if_possible_policy\", value)  # @inspect leaderboard"
+        },
+        {
+          "path": "reinforcement_learning.py",
+          "line_number": 18,
+          "function_name": "update_leaderboard",
+          "code": "return LEADERBOARD"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "reinforcement_learning.py",
+          "line_number": 26,
+          "function_name": "main",
+          "code": "introduce_rl()"
+        },
+        {
+          "path": "reinforcement_learning.py",
+          "line_number": 125,
+          "function_name": "introduce_rl",
+          "code": "leaderboard = update_leaderboard(\"tram_if_possible_policy\", value)  # @inspect leaderboard"
+        }
+      ],
+      "env": {
+        "leaderboard": {
+          "type": "dict",
+          "contents": {
+            "tram_if_possible_policy": {
+              "type": "float",
+              "contents": -11.6,
+              "dtype": null,
+              "shape": null
+            }
+          },
+          "dtype": null,
+          "shape": null
+        }
+      },
       "renderings": []
     },
     {
@@ -39281,693 +39416,7 @@
           "path": "reinforcement_learning.py",
           "line_number": 534,
           "function_name": "try_out_model_free_monte_carlo",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 28,
-          "function_name": "main",
-          "code": "introduce_model_free_monte_carlo()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 423,
-          "function_name": "introduce_model_free_monte_carlo",
-          "code": "try_out_model_free_monte_carlo(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 534,
-          "function_name": "try_out_model_free_monte_carlo",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 470,
-          "function_name": "get_action",
-          "code": "def get_action(self, state: Any) -> Any:"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 28,
-          "function_name": "main",
-          "code": "introduce_model_free_monte_carlo()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 423,
-          "function_name": "introduce_model_free_monte_carlo",
-          "code": "try_out_model_free_monte_carlo(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 534,
-          "function_name": "try_out_model_free_monte_carlo",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 471,
-          "function_name": "get_action",
-          "code": "if len(self.counts[state]) == 0:"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 28,
-          "function_name": "main",
-          "code": "introduce_model_free_monte_carlo()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 423,
-          "function_name": "introduce_model_free_monte_carlo",
-          "code": "try_out_model_free_monte_carlo(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 534,
-          "function_name": "try_out_model_free_monte_carlo",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 476,
-          "function_name": "get_action",
-          "code": "if np.random.random() < self.epsilon:"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 28,
-          "function_name": "main",
-          "code": "introduce_model_free_monte_carlo()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 423,
-          "function_name": "introduce_model_free_monte_carlo",
-          "code": "try_out_model_free_monte_carlo(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 534,
-          "function_name": "try_out_model_free_monte_carlo",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 481,
-          "function_name": "get_action",
-          "code": "return self.pi(state)"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 28,
-          "function_name": "main",
-          "code": "introduce_model_free_monte_carlo()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 423,
-          "function_name": "introduce_model_free_monte_carlo",
-          "code": "try_out_model_free_monte_carlo(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 534,
-          "function_name": "try_out_model_free_monte_carlo",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 481,
-          "function_name": "get_action",
-          "code": "return self.pi(state)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 485,
-          "function_name": "pi",
-          "code": "def pi(self, state: Any) -> Any:"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 28,
-          "function_name": "main",
-          "code": "introduce_model_free_monte_carlo()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 423,
-          "function_name": "introduce_model_free_monte_carlo",
-          "code": "try_out_model_free_monte_carlo(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 534,
-          "function_name": "try_out_model_free_monte_carlo",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 481,
-          "function_name": "get_action",
-          "code": "return self.pi(state)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 487,
-          "function_name": "pi",
-          "code": "actions = list(self.counts[state].keys())  # @inspect actions"
-        }
-      ],
-      "env": {
-        "actions": {
-          "type": "list",
-          "contents": [
-            {
-              "type": "str",
-              "contents": "walk",
-              "dtype": null,
-              "shape": null
-            }
-          ],
-          "dtype": null,
-          "shape": null
-        }
-      },
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 28,
-          "function_name": "main",
-          "code": "introduce_model_free_monte_carlo()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 423,
-          "function_name": "introduce_model_free_monte_carlo",
-          "code": "try_out_model_free_monte_carlo(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 534,
-          "function_name": "try_out_model_free_monte_carlo",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 481,
-          "function_name": "get_action",
-          "code": "return self.pi(state)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 488,
-          "function_name": "pi",
-          "code": "q_values = [self.Q(state, action) for action in actions]  # @inspect q_values"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 28,
-          "function_name": "main",
-          "code": "introduce_model_free_monte_carlo()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 423,
-          "function_name": "introduce_model_free_monte_carlo",
-          "code": "try_out_model_free_monte_carlo(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 534,
-          "function_name": "try_out_model_free_monte_carlo",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 481,
-          "function_name": "get_action",
-          "code": "return self.pi(state)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 488,
-          "function_name": "pi",
-          "code": "q_values = [self.Q(state, action) for action in actions]  # @inspect q_values"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 488,
-          "function_name": "<listcomp>",
-          "code": "q_values = [self.Q(state, action) for action in actions]  # @inspect q_values"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 493,
-          "function_name": "Q",
-          "code": "def Q(self, state: Any, action: Any) -> float:"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 28,
-          "function_name": "main",
-          "code": "introduce_model_free_monte_carlo()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 423,
-          "function_name": "introduce_model_free_monte_carlo",
-          "code": "try_out_model_free_monte_carlo(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 534,
-          "function_name": "try_out_model_free_monte_carlo",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 481,
-          "function_name": "get_action",
-          "code": "return self.pi(state)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 488,
-          "function_name": "pi",
-          "code": "q_values = [self.Q(state, action) for action in actions]  # @inspect q_values"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 488,
-          "function_name": "<listcomp>",
-          "code": "q_values = [self.Q(state, action) for action in actions]  # @inspect q_values"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 495,
-          "function_name": "Q",
-          "code": "sum_utility = self.sum_utilities[state][action]  # @inspect sum_utility"
-        }
-      ],
-      "env": {
-        "sum_utility": {
-          "type": "float",
-          "contents": -5.0,
-          "dtype": null,
-          "shape": null
-        }
-      },
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 28,
-          "function_name": "main",
-          "code": "introduce_model_free_monte_carlo()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 423,
-          "function_name": "introduce_model_free_monte_carlo",
-          "code": "try_out_model_free_monte_carlo(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 534,
-          "function_name": "try_out_model_free_monte_carlo",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 481,
-          "function_name": "get_action",
-          "code": "return self.pi(state)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 488,
-          "function_name": "pi",
-          "code": "q_values = [self.Q(state, action) for action in actions]  # @inspect q_values"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 488,
-          "function_name": "<listcomp>",
-          "code": "q_values = [self.Q(state, action) for action in actions]  # @inspect q_values"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 496,
-          "function_name": "Q",
-          "code": "count = self.counts[state][action]  # @inspect count"
-        }
-      ],
-      "env": {
-        "count": {
-          "type": "int",
-          "contents": 1,
-          "dtype": null,
-          "shape": null
-        }
-      },
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 28,
-          "function_name": "main",
-          "code": "introduce_model_free_monte_carlo()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 423,
-          "function_name": "introduce_model_free_monte_carlo",
-          "code": "try_out_model_free_monte_carlo(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 534,
-          "function_name": "try_out_model_free_monte_carlo",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 481,
-          "function_name": "get_action",
-          "code": "return self.pi(state)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 488,
-          "function_name": "pi",
-          "code": "q_values = [self.Q(state, action) for action in actions]  # @inspect q_values"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 488,
-          "function_name": "<listcomp>",
-          "code": "q_values = [self.Q(state, action) for action in actions]  # @inspect q_values"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 497,
-          "function_name": "Q",
-          "code": "value = sum_utility / count  # @inspect value"
-        }
-      ],
-      "env": {
-        "value": {
-          "type": "float",
-          "contents": -5.0,
-          "dtype": null,
-          "shape": null
-        }
-      },
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 28,
-          "function_name": "main",
-          "code": "introduce_model_free_monte_carlo()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 423,
-          "function_name": "introduce_model_free_monte_carlo",
-          "code": "try_out_model_free_monte_carlo(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 534,
-          "function_name": "try_out_model_free_monte_carlo",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 481,
-          "function_name": "get_action",
-          "code": "return self.pi(state)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 488,
-          "function_name": "pi",
-          "code": "q_values = [self.Q(state, action) for action in actions]  # @inspect q_values"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 488,
-          "function_name": "<listcomp>",
-          "code": "q_values = [self.Q(state, action) for action in actions]  # @inspect q_values"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 498,
-          "function_name": "Q",
-          "code": "return value"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 28,
-          "function_name": "main",
-          "code": "introduce_model_free_monte_carlo()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 423,
-          "function_name": "introduce_model_free_monte_carlo",
-          "code": "try_out_model_free_monte_carlo(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 534,
-          "function_name": "try_out_model_free_monte_carlo",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 481,
-          "function_name": "get_action",
-          "code": "return self.pi(state)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 488,
-          "function_name": "pi",
-          "code": "q_values = [self.Q(state, action) for action in actions]  # @inspect q_values"
-        }
-      ],
-      "env": {
-        "q_values": {
-          "type": "list",
-          "contents": [
-            {
-              "type": "float",
-              "contents": -5.0,
-              "dtype": null,
-              "shape": null
-            }
-          ],
-          "dtype": null,
-          "shape": null
-        }
-      },
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 28,
-          "function_name": "main",
-          "code": "introduce_model_free_monte_carlo()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 423,
-          "function_name": "introduce_model_free_monte_carlo",
-          "code": "try_out_model_free_monte_carlo(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 534,
-          "function_name": "try_out_model_free_monte_carlo",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 481,
-          "function_name": "get_action",
-          "code": "return self.pi(state)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 489,
-          "function_name": "pi",
-          "code": "action = actions[np.argmax(q_values).item()]  # @inspect action"
-        }
-      ],
-      "env": {
-        "action": {
-          "type": "str",
-          "contents": "walk",
-          "dtype": null,
-          "shape": null
-        }
-      },
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 28,
-          "function_name": "main",
-          "code": "introduce_model_free_monte_carlo()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 423,
-          "function_name": "introduce_model_free_monte_carlo",
-          "code": "try_out_model_free_monte_carlo(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 534,
-          "function_name": "try_out_model_free_monte_carlo",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 481,
-          "function_name": "get_action",
-          "code": "return self.pi(state)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 490,
-          "function_name": "pi",
-          "code": "return action"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 28,
-          "function_name": "main",
-          "code": "introduce_model_free_monte_carlo()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 423,
-          "function_name": "introduce_model_free_monte_carlo",
-          "code": "try_out_model_free_monte_carlo(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 534,
-          "function_name": "try_out_model_free_monte_carlo",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 481,
-          "function_name": "get_action",
-          "code": "return self.pi(state)"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 28,
-          "function_name": "main",
-          "code": "introduce_model_free_monte_carlo()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 423,
-          "function_name": "introduce_model_free_monte_carlo",
-          "code": "try_out_model_free_monte_carlo(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 534,
-          "function_name": "try_out_model_free_monte_carlo",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
+          "code": "action = rl.get_action(state=1)  # @inspect action @stepover"
         }
       ],
       "env": {
@@ -39998,151 +39447,7 @@
           "path": "reinforcement_learning.py",
           "line_number": 535,
           "function_name": "try_out_model_free_monte_carlo",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 28,
-          "function_name": "main",
-          "code": "introduce_model_free_monte_carlo()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 423,
-          "function_name": "introduce_model_free_monte_carlo",
-          "code": "try_out_model_free_monte_carlo(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 535,
-          "function_name": "try_out_model_free_monte_carlo",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 470,
-          "function_name": "get_action",
-          "code": "def get_action(self, state: Any) -> Any:"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 28,
-          "function_name": "main",
-          "code": "introduce_model_free_monte_carlo()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 423,
-          "function_name": "introduce_model_free_monte_carlo",
-          "code": "try_out_model_free_monte_carlo(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 535,
-          "function_name": "try_out_model_free_monte_carlo",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 471,
-          "function_name": "get_action",
-          "code": "if len(self.counts[state]) == 0:"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 28,
-          "function_name": "main",
-          "code": "introduce_model_free_monte_carlo()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 423,
-          "function_name": "introduce_model_free_monte_carlo",
-          "code": "try_out_model_free_monte_carlo(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 535,
-          "function_name": "try_out_model_free_monte_carlo",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 476,
-          "function_name": "get_action",
-          "code": "if np.random.random() < self.epsilon:"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 28,
-          "function_name": "main",
-          "code": "introduce_model_free_monte_carlo()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 423,
-          "function_name": "introduce_model_free_monte_carlo",
-          "code": "try_out_model_free_monte_carlo(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 535,
-          "function_name": "try_out_model_free_monte_carlo",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 478,
-          "function_name": "get_action",
-          "code": "return self.exploration_policy(state)  # @stepover"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 28,
-          "function_name": "main",
-          "code": "introduce_model_free_monte_carlo()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 423,
-          "function_name": "introduce_model_free_monte_carlo",
-          "code": "try_out_model_free_monte_carlo(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 535,
-          "function_name": "try_out_model_free_monte_carlo",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
+          "code": "action = rl.get_action(state=1)  # @inspect action @stepover"
         }
       ],
       "env": {
@@ -40173,289 +39478,7 @@
           "path": "reinforcement_learning.py",
           "line_number": 536,
           "function_name": "try_out_model_free_monte_carlo",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 28,
-          "function_name": "main",
-          "code": "introduce_model_free_monte_carlo()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 423,
-          "function_name": "introduce_model_free_monte_carlo",
-          "code": "try_out_model_free_monte_carlo(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 536,
-          "function_name": "try_out_model_free_monte_carlo",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 470,
-          "function_name": "get_action",
-          "code": "def get_action(self, state: Any) -> Any:"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 28,
-          "function_name": "main",
-          "code": "introduce_model_free_monte_carlo()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 423,
-          "function_name": "introduce_model_free_monte_carlo",
-          "code": "try_out_model_free_monte_carlo(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 536,
-          "function_name": "try_out_model_free_monte_carlo",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 471,
-          "function_name": "get_action",
-          "code": "if len(self.counts[state]) == 0:"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 28,
-          "function_name": "main",
-          "code": "introduce_model_free_monte_carlo()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 423,
-          "function_name": "introduce_model_free_monte_carlo",
-          "code": "try_out_model_free_monte_carlo(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 536,
-          "function_name": "try_out_model_free_monte_carlo",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 476,
-          "function_name": "get_action",
-          "code": "if np.random.random() < self.epsilon:"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 28,
-          "function_name": "main",
-          "code": "introduce_model_free_monte_carlo()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 423,
-          "function_name": "introduce_model_free_monte_carlo",
-          "code": "try_out_model_free_monte_carlo(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 536,
-          "function_name": "try_out_model_free_monte_carlo",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 478,
-          "function_name": "get_action",
-          "code": "return self.exploration_policy(state)  # @stepover"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 28,
-          "function_name": "main",
-          "code": "introduce_model_free_monte_carlo()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 423,
-          "function_name": "introduce_model_free_monte_carlo",
-          "code": "try_out_model_free_monte_carlo(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 536,
-          "function_name": "try_out_model_free_monte_carlo",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 478,
-          "function_name": "get_action",
-          "code": "return self.exploration_policy(state)  # @stepover"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 213,
-          "function_name": "walk_tram_policy",
-          "code": "def walk_tram_policy(num_locs: int, state: Any) -> Any:"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 28,
-          "function_name": "main",
-          "code": "introduce_model_free_monte_carlo()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 423,
-          "function_name": "introduce_model_free_monte_carlo",
-          "code": "try_out_model_free_monte_carlo(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 536,
-          "function_name": "try_out_model_free_monte_carlo",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 478,
-          "function_name": "get_action",
-          "code": "return self.exploration_policy(state)  # @stepover"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 215,
-          "function_name": "walk_tram_policy",
-          "code": "if 2 * state <= num_locs:"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 28,
-          "function_name": "main",
-          "code": "introduce_model_free_monte_carlo()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 423,
-          "function_name": "introduce_model_free_monte_carlo",
-          "code": "try_out_model_free_monte_carlo(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 536,
-          "function_name": "try_out_model_free_monte_carlo",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 478,
-          "function_name": "get_action",
-          "code": "return self.exploration_policy(state)  # @stepover"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 217,
-          "function_name": "walk_tram_policy",
-          "code": "return np.random.choice([\"walk\", \"tram\"]).item()"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 28,
-          "function_name": "main",
-          "code": "introduce_model_free_monte_carlo()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 423,
-          "function_name": "introduce_model_free_monte_carlo",
-          "code": "try_out_model_free_monte_carlo(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 536,
-          "function_name": "try_out_model_free_monte_carlo",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 478,
-          "function_name": "get_action",
-          "code": "return self.exploration_policy(state)  # @stepover"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 28,
-          "function_name": "main",
-          "code": "introduce_model_free_monte_carlo()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 423,
-          "function_name": "introduce_model_free_monte_carlo",
-          "code": "try_out_model_free_monte_carlo(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 536,
-          "function_name": "try_out_model_free_monte_carlo",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
+          "code": "action = rl.get_action(state=1)  # @inspect action @stepover"
         }
       ],
       "env": {
@@ -41403,145 +40426,7 @@
           "path": "reinforcement_learning.py",
           "line_number": 585,
           "function_name": "get_action",
-          "code": "return self.exploration_policy(state)"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 29,
-          "function_name": "main",
-          "code": "introduce_sarsa()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 560,
-          "function_name": "introduce_sarsa",
-          "code": "try_out_sarsa(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 610,
-          "function_name": "try_out_sarsa",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 585,
-          "function_name": "get_action",
-          "code": "return self.exploration_policy(state)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 213,
-          "function_name": "walk_tram_policy",
-          "code": "def walk_tram_policy(num_locs: int, state: Any) -> Any:"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 29,
-          "function_name": "main",
-          "code": "introduce_sarsa()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 560,
-          "function_name": "introduce_sarsa",
-          "code": "try_out_sarsa(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 610,
-          "function_name": "try_out_sarsa",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 585,
-          "function_name": "get_action",
-          "code": "return self.exploration_policy(state)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 215,
-          "function_name": "walk_tram_policy",
-          "code": "if 2 * state <= num_locs:"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 29,
-          "function_name": "main",
-          "code": "introduce_sarsa()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 560,
-          "function_name": "introduce_sarsa",
-          "code": "try_out_sarsa(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 610,
-          "function_name": "try_out_sarsa",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 585,
-          "function_name": "get_action",
-          "code": "return self.exploration_policy(state)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 217,
-          "function_name": "walk_tram_policy",
-          "code": "return np.random.choice([\"walk\", \"tram\"]).item()"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 29,
-          "function_name": "main",
-          "code": "introduce_sarsa()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 560,
-          "function_name": "introduce_sarsa",
-          "code": "try_out_sarsa(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 610,
-          "function_name": "try_out_sarsa",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 585,
-          "function_name": "get_action",
-          "code": "return self.exploration_policy(state)"
+          "code": "return self.exploration_policy(state) # @stepover"
         }
       ],
       "env": {},
@@ -41808,7 +40693,7 @@
           "path": "reinforcement_learning.py",
           "line_number": 585,
           "function_name": "get_action",
-          "code": "return self.exploration_policy(state)"
+          "code": "return self.exploration_policy(state) # @stepover"
         }
       ],
       "env": {},
@@ -41844,7 +40729,7 @@
           "path": "reinforcement_learning.py",
           "line_number": 585,
           "function_name": "get_action",
-          "code": "return self.exploration_policy(state)"
+          "code": "return self.exploration_policy(state) # @stepover"
         },
         {
           "path": "reinforcement_learning.py",
@@ -41886,7 +40771,7 @@
           "path": "reinforcement_learning.py",
           "line_number": 585,
           "function_name": "get_action",
-          "code": "return self.exploration_policy(state)"
+          "code": "return self.exploration_policy(state) # @stepover"
         },
         {
           "path": "reinforcement_learning.py",
@@ -41928,7 +40813,7 @@
           "path": "reinforcement_learning.py",
           "line_number": 585,
           "function_name": "get_action",
-          "code": "return self.exploration_policy(state)"
+          "code": "return self.exploration_policy(state) # @stepover"
         },
         {
           "path": "reinforcement_learning.py",
@@ -41970,7 +40855,7 @@
           "path": "reinforcement_learning.py",
           "line_number": 585,
           "function_name": "get_action",
-          "code": "return self.exploration_policy(state)"
+          "code": "return self.exploration_policy(state) # @stepover"
         }
       ],
       "env": {},
@@ -42374,169 +41259,7 @@
           "path": "reinforcement_learning.py",
           "line_number": 585,
           "function_name": "get_action",
-          "code": "return self.exploration_policy(state)"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 29,
-          "function_name": "main",
-          "code": "introduce_sarsa()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 560,
-          "function_name": "introduce_sarsa",
-          "code": "try_out_sarsa(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 613,
-          "function_name": "try_out_sarsa",
-          "code": "rl.incorporate_feedback(state=2, action=\"tram\", reward=-2, next_state=2, is_end=False)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 604,
-          "function_name": "incorporate_feedback",
-          "code": "next_action = self.get_action(next_state)  # @inspect next_action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 585,
-          "function_name": "get_action",
-          "code": "return self.exploration_policy(state)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 213,
-          "function_name": "walk_tram_policy",
-          "code": "def walk_tram_policy(num_locs: int, state: Any) -> Any:"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 29,
-          "function_name": "main",
-          "code": "introduce_sarsa()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 560,
-          "function_name": "introduce_sarsa",
-          "code": "try_out_sarsa(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 613,
-          "function_name": "try_out_sarsa",
-          "code": "rl.incorporate_feedback(state=2, action=\"tram\", reward=-2, next_state=2, is_end=False)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 604,
-          "function_name": "incorporate_feedback",
-          "code": "next_action = self.get_action(next_state)  # @inspect next_action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 585,
-          "function_name": "get_action",
-          "code": "return self.exploration_policy(state)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 215,
-          "function_name": "walk_tram_policy",
-          "code": "if 2 * state <= num_locs:"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 29,
-          "function_name": "main",
-          "code": "introduce_sarsa()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 560,
-          "function_name": "introduce_sarsa",
-          "code": "try_out_sarsa(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 613,
-          "function_name": "try_out_sarsa",
-          "code": "rl.incorporate_feedback(state=2, action=\"tram\", reward=-2, next_state=2, is_end=False)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 604,
-          "function_name": "incorporate_feedback",
-          "code": "next_action = self.get_action(next_state)  # @inspect next_action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 585,
-          "function_name": "get_action",
-          "code": "return self.exploration_policy(state)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 217,
-          "function_name": "walk_tram_policy",
-          "code": "return np.random.choice([\"walk\", \"tram\"]).item()"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 29,
-          "function_name": "main",
-          "code": "introduce_sarsa()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 560,
-          "function_name": "introduce_sarsa",
-          "code": "try_out_sarsa(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 613,
-          "function_name": "try_out_sarsa",
-          "code": "rl.incorporate_feedback(state=2, action=\"tram\", reward=-2, next_state=2, is_end=False)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 604,
-          "function_name": "incorporate_feedback",
-          "code": "next_action = self.get_action(next_state)  # @inspect next_action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 585,
-          "function_name": "get_action",
-          "code": "return self.exploration_policy(state)"
+          "code": "return self.exploration_policy(state) # @stepover"
         }
       ],
       "env": {},
@@ -42954,7 +41677,7 @@
           "path": "reinforcement_learning.py",
           "line_number": 585,
           "function_name": "get_action",
-          "code": "return self.exploration_policy(state)"
+          "code": "return self.exploration_policy(state) # @stepover"
         }
       ],
       "env": {},
@@ -42990,7 +41713,7 @@
           "path": "reinforcement_learning.py",
           "line_number": 585,
           "function_name": "get_action",
-          "code": "return self.exploration_policy(state)"
+          "code": "return self.exploration_policy(state) # @stepover"
         },
         {
           "path": "reinforcement_learning.py",
@@ -43032,7 +41755,7 @@
           "path": "reinforcement_learning.py",
           "line_number": 585,
           "function_name": "get_action",
-          "code": "return self.exploration_policy(state)"
+          "code": "return self.exploration_policy(state) # @stepover"
         },
         {
           "path": "reinforcement_learning.py",
@@ -43074,7 +41797,7 @@
           "path": "reinforcement_learning.py",
           "line_number": 585,
           "function_name": "get_action",
-          "code": "return self.exploration_policy(state)"
+          "code": "return self.exploration_policy(state) # @stepover"
         },
         {
           "path": "reinforcement_learning.py",
@@ -43116,7 +41839,7 @@
           "path": "reinforcement_learning.py",
           "line_number": 585,
           "function_name": "get_action",
-          "code": "return self.exploration_policy(state)"
+          "code": "return self.exploration_policy(state) # @stepover"
         }
       ],
       "env": {},
@@ -43428,145 +42151,7 @@
           "path": "reinforcement_learning.py",
           "line_number": 588,
           "function_name": "get_action",
-          "code": "return self.exploration_policy(state)"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 29,
-          "function_name": "main",
-          "code": "introduce_sarsa()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 560,
-          "function_name": "introduce_sarsa",
-          "code": "try_out_sarsa(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 616,
-          "function_name": "try_out_sarsa",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 588,
-          "function_name": "get_action",
-          "code": "return self.exploration_policy(state)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 213,
-          "function_name": "walk_tram_policy",
-          "code": "def walk_tram_policy(num_locs: int, state: Any) -> Any:"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 29,
-          "function_name": "main",
-          "code": "introduce_sarsa()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 560,
-          "function_name": "introduce_sarsa",
-          "code": "try_out_sarsa(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 616,
-          "function_name": "try_out_sarsa",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 588,
-          "function_name": "get_action",
-          "code": "return self.exploration_policy(state)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 215,
-          "function_name": "walk_tram_policy",
-          "code": "if 2 * state <= num_locs:"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 29,
-          "function_name": "main",
-          "code": "introduce_sarsa()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 560,
-          "function_name": "introduce_sarsa",
-          "code": "try_out_sarsa(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 616,
-          "function_name": "try_out_sarsa",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 588,
-          "function_name": "get_action",
-          "code": "return self.exploration_policy(state)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 217,
-          "function_name": "walk_tram_policy",
-          "code": "return np.random.choice([\"walk\", \"tram\"]).item()"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 29,
-          "function_name": "main",
-          "code": "introduce_sarsa()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 560,
-          "function_name": "introduce_sarsa",
-          "code": "try_out_sarsa(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 616,
-          "function_name": "try_out_sarsa",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 588,
-          "function_name": "get_action",
-          "code": "return self.exploration_policy(state)"
+          "code": "return self.exploration_policy(state) # @stepover"
         }
       ],
       "env": {},
@@ -44388,145 +42973,7 @@
           "path": "reinforcement_learning.py",
           "line_number": 585,
           "function_name": "get_action",
-          "code": "return self.exploration_policy(state)"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 30,
-          "function_name": "main",
-          "code": "introduce_q_learning()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 631,
-          "function_name": "introduce_q_learning",
-          "code": "try_out_q_learning(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 653,
-          "function_name": "try_out_q_learning",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 585,
-          "function_name": "get_action",
-          "code": "return self.exploration_policy(state)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 213,
-          "function_name": "walk_tram_policy",
-          "code": "def walk_tram_policy(num_locs: int, state: Any) -> Any:"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 30,
-          "function_name": "main",
-          "code": "introduce_q_learning()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 631,
-          "function_name": "introduce_q_learning",
-          "code": "try_out_q_learning(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 653,
-          "function_name": "try_out_q_learning",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 585,
-          "function_name": "get_action",
-          "code": "return self.exploration_policy(state)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 215,
-          "function_name": "walk_tram_policy",
-          "code": "if 2 * state <= num_locs:"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 30,
-          "function_name": "main",
-          "code": "introduce_q_learning()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 631,
-          "function_name": "introduce_q_learning",
-          "code": "try_out_q_learning(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 653,
-          "function_name": "try_out_q_learning",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 585,
-          "function_name": "get_action",
-          "code": "return self.exploration_policy(state)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 217,
-          "function_name": "walk_tram_policy",
-          "code": "return np.random.choice([\"walk\", \"tram\"]).item()"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 30,
-          "function_name": "main",
-          "code": "introduce_q_learning()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 631,
-          "function_name": "introduce_q_learning",
-          "code": "try_out_q_learning(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 653,
-          "function_name": "try_out_q_learning",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 585,
-          "function_name": "get_action",
-          "code": "return self.exploration_policy(state)"
+          "code": "return self.exploration_policy(state) # @stepover"
         }
       ],
       "env": {},
@@ -46056,288 +44503,7 @@
           "path": "reinforcement_learning.py",
           "line_number": 590,
           "function_name": "get_action",
-          "code": "return self.pi(state)"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 30,
-          "function_name": "main",
-          "code": "introduce_q_learning()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 631,
-          "function_name": "introduce_q_learning",
-          "code": "try_out_q_learning(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 659,
-          "function_name": "try_out_q_learning",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 590,
-          "function_name": "get_action",
-          "code": "return self.pi(state)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 592,
-          "function_name": "pi",
-          "code": "def pi(self, state: Any) -> Any:"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 30,
-          "function_name": "main",
-          "code": "introduce_q_learning()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 631,
-          "function_name": "introduce_q_learning",
-          "code": "try_out_q_learning(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 659,
-          "function_name": "try_out_q_learning",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 590,
-          "function_name": "get_action",
-          "code": "return self.pi(state)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 594,
-          "function_name": "pi",
-          "code": "actions = list(self.Q[state].keys())  # @inspect actions"
-        }
-      ],
-      "env": {
-        "actions": {
-          "type": "list",
-          "contents": [
-            {
-              "type": "str",
-              "contents": "walk",
-              "dtype": null,
-              "shape": null
-            }
-          ],
-          "dtype": null,
-          "shape": null
-        }
-      },
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 30,
-          "function_name": "main",
-          "code": "introduce_q_learning()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 631,
-          "function_name": "introduce_q_learning",
-          "code": "try_out_q_learning(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 659,
-          "function_name": "try_out_q_learning",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 590,
-          "function_name": "get_action",
-          "code": "return self.pi(state)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 595,
-          "function_name": "pi",
-          "code": "if len(actions) == 0:"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 30,
-          "function_name": "main",
-          "code": "introduce_q_learning()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 631,
-          "function_name": "introduce_q_learning",
-          "code": "try_out_q_learning(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 659,
-          "function_name": "try_out_q_learning",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 590,
-          "function_name": "get_action",
-          "code": "return self.pi(state)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 597,
-          "function_name": "pi",
-          "code": "q_values = [self.Q[state][action] for action in actions]  # @inspect q_values"
-        }
-      ],
-      "env": {
-        "q_values": {
-          "type": "list",
-          "contents": [
-            {
-              "type": "float",
-              "contents": -0.1,
-              "dtype": null,
-              "shape": null
-            }
-          ],
-          "dtype": null,
-          "shape": null
-        }
-      },
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 30,
-          "function_name": "main",
-          "code": "introduce_q_learning()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 631,
-          "function_name": "introduce_q_learning",
-          "code": "try_out_q_learning(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 659,
-          "function_name": "try_out_q_learning",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 590,
-          "function_name": "get_action",
-          "code": "return self.pi(state)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 598,
-          "function_name": "pi",
-          "code": "action = actions[np.argmax(q_values).item()]  # @inspect action"
-        }
-      ],
-      "env": {
-        "action": {
-          "type": "str",
-          "contents": "walk",
-          "dtype": null,
-          "shape": null
-        }
-      },
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 30,
-          "function_name": "main",
-          "code": "introduce_q_learning()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 631,
-          "function_name": "introduce_q_learning",
-          "code": "try_out_q_learning(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 659,
-          "function_name": "try_out_q_learning",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 590,
-          "function_name": "get_action",
-          "code": "return self.pi(state)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 599,
-          "function_name": "pi",
-          "code": "return action"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 30,
-          "function_name": "main",
-          "code": "introduce_q_learning()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 631,
-          "function_name": "introduce_q_learning",
-          "code": "try_out_q_learning(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 659,
-          "function_name": "try_out_q_learning",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 590,
-          "function_name": "get_action",
-          "code": "return self.pi(state)"
+          "code": "return self.pi(state) # @stepover"
         }
       ],
       "env": {},
@@ -46368,775 +44534,6 @@
         "action": {
           "type": "str",
           "contents": "walk",
-          "dtype": null,
-          "shape": null
-        }
-      },
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 30,
-          "function_name": "main",
-          "code": "introduce_q_learning()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 631,
-          "function_name": "introduce_q_learning",
-          "code": "try_out_q_learning(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 660,
-          "function_name": "try_out_q_learning",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 30,
-          "function_name": "main",
-          "code": "introduce_q_learning()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 631,
-          "function_name": "introduce_q_learning",
-          "code": "try_out_q_learning(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 660,
-          "function_name": "try_out_q_learning",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 583,
-          "function_name": "get_action",
-          "code": "def get_action(self, state: Any) -> Any:"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 30,
-          "function_name": "main",
-          "code": "introduce_q_learning()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 631,
-          "function_name": "introduce_q_learning",
-          "code": "try_out_q_learning(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 660,
-          "function_name": "try_out_q_learning",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 584,
-          "function_name": "get_action",
-          "code": "if len(self.Q[state]) == 0:"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 30,
-          "function_name": "main",
-          "code": "introduce_q_learning()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 631,
-          "function_name": "introduce_q_learning",
-          "code": "try_out_q_learning(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 660,
-          "function_name": "try_out_q_learning",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 587,
-          "function_name": "get_action",
-          "code": "if np.random.random() < self.epsilon:"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 30,
-          "function_name": "main",
-          "code": "introduce_q_learning()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 631,
-          "function_name": "introduce_q_learning",
-          "code": "try_out_q_learning(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 660,
-          "function_name": "try_out_q_learning",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 590,
-          "function_name": "get_action",
-          "code": "return self.pi(state)"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 30,
-          "function_name": "main",
-          "code": "introduce_q_learning()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 631,
-          "function_name": "introduce_q_learning",
-          "code": "try_out_q_learning(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 660,
-          "function_name": "try_out_q_learning",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 590,
-          "function_name": "get_action",
-          "code": "return self.pi(state)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 592,
-          "function_name": "pi",
-          "code": "def pi(self, state: Any) -> Any:"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 30,
-          "function_name": "main",
-          "code": "introduce_q_learning()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 631,
-          "function_name": "introduce_q_learning",
-          "code": "try_out_q_learning(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 660,
-          "function_name": "try_out_q_learning",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 590,
-          "function_name": "get_action",
-          "code": "return self.pi(state)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 594,
-          "function_name": "pi",
-          "code": "actions = list(self.Q[state].keys())  # @inspect actions"
-        }
-      ],
-      "env": {
-        "actions": {
-          "type": "list",
-          "contents": [
-            {
-              "type": "str",
-              "contents": "walk",
-              "dtype": null,
-              "shape": null
-            }
-          ],
-          "dtype": null,
-          "shape": null
-        }
-      },
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 30,
-          "function_name": "main",
-          "code": "introduce_q_learning()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 631,
-          "function_name": "introduce_q_learning",
-          "code": "try_out_q_learning(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 660,
-          "function_name": "try_out_q_learning",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 590,
-          "function_name": "get_action",
-          "code": "return self.pi(state)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 595,
-          "function_name": "pi",
-          "code": "if len(actions) == 0:"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 30,
-          "function_name": "main",
-          "code": "introduce_q_learning()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 631,
-          "function_name": "introduce_q_learning",
-          "code": "try_out_q_learning(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 660,
-          "function_name": "try_out_q_learning",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 590,
-          "function_name": "get_action",
-          "code": "return self.pi(state)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 597,
-          "function_name": "pi",
-          "code": "q_values = [self.Q[state][action] for action in actions]  # @inspect q_values"
-        }
-      ],
-      "env": {
-        "q_values": {
-          "type": "list",
-          "contents": [
-            {
-              "type": "float",
-              "contents": -0.1,
-              "dtype": null,
-              "shape": null
-            }
-          ],
-          "dtype": null,
-          "shape": null
-        }
-      },
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 30,
-          "function_name": "main",
-          "code": "introduce_q_learning()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 631,
-          "function_name": "introduce_q_learning",
-          "code": "try_out_q_learning(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 660,
-          "function_name": "try_out_q_learning",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 590,
-          "function_name": "get_action",
-          "code": "return self.pi(state)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 598,
-          "function_name": "pi",
-          "code": "action = actions[np.argmax(q_values).item()]  # @inspect action"
-        }
-      ],
-      "env": {
-        "action": {
-          "type": "str",
-          "contents": "walk",
-          "dtype": null,
-          "shape": null
-        }
-      },
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 30,
-          "function_name": "main",
-          "code": "introduce_q_learning()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 631,
-          "function_name": "introduce_q_learning",
-          "code": "try_out_q_learning(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 660,
-          "function_name": "try_out_q_learning",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 590,
-          "function_name": "get_action",
-          "code": "return self.pi(state)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 599,
-          "function_name": "pi",
-          "code": "return action"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 30,
-          "function_name": "main",
-          "code": "introduce_q_learning()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 631,
-          "function_name": "introduce_q_learning",
-          "code": "try_out_q_learning(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 660,
-          "function_name": "try_out_q_learning",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 590,
-          "function_name": "get_action",
-          "code": "return self.pi(state)"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 30,
-          "function_name": "main",
-          "code": "introduce_q_learning()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 631,
-          "function_name": "introduce_q_learning",
-          "code": "try_out_q_learning(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 660,
-          "function_name": "try_out_q_learning",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        }
-      ],
-      "env": {
-        "action": {
-          "type": "str",
-          "contents": "walk",
-          "dtype": null,
-          "shape": null
-        }
-      },
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 30,
-          "function_name": "main",
-          "code": "introduce_q_learning()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 631,
-          "function_name": "introduce_q_learning",
-          "code": "try_out_q_learning(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 661,
-          "function_name": "try_out_q_learning",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 30,
-          "function_name": "main",
-          "code": "introduce_q_learning()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 631,
-          "function_name": "introduce_q_learning",
-          "code": "try_out_q_learning(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 661,
-          "function_name": "try_out_q_learning",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 583,
-          "function_name": "get_action",
-          "code": "def get_action(self, state: Any) -> Any:"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 30,
-          "function_name": "main",
-          "code": "introduce_q_learning()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 631,
-          "function_name": "introduce_q_learning",
-          "code": "try_out_q_learning(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 661,
-          "function_name": "try_out_q_learning",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 584,
-          "function_name": "get_action",
-          "code": "if len(self.Q[state]) == 0:"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 30,
-          "function_name": "main",
-          "code": "introduce_q_learning()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 631,
-          "function_name": "introduce_q_learning",
-          "code": "try_out_q_learning(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 661,
-          "function_name": "try_out_q_learning",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 587,
-          "function_name": "get_action",
-          "code": "if np.random.random() < self.epsilon:"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 30,
-          "function_name": "main",
-          "code": "introduce_q_learning()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 631,
-          "function_name": "introduce_q_learning",
-          "code": "try_out_q_learning(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 661,
-          "function_name": "try_out_q_learning",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 588,
-          "function_name": "get_action",
-          "code": "return self.exploration_policy(state)"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 30,
-          "function_name": "main",
-          "code": "introduce_q_learning()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 631,
-          "function_name": "introduce_q_learning",
-          "code": "try_out_q_learning(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 661,
-          "function_name": "try_out_q_learning",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 588,
-          "function_name": "get_action",
-          "code": "return self.exploration_policy(state)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 213,
-          "function_name": "walk_tram_policy",
-          "code": "def walk_tram_policy(num_locs: int, state: Any) -> Any:"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 30,
-          "function_name": "main",
-          "code": "introduce_q_learning()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 631,
-          "function_name": "introduce_q_learning",
-          "code": "try_out_q_learning(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 661,
-          "function_name": "try_out_q_learning",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 588,
-          "function_name": "get_action",
-          "code": "return self.exploration_policy(state)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 215,
-          "function_name": "walk_tram_policy",
-          "code": "if 2 * state <= num_locs:"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 30,
-          "function_name": "main",
-          "code": "introduce_q_learning()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 631,
-          "function_name": "introduce_q_learning",
-          "code": "try_out_q_learning(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 661,
-          "function_name": "try_out_q_learning",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 588,
-          "function_name": "get_action",
-          "code": "return self.exploration_policy(state)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 217,
-          "function_name": "walk_tram_policy",
-          "code": "return np.random.choice([\"walk\", \"tram\"]).item()"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 30,
-          "function_name": "main",
-          "code": "introduce_q_learning()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 631,
-          "function_name": "introduce_q_learning",
-          "code": "try_out_q_learning(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 661,
-          "function_name": "try_out_q_learning",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 588,
-          "function_name": "get_action",
-          "code": "return self.exploration_policy(state)"
-        }
-      ],
-      "env": {},
-      "renderings": []
-    },
-    {
-      "stack": [
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 30,
-          "function_name": "main",
-          "code": "introduce_q_learning()"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 631,
-          "function_name": "introduce_q_learning",
-          "code": "try_out_q_learning(rl)"
-        },
-        {
-          "path": "reinforcement_learning.py",
-          "line_number": 661,
-          "function_name": "try_out_q_learning",
-          "code": "action = rl.get_action(state=1)  # @inspect action"
-        }
-      ],
-      "env": {
-        "action": {
-          "type": "str",
-          "contents": "tram",
           "dtype": null,
           "shape": null
         }
@@ -47205,7 +44602,7 @@
       "env": {
         "value": {
           "type": "float",
-          "contents": -9.7,
+          "contents": -9.9,
           "dtype": null,
           "shape": null
         }
@@ -47263,7 +44660,7 @@
             },
             "q_learning": {
               "type": "float",
-              "contents": -9.7,
+              "contents": -9.9,
               "dtype": null,
               "shape": null
             }

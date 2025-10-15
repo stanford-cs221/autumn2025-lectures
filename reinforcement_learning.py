@@ -115,14 +115,14 @@ def introduce_rl():
     mdp = FlakyTramMDP(num_locs=10, failure_prob=0.4)  # @stepover
     np.random.seed(1)
     text("...and an agent (RL algorithm):")
-    policy = partial(tram_if_possible_policy, mdp)  # Note this is a randomized policy!
+    policy = partial(tram_if_possible_policy, mdp)
     rl = StaticAgent(policy=policy)
     rl.get_action(state=1)
     rl.incorporate_feedback(state=1, action="walk", reward=-1, next_state=2, is_end=False)
 
     text("Now let's simulate the agent and the environment (generating rollouts).")
     value = simulate(mdp, rl, num_trials=10)  # @inspect value
-    LEADERBOARD["tram_if_possible_policy"] = value  # @inspect leaderboard
+    leaderboard = update_leaderboard("tram_if_possible_policy", value)  # @inspect leaderboard
     text("Simulation yields some estimated value (expected utility).")
     text("The agent (RL algorithm) doesn't do anything with the feedback.")
 
@@ -531,9 +531,9 @@ def try_out_model_free_monte_carlo(rl: ModelFreeMonteCarlo):
     rl.incorporate_feedback(state=2, action="tram", reward=-2, next_state=4, is_end=True)
 
     action = rl.get_action(state=1)  # @inspect action
-    action = rl.get_action(state=1)  # @inspect action
-    action = rl.get_action(state=1)  # @inspect action
-    action = rl.get_action(state=1)  # @inspect action
+    action = rl.get_action(state=1)  # @inspect action @stepover
+    action = rl.get_action(state=1)  # @inspect action @stepover
+    action = rl.get_action(state=1)  # @inspect action @stepover
 
 
 def introduce_sarsa():
@@ -582,12 +582,12 @@ class SARSA(RLAlgorithm):
 
     def get_action(self, state: Any) -> Any:
         if len(self.Q[state]) == 0:
-            return self.exploration_policy(state)
+            return self.exploration_policy(state) # @stepover
         
         if np.random.random() < self.epsilon:
-            return self.exploration_policy(state)
+            return self.exploration_policy(state) # @stepover
         else:
-            return self.pi(state)
+            return self.pi(state) # @stepover
 
     def pi(self, state: Any) -> Any:
         """Return the policy corresponding to the current Q-values."""
@@ -600,7 +600,7 @@ class SARSA(RLAlgorithm):
 
     def incorporate_feedback(self, state: Any, action: Any, reward: Any, next_state: Any, is_end: bool) -> None:  # @inspect self.Q state action reward next_state is_end
         # state → action reward next_state → next_action ...
-        # Important: use `get_action` to get on-policy
+        # Important: use `self.get_action` (not `self.pi`) to get on-policy
         next_action = self.get_action(next_state)  # @inspect next_action
         utility = reward + self.discount * self.Q[next_state].get(next_action, 0)  # @inspect utility
         self.Q[state][action] += self.learning_rate * (utility - self.Q[state][action])  # @inspect self.Q
@@ -643,7 +643,7 @@ class QLearning(SARSA):
     """Q-learning is SARSA, but with an off-policy exploration policy."""
     def incorporate_feedback(self, state: Any, action: Any, reward: Any, next_state: Any, is_end: bool) -> None:  # @inspect self.Q state action reward next_state is_end
         # state → action reward next_state → next_action ...
-        # Important: use `pi` (our estimate of the optimal policy) to get off-policy
+        # Important: use `self.pi` (not `self.get_action`) to get off-policy
         next_action = self.pi(next_state)  # @inspect next_action
         utility = reward + self.discount * self.Q[next_state].get(next_action, 0)  # @inspect utility
         self.Q[state][action] += self.learning_rate * (utility - self.Q[state][action])  # @inspect self.Q
@@ -657,8 +657,7 @@ def try_out_q_learning(rl: QLearning):
     rl.incorporate_feedback(state=2, action="tram", reward=-2, next_state=4, is_end=True)
 
     action = rl.get_action(state=1)  # @inspect action
-    action = rl.get_action(state=1)  # @inspect action
-    action = rl.get_action(state=1)  # @inspect action
+
 
 if __name__ == "__main__":
     main()
