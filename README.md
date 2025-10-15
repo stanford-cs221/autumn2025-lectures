@@ -47,4 +47,4 @@ To run locally:
 
 ### Wed Oct 15: reinforcement learning (lecture 8)
 
-- [rl](https://stanford-cs221.github.io/autumn2025-lectures/?trace=rl): under construction
+- [reinforcement_learning](https://stanford-cs221.github.io/autumn2025-lectures/?trace=reinforcement_learning)
