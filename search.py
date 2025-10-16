@@ -420,7 +420,7 @@ def introduce_best_of_n():
     step = uniform_policy(problem, state)  # @inspect step @stepover
     step = uniform_policy(problem, state)  # @inspect step @stepover
 
-    text("We can iterately apply a policy until we reach the end state to get a solution.")
+    text("We can iteratively apply a policy until we reach the end state to get a solution.")
     solution = rollout(problem, uniform_policy)  # @inspect solution
     text("Do it again:")
     solution = rollout(problem, uniform_policy)  # @inspect solution @stepover
