@@ -129,6 +129,9 @@ class FlakyTramMDP(MDP):
             successors.append(Step(action="tram", prob=1 - self.failure_prob, reward=-2, state=2 * state))  # @inspect successors
             # Failure: stay in the same state
             successors.append(Step(action="tram", prob=self.failure_prob, reward=-2, state=state))  # @inspect successors
+        else:
+            # Stay in the same state (failed)
+            successors.append(Step(action="tram", prob=1, reward=-2, state=state))  # @inspect successors
 
         return successors
 

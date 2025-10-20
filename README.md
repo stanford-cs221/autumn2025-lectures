@@ -48,3 +48,7 @@ To run locally:
 ### Wed Oct 15: reinforcement learning (lecture 8)
 
 - [reinforcement_learning](https://stanford-cs221.github.io/autumn2025-lectures/?trace=reinforcement_learning)
+
+### Mon Oct 20: policy gradient (lecture 9)
+
+- [policy_gradient](https://stanford-cs221.github.io/autumn2025-lectures/?trace=policy_gradient)
