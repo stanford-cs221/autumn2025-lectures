@@ -52,3 +52,7 @@ To run locally:
 ### Mon Oct 20: policy gradient (lecture 9)
 
 - [policy_gradient](https://stanford-cs221.github.io/autumn2025-lectures/?trace=policy_gradient)
+
+### Wed Oct 22: games i (lecture 10)
+
+- [games](https://stanford-cs221.github.io/autumn2025-lectures/?trace=games)

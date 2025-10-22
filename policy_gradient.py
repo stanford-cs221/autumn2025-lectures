@@ -56,7 +56,7 @@ def review_rl():
     text("Each rollout generates a utility (discounted sum of rewards).")  # @clear action
 
     text("Generate rollouts, value is the mean utility.")
-    value = simulate(mdp, rl, num_trials=20)  # @inspect value
+    value = simulate(mdp, rl, num_trials=100)  # @inspect value
 
     text("Various flavors of values (expected utility):")
     text("- V_π(s): value of following policy π from state s")
@@ -106,7 +106,7 @@ def function_approximation():
     text("Function approximation: Q_θ(s, a) is a function with parameters θ")
 
     text("Design decisions:")
-    text("1. What are the possible functions Q_θ(s, a)?")
+    text("1. What are the possible functions Q_θ(s, a)? (hypothesis class)")
     text("2. What do we determine whether Q_θ(s, a) is good? (loss function)")
     text("3. How do we reduce the loss function? (optimization algorithm)")
     text("Should seem familiar from the machine learning lecture!")
@@ -118,7 +118,7 @@ def function_approximation():
 
     text("Let's define the same environment as before:")
     mdp = FlakyTramMDP(num_locs=6, failure_prob=0.1)
-    set_random_seed(1)
+    set_random_seed(2)
 
     text("For the agent, use a parameterized Q-value function (but for simplicity, simulate the tabular setting):")
     policy = partial(walk_tram_policy, mdp.num_locs)
@@ -139,6 +139,7 @@ def function_approximation():
     action = rl.pi(state=1)  # @inspect action
  
     text("Using these pieces, the agent interacts with the environment:")  # @clear phi action value
+    text("2, 3. loss function and optimization algorithm defined in `incorporate_feedback`")
     rl.get_action(state=1)
     rl.incorporate_feedback(state=1, action="walk", reward=-1, next_state=2, is_end=False)
     rl.get_action(state=2)
@@ -277,7 +278,7 @@ def imitation_learning():
         Example(input=2, output="walk"),
         Example(input=3, output="tram"),
     ]
-    text("J(θ) = Σ_i log π_θ(a_i | s_i)")
+    text("J(θ) = Σ`_`t log π`_`θ(a`_`t | s`_`{t-1})")
     text("This is called **imitation learning**.")
 
     text("Examples:")
@@ -329,7 +330,7 @@ def policy_gradient_math():
     text("...and update θ by taking a step in the direction of ∇_θ J(θ, 𝜏).")
 
     text("Breaking down the gradient:")
-    text("∇_θ J(θ, 𝜏) = utility(𝜏) * Σ_t ∇_θ log π_θ(a_t | s_{t-1})")
+    text("∇`_`θ J(θ, 𝜏) = utility(𝜏) * Σ`_`t ∇`_`θ log π`_`θ(a`_`t | s`_`{t-1})")
     
     text("This is the REINFORCE algorithm "), link("https://link.springer.com/article/10.1007/BF00992696", title="[Williams, 1992]")
     
@@ -346,7 +347,7 @@ def policy_gradient_math():
 def policy_gradient_implementation():
     mdp = FlakyTramMDP(num_locs=6, failure_prob=0.1)
     set_random_seed(1)
-    rl = Reinforce(num_locs=mdp.num_locs, actions=["walk", "tram"], discount=1, learning_rate=0.1)
+    rl = Reinforce(num_locs=mdp.num_locs, actions=["walk", "tram"], discount=1, learning_rate=0.01)
     text("Note that we don't need an explicit exploration policy")
     text("...because the stochastic policy should give us exploration.")
 
@@ -359,7 +360,7 @@ def policy_gradient_implementation():
     rl.incorporate_feedback(state=2, action="tram", reward=-2, next_state=4, is_end=True)
 
     text("Now let's run this agent for multiple rollouts:")
-    value = simulate(mdp, rl, num_trials=100)  # @inspect value rl @stepover
+    value = simulate(mdp, rl, num_trials=50)  # @inspect value rl @stepover
     text("We can extract the current optimal policy π_θ(s) of the agent:")
     states = range(1, mdp.num_locs + 1)
     pi = {state: rl.pi(state) for state in states}  # @inspect pi @stepover
@@ -429,7 +430,7 @@ class Reinforce(RLAlgorithm):
                 logits = self.model(phi) # @inspect logits
                 cross_entropy = nn.CrossEntropyLoss()
                 target = one_hot(self.actions.index(action), len(self.actions))  # @inspect target
-                loss += cross_entropy(logits, target)  # @inspect loss
+                loss += self.utility * cross_entropy(logits, target)  # @inspect loss
 
             # Update parameters
             self.optimizer.zero_grad()
@@ -549,8 +550,8 @@ def variance_reduction():
 
 
 def evaluate_estimator(estimator):
-    # Try 1000 samples
-    num_samples = 1000
+    # Try 100 samples
+    num_samples = 100
     samples = torch.tensor([estimator() for _ in range(num_samples)])  # @inspect samples @stepover
     mean = torch.mean(samples)  # @inspect mean
     variance = torch.var(samples)  # @inspect variance

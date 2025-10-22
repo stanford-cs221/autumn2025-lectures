@@ -1,5 +1,5 @@
 from edtrace import link
-from typing import Callable
+from typing import Callable, Any
 from altair import Chart, Data
 import functools
 import numpy as np
@@ -71,3 +71,8 @@ def one_hot(index: int, length: int) -> torch.Tensor:
     vector = torch.zeros(length)
     vector[index] = 1
     return vector
+        
+
+def sample_dict(choices: dict[Any, float]) -> Any:
+    """Sample a key from a dictionary of choices based on their probabilities (values)."""
+    return np.random.choice(list(choices.keys()), p=list(choices.values()))
