@@ -24,7 +24,7 @@ def main():
 
     modeling()               # What is a game?
     game_evaluation()        # Play the game and see who wins
-    expectimax()             # Assume tha opponent is playing a fixed strategy
+    expectimax()             # Assume the opponent is playing a fixed strategy
     minimax()                # Assume the opponent is playing the best possible strategy
     face_off()               # Relationships between values
     expectiminimax()         # ...and there is randomness in the game
@@ -307,7 +307,7 @@ def expectimax():
 
     game = Game1()
     state = game.start_state()  # @stepover
-    value = V_expectimax(game, random_policy, state)  # @inspect value
+    value = V_exptmax(game, random_policy, state)  # @inspect value
     text("Now the optimal action is to choose C!")
 
     text("Summary:")
@@ -315,7 +315,7 @@ def expectimax():
     text("- Analogous to value iteration in MDPs")
 
 
-def V_expectimax(game: Game, opp_policy: Policy, state: Any) -> float:
+def V_exptmax(game: Game, opp_policy: Policy, state: Any) -> float:
     """Return the value of the game."""
     # At the end of the game?
     if game.is_end(state):  # @stepover
@@ -327,15 +327,15 @@ def V_expectimax(game: Game, opp_policy: Policy, state: Any) -> float:
     if player == "agent":
         # Choose the action (next state) that maximizes utility
         next_states = list(game.successors(state).values())  # @stepover @inspect next_states
-        values = [V_expectimax(game, opp_policy, next_state) for next_state in next_states]  # @stepover @inspect values
+        values = [V_exptmax(game, opp_policy, next_state) for next_state in next_states]  # @stepover @inspect values
         value = np.max(values)  # @inspect value
         return value
 
     elif player == "opp":
         # Follow the opponent's policy
         successors = game.successors(state)  # action -> next state
-        values = [prob * V_expectimax(game, opp_policy, successors[action]) for action, prob in opp_policy(state).items()]  # @stepover @inspect values
-        value = np.mean(values)  # @inspect value
+        values = [prob * V_exptmax(game, opp_policy, successors[action]) for action, prob in opp_policy(state).items()]  # @stepover @inspect values
+        value = np.sum(values)  # @inspect value
         return value
 
     else:
@@ -535,7 +535,7 @@ def evaluation_functions():
     link("https://stanford-cs221.github.io/autumn2023/modules/module.html#include=games%2Feval-functions.js&mode=print6pp", title="[Autumn 2023 lecture]")
 
     text("Now let's go back to the basic minimax formulation.")
-    image("images/minimax-recurrence.png", width=500)
+    image("images/minimax-recurrence.png", width=600)
     text("Recall that it takes exponential time in general!")
     text("How can we compute things approximately?")
 
