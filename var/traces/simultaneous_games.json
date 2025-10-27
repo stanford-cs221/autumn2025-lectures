@@ -1,0 +1,4624 @@
+{
+  "files": {
+    "simultaneous_games.py": "from edtrace import text, image, link\nfrom sympy import symbols\n\ndef main():\n    text(\"So far: turn-based games\")\n    text(\"Now: simultaneous games\")\n    link(\"https://stanford-cs221.github.io/autumn2023/modules/module.html#include=games/simultaneous-games.js&mode=print6pp\", title=\"[Autumn 2023 lecture]\")\n\n    text(\"Example: rock-paper-scissors\")\n    image(\"images/rock-paper-scissors.jpg\", width=200)\n\n    text(\"Poll: can you still play optimally if you reveal your strategy?\")\n\n    text(\"In turn-based games, we could compute minimax policies using a game tree:\")\n    image(\"images/minimax.png\", width=400)\n\n    text(\"But in simultaneous games, two players have to move at the same time,\")\n    text(\"...so the game tree breaks down!\")\n\n    zero_sum_games()\n    non_zero_sum_games()\n\n    text(\"Summary:\")\n    text(\"- Simultaneous games: two players move at the same time\")\n    text(\"- In general, second player has an advantage (and can play pure strategy)\")\n    text(\"- Minimax theorem: if we allow mixed strategies, then both players can play optimally\")\n    text(\"- Nash equilibrium: exists for non-zero-sum games (but not unique)\")\n    text(\"- Huge literature in game theory / economics\")\n\n\ndef zero_sum_games():\n    text(\"We will focus on simultaneous zero-sum games.\")\n    zero_sum_games_definitions()  # Problem\n    minimax_theorem()             # Solution\n\ndef zero_sum_games_definitions():\n    text(\"Let's start with an example game:\")\n    image(\"images/two-finger-morra.png\", width=400)\n    text(\"Intuition: A wants same # fingers as B, leaning towards 4\")\n\n    text(\"Definition: **single-move simultaneous game**\")\n    text(\"Two players: A and B\")\n    text(\"Payoff matrix: V(a, b) for each action pair (a, b)\")\n    text(\"Zero-sum: A's utility is V(a, b), B's utility is -V(a, b)\")\n    text(\"Note that there is no state, only one action.\")\n\n    image(\"images/morra-payoff.png\", width=400)\n    actions = [1, 2]\n    V = {\n        1: {1: 2, 2: -3},\n        2: {1: -3, 2: 4},\n    }\n\n    text(\"Definition: **strategy** (policy)\")\n    text(\"A **pure strategy** (deterministic policy) is just a single action a.\")\n    text(\"A **mixed strategy** (stochastic policy) is a probability distribution over actions \u03c0(a).\")\n\n    text(\"Example policies in two-finger Morra:\")\n    always_one = {1: 1.0}  # \u03c0 = [1, 0]\n    always_two = {2: 1.0}  # \u03c0 = [0, 1]\n    uniform = {1: 0.5, 2: 0.5}  # \u03c0 = [0.5, 0.5]\n\n    text(\"Game evaluation:\")\n    text(\"V(\u03c0_A, \u03c0_B) = \u03a3_a \u03a3_b \u03c0_A(a) \u03c0_B(b) V(a, b)\")\n    value = evaluate_game(V, uniform, uniform)  # @inspect value\n    value = evaluate_game(V, always_one, uniform)  # @inspect value @stepover\n    value = evaluate_game(V, always_two, uniform)  # @inspect value @stepover\n    value = evaluate_game(V, uniform, always_one)  # @inspect value @stepover\n    value = evaluate_game(V, uniform, always_two)  # @inspect value @stepover\n\n\ndef evaluate_game(V, policy_a, policy_b):  # @inspect V policy_a policy_b\n    \"\"\"Computed expected utility of the game.\"\"\"\n    value = 0\n    for a, prob_a in policy_a.items():\n        for b, prob_b in policy_b.items():\n            value += prob_a * prob_b * V[a][b]\n    return value\n\n\ndef minimax_theorem():\n    text(\"How do you come up with the optimal strategy?\")\n    text(\"Think of a strategy and try it with a partner!\")\n\n    text(\"Game value: V(\u03c0_A, \u03c0_B)\")\n    text(\"Player A wants to maximize...\")\n    text(\"Player B wants to minimize...\")\n    text(\"**simultaneously**!\")\n    image(\"images/deadlock-traffic.png\", width=150)\n\n    text(\"Let's break the jam and just let someone go first.\")\n\n    text(\"First, consider pure strategies (actions):\")\n    image(\"images/pure-a-b.png\", width=400)\n    image(\"images/second-is-no-worse.png\", width=400)\n\n    text(\"Now, let's consider mixed strategies:\")\n    text(\"Suppose player A plays a mixed strategy \u03c0_A:\")\n    pi_A = {1: 0.5, 2: 0.5}  # \u03c0_A = [0.5, 0.5]\n\n    text(\"Let's compute the optimal strategy for player B:\")\n    text(\"V(\u03c0_A, \u03c0_B) = \u03c0_A(1) \u03c0_B(1) V(1, 1) + \u03c0_A(1) \u03c0_B(2) V(1, 2) + \u03c0_A(2) \u03c0_B(1) V(2, 1) + \u03c0_A(2) \u03c0_B(2) V(2, 2)\")\n    text(\"V(\u03c0_A, \u03c0_B) = 0.5 * \u03c0_B(1) (2 - 3) + 0.5 * \u03c0_B(2) (4 - 3)\")\n    text(\"V(\u03c0_A, \u03c0_B) = -0.5 * \u03c0_B(1) + 0.5 * \u03c0_B(2)\")\n    text(\"Optimal \u03c0_B: \u03c0_B(1) = 1, \u03c0_B(2) = 0\")\n\n    text(\"In general, the second player can always play a pure strategy:\")\n    image(\"images/second-pure.png\", width=500)\n    \n    text(\"In general, player A plays \u03c0_A = [p, 1-p].\")\n    image(\"images/mixed-a-b.png\", width=400)\n    text(\"Minimax value of the game:\")\n    image(\"images/mixed-a-b-value.png\", width=400)\n\n    text(\"Now let's let player B go first with a mixed strategy \u03c0_B = [p, 1-p]:\")\n    image(\"images/mixed-b-a.png\", width=400)\n    text(\"Minimax value of the game:\")\n    image(\"images/mixed-b-a-value.png\", width=400)\n\n    text(\"It's not a coincidence...\")\n    image(\"images/minimax-theorem.png\", width=600)\n    text(\"Proof: linear programming duality\")\n    text(\"Algorithm: compute optimal mixed strategies via linear programming\")\n\n    text(\"Upshot: **revealing your optimal mixed strategy doesn't hurt you**!\")\n\n    text(\"For two-finger Morra:\")\n    text(\"- The optimal mixed strategy for player A is [7/12, 5/12]\")\n    text(\"- The optimal mixed strategy for player B is [7/12, 5/12]\")\n\n    V = {\n        1: {1: 2, 2: -3},\n        2: {1: -3, 2: 4},\n    }\n    pi_opt = {1: 7/12, 2: 5/12}\n    value = evaluate_game(V, pi_opt, pi_opt)  # @inspect value @stepover\n\n    text(\"From minimax principles:\")\n    text(\"- If your opponent changes their strategy, you can only improve!\")\n    text(\"- If you change your strategy, you can only get worse!\")\n\n\ndef non_zero_sum_games():\n    non_zero_sum_games_definitions()  # Problem\n    nash_equilibria()                 # Solution\n\n\ndef non_zero_sum_games_definitions():\n    text(\"So far: zero-sum games (utility of player A + utility of player B = 0)\")\n    text(\"Now: non-zero-sum games (utility of players are arbitrary)\")\n    link(\"https://stanford-cs221.github.io/autumn2023/modules/module.html#include=games%2Fnon-zero-sum-games.js&mode=print6pp\", title=\"[Autumn 2023 lecture]\")\n\n    text(\"Relationship between utilities:\")\n    text(\"- Competitive games: minimax, via linear programming or search\")\n    text(\"- Cooperative games (utility of all players is same): pure maximization, via search\")\n    text(\"- Real life: somewhere in between\")\n\n    image(\"images/prisoners-dilemma.png\", width=500)\n\n    text(\"Definition: **payoff matrix**\")\n    text(\"V_p(\u03c0_A, \u03c0_B): utility for player p \u2208 {A, B} when \u03c0_A and \u03c0_B are the strategies\")\n\n    text(\"Utility: -number of years in jail\")\n    image(\"images/payoff-prisoners.png\", width=500)\n\n\ndef nash_equilibria():\n    text(\"Can't apply von Neumann's minimax theorem (not zero-sum).\")\n\n    text(\"But we can get something weaker: Nash equilibrium.\")\n    image(\"images/nash-equilibrium.png\", width=500)\n    text(\"Theorem (Nash's existence theorem [1950]):\")\n    text(\"- Consider any finite-player game with finite number of actions.\")\n    text(\"- There exists **at least one** Nash equilibrium.\")\n\n    text(\"Examples of Nash equilibria:\")\n    image(\"images/payoff-morra.png\", width=500)\n    text(\"Nash equilibrium (also the minimax strategy): [7/12, 5/12]\")\n    \n    image(\"images/payoff-collaborative-morra.png\", width=500)\n    text(\"Nash equilibrium: both players play 1 or both players play 2\")\n\n    image(\"images/payoff-prisoners.png\", width=500)\n    text(\"Nash equilibrium: both players testify\")\n\n    text(\"Simultaneous zero-sum games:\")\n    text(\"- von Neumann's minimax theorem\")\n    text(\"- Multiple minimax strategies, single game value\")\n    text(\"Simultaneous non-zero-sum games:\")\n    text(\"- Nash's existence theorem\")\n    text(\"- Multiple Nash equilibria, multiple game values\")\n\n    text(\"Summary:\")\n    text(\"- Nash equilibria are stable (no notion of optimality)\")\n    text(\"- Nash equilibria exist for non-zero-sum games\")\n\n\nif __name__ == \"__main__\":\n    main()"
+  },
+  "hidden_line_numbers": {
+    "simultaneous_games.py": []
+  },
+  "steps": [
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 4,
+          "function_name": "main",
+          "code": "def main():"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 5,
+          "function_name": "main",
+          "code": "text(\"So far: turn-based games\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "So far: turn-based games",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 6,
+          "function_name": "main",
+          "code": "text(\"Now: simultaneous games\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Now: simultaneous games",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 7,
+          "function_name": "main",
+          "code": "link(\"https://stanford-cs221.github.io/autumn2023/modules/module.html#include=games/simultaneous-games.js&mode=print6pp\", title=\"[Autumn 2023 lecture]\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "link",
+          "data": null,
+          "style": {},
+          "external_link": {
+            "title": "[Autumn 2023 lecture]",
+            "authors": null,
+            "organization": null,
+            "date": null,
+            "url": "https://stanford-cs221.github.io/autumn2023/modules/module.html#include=games/simultaneous-games.js&mode=print6pp",
+            "description": null,
+            "notes": null
+          },
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 9,
+          "function_name": "main",
+          "code": "text(\"Example: rock-paper-scissors\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Example: rock-paper-scissors",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 10,
+          "function_name": "main",
+          "code": "image(\"images/rock-paper-scissors.jpg\", width=200)"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "image",
+          "data": "images/rock-paper-scissors.jpg",
+          "style": {
+            "width": 200
+          },
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 12,
+          "function_name": "main",
+          "code": "text(\"Poll: can you still play optimally if you reveal your strategy?\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Poll: can you still play optimally if you reveal your strategy?",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 14,
+          "function_name": "main",
+          "code": "text(\"In turn-based games, we could compute minimax policies using a game tree:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "In turn-based games, we could compute minimax policies using a game tree:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 15,
+          "function_name": "main",
+          "code": "image(\"images/minimax.png\", width=400)"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "image",
+          "data": "images/minimax.png",
+          "style": {
+            "width": 400
+          },
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "text(\"But in simultaneous games, two players have to move at the same time,\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "But in simultaneous games, two players have to move at the same time,",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "text(\"...so the game tree breaks down!\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "...so the game tree breaks down!",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 31,
+          "function_name": "zero_sum_games",
+          "code": "def zero_sum_games():"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 32,
+          "function_name": "zero_sum_games",
+          "code": "text(\"We will focus on simultaneous zero-sum games.\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "We will focus on simultaneous zero-sum games.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 36,
+          "function_name": "zero_sum_games_definitions",
+          "code": "def zero_sum_games_definitions():"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 37,
+          "function_name": "zero_sum_games_definitions",
+          "code": "text(\"Let's start with an example game:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Let's start with an example game:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 38,
+          "function_name": "zero_sum_games_definitions",
+          "code": "image(\"images/two-finger-morra.png\", width=400)"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "image",
+          "data": "images/two-finger-morra.png",
+          "style": {
+            "width": 400
+          },
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 39,
+          "function_name": "zero_sum_games_definitions",
+          "code": "text(\"Intuition: A wants same # fingers as B, leaning towards 4\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Intuition: A wants same # fingers as B, leaning towards 4",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 41,
+          "function_name": "zero_sum_games_definitions",
+          "code": "text(\"Definition: **single-move simultaneous game**\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Definition: **single-move simultaneous game**",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 42,
+          "function_name": "zero_sum_games_definitions",
+          "code": "text(\"Two players: A and B\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Two players: A and B",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 43,
+          "function_name": "zero_sum_games_definitions",
+          "code": "text(\"Payoff matrix: V(a, b) for each action pair (a, b)\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Payoff matrix: V(a, b) for each action pair (a, b)",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 44,
+          "function_name": "zero_sum_games_definitions",
+          "code": "text(\"Zero-sum: A's utility is V(a, b), B's utility is -V(a, b)\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Zero-sum: A's utility is V(a, b), B's utility is -V(a, b)",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 45,
+          "function_name": "zero_sum_games_definitions",
+          "code": "text(\"Note that there is no state, only one action.\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Note that there is no state, only one action.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 47,
+          "function_name": "zero_sum_games_definitions",
+          "code": "image(\"images/morra-payoff.png\", width=400)"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "image",
+          "data": "images/morra-payoff.png",
+          "style": {
+            "width": 400
+          },
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 48,
+          "function_name": "zero_sum_games_definitions",
+          "code": "actions = [1, 2]"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 50,
+          "function_name": "zero_sum_games_definitions",
+          "code": "1: {1: 2, 2: -3},"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 51,
+          "function_name": "zero_sum_games_definitions",
+          "code": "2: {1: -3, 2: 4},"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 49,
+          "function_name": "zero_sum_games_definitions",
+          "code": "V = {"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 54,
+          "function_name": "zero_sum_games_definitions",
+          "code": "text(\"Definition: **strategy** (policy)\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Definition: **strategy** (policy)",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 55,
+          "function_name": "zero_sum_games_definitions",
+          "code": "text(\"A **pure strategy** (deterministic policy) is just a single action a.\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "A **pure strategy** (deterministic policy) is just a single action a.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 56,
+          "function_name": "zero_sum_games_definitions",
+          "code": "text(\"A **mixed strategy** (stochastic policy) is a probability distribution over actions \u03c0(a).\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "A **mixed strategy** (stochastic policy) is a probability distribution over actions \u03c0(a).",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 58,
+          "function_name": "zero_sum_games_definitions",
+          "code": "text(\"Example policies in two-finger Morra:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Example policies in two-finger Morra:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 59,
+          "function_name": "zero_sum_games_definitions",
+          "code": "always_one = {1: 1.0}  # \u03c0 = [1, 0]"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 60,
+          "function_name": "zero_sum_games_definitions",
+          "code": "always_two = {2: 1.0}  # \u03c0 = [0, 1]"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 61,
+          "function_name": "zero_sum_games_definitions",
+          "code": "uniform = {1: 0.5, 2: 0.5}  # \u03c0 = [0.5, 0.5]"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 63,
+          "function_name": "zero_sum_games_definitions",
+          "code": "text(\"Game evaluation:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Game evaluation:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 64,
+          "function_name": "zero_sum_games_definitions",
+          "code": "text(\"V(\u03c0_A, \u03c0_B) = \u03a3_a \u03a3_b \u03c0_A(a) \u03c0_B(b) V(a, b)\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "V(\u03c0_A, \u03c0_B) = \u03a3_a \u03a3_b \u03c0_A(a) \u03c0_B(b) V(a, b)",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 65,
+          "function_name": "zero_sum_games_definitions",
+          "code": "value = evaluate_game(V, uniform, uniform)  # @inspect value"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 65,
+          "function_name": "zero_sum_games_definitions",
+          "code": "value = evaluate_game(V, uniform, uniform)  # @inspect value"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 72,
+          "function_name": "evaluate_game",
+          "code": "def evaluate_game(V, policy_a, policy_b):  # @inspect V policy_a policy_b"
+        }
+      ],
+      "env": {
+        "V": {
+          "type": "dict",
+          "contents": {
+            "1": {
+              "type": "dict",
+              "contents": {
+                "1": {
+                  "type": "int",
+                  "contents": 2,
+                  "dtype": null,
+                  "shape": null
+                },
+                "2": {
+                  "type": "int",
+                  "contents": -3,
+                  "dtype": null,
+                  "shape": null
+                }
+              },
+              "dtype": null,
+              "shape": null
+            },
+            "2": {
+              "type": "dict",
+              "contents": {
+                "1": {
+                  "type": "int",
+                  "contents": -3,
+                  "dtype": null,
+                  "shape": null
+                },
+                "2": {
+                  "type": "int",
+                  "contents": 4,
+                  "dtype": null,
+                  "shape": null
+                }
+              },
+              "dtype": null,
+              "shape": null
+            }
+          },
+          "dtype": null,
+          "shape": null
+        },
+        "policy_a": {
+          "type": "dict",
+          "contents": {
+            "1": {
+              "type": "float",
+              "contents": 0.5,
+              "dtype": null,
+              "shape": null
+            },
+            "2": {
+              "type": "float",
+              "contents": 0.5,
+              "dtype": null,
+              "shape": null
+            }
+          },
+          "dtype": null,
+          "shape": null
+        },
+        "policy_b": {
+          "type": "dict",
+          "contents": {
+            "1": {
+              "type": "float",
+              "contents": 0.5,
+              "dtype": null,
+              "shape": null
+            },
+            "2": {
+              "type": "float",
+              "contents": 0.5,
+              "dtype": null,
+              "shape": null
+            }
+          },
+          "dtype": null,
+          "shape": null
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 65,
+          "function_name": "zero_sum_games_definitions",
+          "code": "value = evaluate_game(V, uniform, uniform)  # @inspect value"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 74,
+          "function_name": "evaluate_game",
+          "code": "value = 0"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 65,
+          "function_name": "zero_sum_games_definitions",
+          "code": "value = evaluate_game(V, uniform, uniform)  # @inspect value"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 75,
+          "function_name": "evaluate_game",
+          "code": "for a, prob_a in policy_a.items():"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 65,
+          "function_name": "zero_sum_games_definitions",
+          "code": "value = evaluate_game(V, uniform, uniform)  # @inspect value"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 76,
+          "function_name": "evaluate_game",
+          "code": "for b, prob_b in policy_b.items():"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 65,
+          "function_name": "zero_sum_games_definitions",
+          "code": "value = evaluate_game(V, uniform, uniform)  # @inspect value"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 77,
+          "function_name": "evaluate_game",
+          "code": "value += prob_a * prob_b * V[a][b]"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 65,
+          "function_name": "zero_sum_games_definitions",
+          "code": "value = evaluate_game(V, uniform, uniform)  # @inspect value"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 76,
+          "function_name": "evaluate_game",
+          "code": "for b, prob_b in policy_b.items():"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 65,
+          "function_name": "zero_sum_games_definitions",
+          "code": "value = evaluate_game(V, uniform, uniform)  # @inspect value"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 77,
+          "function_name": "evaluate_game",
+          "code": "value += prob_a * prob_b * V[a][b]"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 65,
+          "function_name": "zero_sum_games_definitions",
+          "code": "value = evaluate_game(V, uniform, uniform)  # @inspect value"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 76,
+          "function_name": "evaluate_game",
+          "code": "for b, prob_b in policy_b.items():"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 65,
+          "function_name": "zero_sum_games_definitions",
+          "code": "value = evaluate_game(V, uniform, uniform)  # @inspect value"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 75,
+          "function_name": "evaluate_game",
+          "code": "for a, prob_a in policy_a.items():"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 65,
+          "function_name": "zero_sum_games_definitions",
+          "code": "value = evaluate_game(V, uniform, uniform)  # @inspect value"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 76,
+          "function_name": "evaluate_game",
+          "code": "for b, prob_b in policy_b.items():"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 65,
+          "function_name": "zero_sum_games_definitions",
+          "code": "value = evaluate_game(V, uniform, uniform)  # @inspect value"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 77,
+          "function_name": "evaluate_game",
+          "code": "value += prob_a * prob_b * V[a][b]"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 65,
+          "function_name": "zero_sum_games_definitions",
+          "code": "value = evaluate_game(V, uniform, uniform)  # @inspect value"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 76,
+          "function_name": "evaluate_game",
+          "code": "for b, prob_b in policy_b.items():"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 65,
+          "function_name": "zero_sum_games_definitions",
+          "code": "value = evaluate_game(V, uniform, uniform)  # @inspect value"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 77,
+          "function_name": "evaluate_game",
+          "code": "value += prob_a * prob_b * V[a][b]"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 65,
+          "function_name": "zero_sum_games_definitions",
+          "code": "value = evaluate_game(V, uniform, uniform)  # @inspect value"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 76,
+          "function_name": "evaluate_game",
+          "code": "for b, prob_b in policy_b.items():"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 65,
+          "function_name": "zero_sum_games_definitions",
+          "code": "value = evaluate_game(V, uniform, uniform)  # @inspect value"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 75,
+          "function_name": "evaluate_game",
+          "code": "for a, prob_a in policy_a.items():"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 65,
+          "function_name": "zero_sum_games_definitions",
+          "code": "value = evaluate_game(V, uniform, uniform)  # @inspect value"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 78,
+          "function_name": "evaluate_game",
+          "code": "return value"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 65,
+          "function_name": "zero_sum_games_definitions",
+          "code": "value = evaluate_game(V, uniform, uniform)  # @inspect value"
+        }
+      ],
+      "env": {
+        "value": {
+          "type": "float",
+          "contents": 0.0,
+          "dtype": null,
+          "shape": null
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 66,
+          "function_name": "zero_sum_games_definitions",
+          "code": "value = evaluate_game(V, always_one, uniform)  # @inspect value @stepover"
+        }
+      ],
+      "env": {
+        "value": {
+          "type": "float",
+          "contents": -0.5,
+          "dtype": null,
+          "shape": null
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 67,
+          "function_name": "zero_sum_games_definitions",
+          "code": "value = evaluate_game(V, always_two, uniform)  # @inspect value @stepover"
+        }
+      ],
+      "env": {
+        "value": {
+          "type": "float",
+          "contents": 0.5,
+          "dtype": null,
+          "shape": null
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 68,
+          "function_name": "zero_sum_games_definitions",
+          "code": "value = evaluate_game(V, uniform, always_one)  # @inspect value @stepover"
+        }
+      ],
+      "env": {
+        "value": {
+          "type": "float",
+          "contents": -0.5,
+          "dtype": null,
+          "shape": null
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 69,
+          "function_name": "zero_sum_games_definitions",
+          "code": "value = evaluate_game(V, uniform, always_two)  # @inspect value @stepover"
+        }
+      ],
+      "env": {
+        "value": {
+          "type": "float",
+          "contents": 0.5,
+          "dtype": null,
+          "shape": null
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 33,
+          "function_name": "zero_sum_games",
+          "code": "zero_sum_games_definitions()  # Problem"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 81,
+          "function_name": "minimax_theorem",
+          "code": "def minimax_theorem():"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 82,
+          "function_name": "minimax_theorem",
+          "code": "text(\"How do you come up with the optimal strategy?\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "How do you come up with the optimal strategy?",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 83,
+          "function_name": "minimax_theorem",
+          "code": "text(\"Think of a strategy and try it with a partner!\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Think of a strategy and try it with a partner!",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 85,
+          "function_name": "minimax_theorem",
+          "code": "text(\"Game value: V(\u03c0_A, \u03c0_B)\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Game value: V(\u03c0_A, \u03c0_B)",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 86,
+          "function_name": "minimax_theorem",
+          "code": "text(\"Player A wants to maximize...\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Player A wants to maximize...",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 87,
+          "function_name": "minimax_theorem",
+          "code": "text(\"Player B wants to minimize...\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Player B wants to minimize...",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 88,
+          "function_name": "minimax_theorem",
+          "code": "text(\"**simultaneously**!\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "**simultaneously**!",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 89,
+          "function_name": "minimax_theorem",
+          "code": "image(\"images/deadlock-traffic.png\", width=150)"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "image",
+          "data": "images/deadlock-traffic.png",
+          "style": {
+            "width": 150
+          },
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 91,
+          "function_name": "minimax_theorem",
+          "code": "text(\"Let's break the jam and just let someone go first.\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Let's break the jam and just let someone go first.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 93,
+          "function_name": "minimax_theorem",
+          "code": "text(\"First, consider pure strategies (actions):\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "First, consider pure strategies (actions):",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 94,
+          "function_name": "minimax_theorem",
+          "code": "image(\"images/pure-a-b.png\", width=400)"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "image",
+          "data": "images/pure-a-b.png",
+          "style": {
+            "width": 400
+          },
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 95,
+          "function_name": "minimax_theorem",
+          "code": "image(\"images/second-is-no-worse.png\", width=400)"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "image",
+          "data": "images/second-is-no-worse.png",
+          "style": {
+            "width": 400
+          },
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 97,
+          "function_name": "minimax_theorem",
+          "code": "text(\"Now, let's consider mixed strategies:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Now, let's consider mixed strategies:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 98,
+          "function_name": "minimax_theorem",
+          "code": "text(\"Suppose player A plays a mixed strategy \u03c0_A:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Suppose player A plays a mixed strategy \u03c0_A:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 99,
+          "function_name": "minimax_theorem",
+          "code": "pi_A = {1: 0.5, 2: 0.5}  # \u03c0_A = [0.5, 0.5]"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 101,
+          "function_name": "minimax_theorem",
+          "code": "text(\"Let's compute the optimal strategy for player B:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Let's compute the optimal strategy for player B:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 102,
+          "function_name": "minimax_theorem",
+          "code": "text(\"V(\u03c0_A, \u03c0_B) = \u03c0_A(1) \u03c0_B(1) V(1, 1) + \u03c0_A(1) \u03c0_B(2) V(1, 2) + \u03c0_A(2) \u03c0_B(1) V(2, 1) + \u03c0_A(2) \u03c0_B(2) V(2, 2)\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "V(\u03c0_A, \u03c0_B) = \u03c0_A(1) \u03c0_B(1) V(1, 1) + \u03c0_A(1) \u03c0_B(2) V(1, 2) + \u03c0_A(2) \u03c0_B(1) V(2, 1) + \u03c0_A(2) \u03c0_B(2) V(2, 2)",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 103,
+          "function_name": "minimax_theorem",
+          "code": "text(\"V(\u03c0_A, \u03c0_B) = 0.5 * \u03c0_B(1) (2 - 3) + 0.5 * \u03c0_B(2) (4 - 3)\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "V(\u03c0_A, \u03c0_B) = 0.5 * \u03c0_B(1) (2 - 3) + 0.5 * \u03c0_B(2) (4 - 3)",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 104,
+          "function_name": "minimax_theorem",
+          "code": "text(\"V(\u03c0_A, \u03c0_B) = -0.5 * \u03c0_B(1) + 0.5 * \u03c0_B(2)\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "V(\u03c0_A, \u03c0_B) = -0.5 * \u03c0_B(1) + 0.5 * \u03c0_B(2)",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 105,
+          "function_name": "minimax_theorem",
+          "code": "text(\"Optimal \u03c0_B: \u03c0_B(1) = 1, \u03c0_B(2) = 0\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Optimal \u03c0_B: \u03c0_B(1) = 1, \u03c0_B(2) = 0",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 107,
+          "function_name": "minimax_theorem",
+          "code": "text(\"In general, the second player can always play a pure strategy:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "In general, the second player can always play a pure strategy:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 108,
+          "function_name": "minimax_theorem",
+          "code": "image(\"images/second-pure.png\", width=500)"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "image",
+          "data": "images/second-pure.png",
+          "style": {
+            "width": 500
+          },
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 110,
+          "function_name": "minimax_theorem",
+          "code": "text(\"In general, player A plays \u03c0_A = [p, 1-p].\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "In general, player A plays \u03c0_A = [p, 1-p].",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 111,
+          "function_name": "minimax_theorem",
+          "code": "image(\"images/mixed-a-b.png\", width=400)"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "image",
+          "data": "images/mixed-a-b.png",
+          "style": {
+            "width": 400
+          },
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 112,
+          "function_name": "minimax_theorem",
+          "code": "text(\"Minimax value of the game:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Minimax value of the game:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 113,
+          "function_name": "minimax_theorem",
+          "code": "image(\"images/mixed-a-b-value.png\", width=400)"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "image",
+          "data": "images/mixed-a-b-value.png",
+          "style": {
+            "width": 400
+          },
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 115,
+          "function_name": "minimax_theorem",
+          "code": "text(\"Now let's let player B go first with a mixed strategy \u03c0_B = [p, 1-p]:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Now let's let player B go first with a mixed strategy \u03c0_B = [p, 1-p]:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 116,
+          "function_name": "minimax_theorem",
+          "code": "image(\"images/mixed-b-a.png\", width=400)"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "image",
+          "data": "images/mixed-b-a.png",
+          "style": {
+            "width": 400
+          },
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 117,
+          "function_name": "minimax_theorem",
+          "code": "text(\"Minimax value of the game:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Minimax value of the game:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 118,
+          "function_name": "minimax_theorem",
+          "code": "image(\"images/mixed-b-a-value.png\", width=400)"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "image",
+          "data": "images/mixed-b-a-value.png",
+          "style": {
+            "width": 400
+          },
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 120,
+          "function_name": "minimax_theorem",
+          "code": "text(\"It's not a coincidence...\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "It's not a coincidence...",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 121,
+          "function_name": "minimax_theorem",
+          "code": "image(\"images/minimax-theorem.png\", width=600)"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "image",
+          "data": "images/minimax-theorem.png",
+          "style": {
+            "width": 600
+          },
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 122,
+          "function_name": "minimax_theorem",
+          "code": "text(\"Proof: linear programming duality\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Proof: linear programming duality",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 123,
+          "function_name": "minimax_theorem",
+          "code": "text(\"Algorithm: compute optimal mixed strategies via linear programming\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Algorithm: compute optimal mixed strategies via linear programming",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 125,
+          "function_name": "minimax_theorem",
+          "code": "text(\"Upshot: **revealing your optimal mixed strategy doesn't hurt you**!\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Upshot: **revealing your optimal mixed strategy doesn't hurt you**!",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 127,
+          "function_name": "minimax_theorem",
+          "code": "text(\"For two-finger Morra:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "For two-finger Morra:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 128,
+          "function_name": "minimax_theorem",
+          "code": "text(\"- The optimal mixed strategy for player A is [7/12, 5/12]\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- The optimal mixed strategy for player A is [7/12, 5/12]",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 129,
+          "function_name": "minimax_theorem",
+          "code": "text(\"- The optimal mixed strategy for player B is [7/12, 5/12]\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- The optimal mixed strategy for player B is [7/12, 5/12]",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 132,
+          "function_name": "minimax_theorem",
+          "code": "1: {1: 2, 2: -3},"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 133,
+          "function_name": "minimax_theorem",
+          "code": "2: {1: -3, 2: 4},"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 131,
+          "function_name": "minimax_theorem",
+          "code": "V = {"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 135,
+          "function_name": "minimax_theorem",
+          "code": "pi_opt = {1: 7/12, 2: 5/12}"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 136,
+          "function_name": "minimax_theorem",
+          "code": "value = evaluate_game(V, pi_opt, pi_opt)  # @inspect value @stepover"
+        }
+      ],
+      "env": {
+        "value": {
+          "type": "float",
+          "contents": -0.08333333333333326,
+          "dtype": null,
+          "shape": null
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 138,
+          "function_name": "minimax_theorem",
+          "code": "text(\"From minimax principles:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "From minimax principles:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 139,
+          "function_name": "minimax_theorem",
+          "code": "text(\"- If your opponent changes their strategy, you can only improve!\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- If your opponent changes their strategy, you can only improve!",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 140,
+          "function_name": "minimax_theorem",
+          "code": "text(\"- If you change your strategy, you can only get worse!\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- If you change your strategy, you can only get worse!",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 34,
+          "function_name": "zero_sum_games",
+          "code": "minimax_theorem()             # Solution"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 20,
+          "function_name": "main",
+          "code": "zero_sum_games()"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 143,
+          "function_name": "non_zero_sum_games",
+          "code": "def non_zero_sum_games():"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 144,
+          "function_name": "non_zero_sum_games",
+          "code": "non_zero_sum_games_definitions()  # Problem"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 144,
+          "function_name": "non_zero_sum_games",
+          "code": "non_zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 148,
+          "function_name": "non_zero_sum_games_definitions",
+          "code": "def non_zero_sum_games_definitions():"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 144,
+          "function_name": "non_zero_sum_games",
+          "code": "non_zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 149,
+          "function_name": "non_zero_sum_games_definitions",
+          "code": "text(\"So far: zero-sum games (utility of player A + utility of player B = 0)\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "So far: zero-sum games (utility of player A + utility of player B = 0)",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 144,
+          "function_name": "non_zero_sum_games",
+          "code": "non_zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 150,
+          "function_name": "non_zero_sum_games_definitions",
+          "code": "text(\"Now: non-zero-sum games (utility of players are arbitrary)\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Now: non-zero-sum games (utility of players are arbitrary)",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 144,
+          "function_name": "non_zero_sum_games",
+          "code": "non_zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 151,
+          "function_name": "non_zero_sum_games_definitions",
+          "code": "link(\"https://stanford-cs221.github.io/autumn2023/modules/module.html#include=games%2Fnon-zero-sum-games.js&mode=print6pp\", title=\"[Autumn 2023 lecture]\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "link",
+          "data": null,
+          "style": {},
+          "external_link": {
+            "title": "[Autumn 2023 lecture]",
+            "authors": null,
+            "organization": null,
+            "date": null,
+            "url": "https://stanford-cs221.github.io/autumn2023/modules/module.html#include=games%2Fnon-zero-sum-games.js&mode=print6pp",
+            "description": null,
+            "notes": null
+          },
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 144,
+          "function_name": "non_zero_sum_games",
+          "code": "non_zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 153,
+          "function_name": "non_zero_sum_games_definitions",
+          "code": "text(\"Relationship between utilities:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Relationship between utilities:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 144,
+          "function_name": "non_zero_sum_games",
+          "code": "non_zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 154,
+          "function_name": "non_zero_sum_games_definitions",
+          "code": "text(\"- Competitive games: minimax, via linear programming or search\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Competitive games: minimax, via linear programming or search",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 144,
+          "function_name": "non_zero_sum_games",
+          "code": "non_zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 155,
+          "function_name": "non_zero_sum_games_definitions",
+          "code": "text(\"- Cooperative games (utility of all players is same): pure maximization, via search\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Cooperative games (utility of all players is same): pure maximization, via search",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 144,
+          "function_name": "non_zero_sum_games",
+          "code": "non_zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 156,
+          "function_name": "non_zero_sum_games_definitions",
+          "code": "text(\"- Real life: somewhere in between\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Real life: somewhere in between",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 144,
+          "function_name": "non_zero_sum_games",
+          "code": "non_zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 158,
+          "function_name": "non_zero_sum_games_definitions",
+          "code": "image(\"images/prisoners-dilemma.png\", width=500)"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "image",
+          "data": "images/prisoners-dilemma.png",
+          "style": {
+            "width": 500
+          },
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 144,
+          "function_name": "non_zero_sum_games",
+          "code": "non_zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 160,
+          "function_name": "non_zero_sum_games_definitions",
+          "code": "text(\"Definition: **payoff matrix**\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Definition: **payoff matrix**",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 144,
+          "function_name": "non_zero_sum_games",
+          "code": "non_zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 161,
+          "function_name": "non_zero_sum_games_definitions",
+          "code": "text(\"V_p(\u03c0_A, \u03c0_B): utility for player p \u2208 {A, B} when \u03c0_A and \u03c0_B are the strategies\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "V_p(\u03c0_A, \u03c0_B): utility for player p \u2208 {A, B} when \u03c0_A and \u03c0_B are the strategies",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 144,
+          "function_name": "non_zero_sum_games",
+          "code": "non_zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 163,
+          "function_name": "non_zero_sum_games_definitions",
+          "code": "text(\"Utility: -number of years in jail\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Utility: -number of years in jail",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 144,
+          "function_name": "non_zero_sum_games",
+          "code": "non_zero_sum_games_definitions()  # Problem"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 164,
+          "function_name": "non_zero_sum_games_definitions",
+          "code": "image(\"images/payoff-prisoners.png\", width=500)"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "image",
+          "data": "images/payoff-prisoners.png",
+          "style": {
+            "width": 500
+          },
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 144,
+          "function_name": "non_zero_sum_games",
+          "code": "non_zero_sum_games_definitions()  # Problem"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 145,
+          "function_name": "non_zero_sum_games",
+          "code": "nash_equilibria()                 # Solution"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 145,
+          "function_name": "non_zero_sum_games",
+          "code": "nash_equilibria()                 # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 167,
+          "function_name": "nash_equilibria",
+          "code": "def nash_equilibria():"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 145,
+          "function_name": "non_zero_sum_games",
+          "code": "nash_equilibria()                 # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 168,
+          "function_name": "nash_equilibria",
+          "code": "text(\"Can't apply von Neumann's minimax theorem (not zero-sum).\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Can't apply von Neumann's minimax theorem (not zero-sum).",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 145,
+          "function_name": "non_zero_sum_games",
+          "code": "nash_equilibria()                 # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 170,
+          "function_name": "nash_equilibria",
+          "code": "text(\"But we can get something weaker: Nash equilibrium.\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "But we can get something weaker: Nash equilibrium.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 145,
+          "function_name": "non_zero_sum_games",
+          "code": "nash_equilibria()                 # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 171,
+          "function_name": "nash_equilibria",
+          "code": "image(\"images/nash-equilibrium.png\", width=500)"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "image",
+          "data": "images/nash-equilibrium.png",
+          "style": {
+            "width": 500
+          },
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 145,
+          "function_name": "non_zero_sum_games",
+          "code": "nash_equilibria()                 # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 172,
+          "function_name": "nash_equilibria",
+          "code": "text(\"Theorem (Nash's existence theorem [1950]):\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Theorem (Nash's existence theorem [1950]):",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 145,
+          "function_name": "non_zero_sum_games",
+          "code": "nash_equilibria()                 # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 173,
+          "function_name": "nash_equilibria",
+          "code": "text(\"- Consider any finite-player game with finite number of actions.\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Consider any finite-player game with finite number of actions.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 145,
+          "function_name": "non_zero_sum_games",
+          "code": "nash_equilibria()                 # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 174,
+          "function_name": "nash_equilibria",
+          "code": "text(\"- There exists **at least one** Nash equilibrium.\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- There exists **at least one** Nash equilibrium.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 145,
+          "function_name": "non_zero_sum_games",
+          "code": "nash_equilibria()                 # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 176,
+          "function_name": "nash_equilibria",
+          "code": "text(\"Examples of Nash equilibria:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Examples of Nash equilibria:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 145,
+          "function_name": "non_zero_sum_games",
+          "code": "nash_equilibria()                 # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 177,
+          "function_name": "nash_equilibria",
+          "code": "image(\"images/payoff-morra.png\", width=500)"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "image",
+          "data": "images/payoff-morra.png",
+          "style": {
+            "width": 500
+          },
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 145,
+          "function_name": "non_zero_sum_games",
+          "code": "nash_equilibria()                 # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 178,
+          "function_name": "nash_equilibria",
+          "code": "text(\"Nash equilibrium (also the minimax strategy): [7/12, 5/12]\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Nash equilibrium (also the minimax strategy): [7/12, 5/12]",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 145,
+          "function_name": "non_zero_sum_games",
+          "code": "nash_equilibria()                 # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 180,
+          "function_name": "nash_equilibria",
+          "code": "image(\"images/payoff-collaborative-morra.png\", width=500)"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "image",
+          "data": "images/payoff-collaborative-morra.png",
+          "style": {
+            "width": 500
+          },
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 145,
+          "function_name": "non_zero_sum_games",
+          "code": "nash_equilibria()                 # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 181,
+          "function_name": "nash_equilibria",
+          "code": "text(\"Nash equilibrium: both players play 1 or both players play 2\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Nash equilibrium: both players play 1 or both players play 2",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 145,
+          "function_name": "non_zero_sum_games",
+          "code": "nash_equilibria()                 # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 183,
+          "function_name": "nash_equilibria",
+          "code": "image(\"images/payoff-prisoners.png\", width=500)"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "image",
+          "data": "images/payoff-prisoners.png",
+          "style": {
+            "width": 500
+          },
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 145,
+          "function_name": "non_zero_sum_games",
+          "code": "nash_equilibria()                 # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 184,
+          "function_name": "nash_equilibria",
+          "code": "text(\"Nash equilibrium: both players testify\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Nash equilibrium: both players testify",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 145,
+          "function_name": "non_zero_sum_games",
+          "code": "nash_equilibria()                 # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 186,
+          "function_name": "nash_equilibria",
+          "code": "text(\"Simultaneous zero-sum games:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Simultaneous zero-sum games:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 145,
+          "function_name": "non_zero_sum_games",
+          "code": "nash_equilibria()                 # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 187,
+          "function_name": "nash_equilibria",
+          "code": "text(\"- von Neumann's minimax theorem\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- von Neumann's minimax theorem",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 145,
+          "function_name": "non_zero_sum_games",
+          "code": "nash_equilibria()                 # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 188,
+          "function_name": "nash_equilibria",
+          "code": "text(\"- Multiple minimax strategies, single game value\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Multiple minimax strategies, single game value",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 145,
+          "function_name": "non_zero_sum_games",
+          "code": "nash_equilibria()                 # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 189,
+          "function_name": "nash_equilibria",
+          "code": "text(\"Simultaneous non-zero-sum games:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Simultaneous non-zero-sum games:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 145,
+          "function_name": "non_zero_sum_games",
+          "code": "nash_equilibria()                 # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 190,
+          "function_name": "nash_equilibria",
+          "code": "text(\"- Nash's existence theorem\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Nash's existence theorem",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 145,
+          "function_name": "non_zero_sum_games",
+          "code": "nash_equilibria()                 # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 191,
+          "function_name": "nash_equilibria",
+          "code": "text(\"- Multiple Nash equilibria, multiple game values\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Multiple Nash equilibria, multiple game values",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 145,
+          "function_name": "non_zero_sum_games",
+          "code": "nash_equilibria()                 # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 193,
+          "function_name": "nash_equilibria",
+          "code": "text(\"Summary:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Summary:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 145,
+          "function_name": "non_zero_sum_games",
+          "code": "nash_equilibria()                 # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 194,
+          "function_name": "nash_equilibria",
+          "code": "text(\"- Nash equilibria are stable (no notion of optimality)\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Nash equilibria are stable (no notion of optimality)",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 145,
+          "function_name": "non_zero_sum_games",
+          "code": "nash_equilibria()                 # Solution"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 195,
+          "function_name": "nash_equilibria",
+          "code": "text(\"- Nash equilibria exist for non-zero-sum games\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Nash equilibria exist for non-zero-sum games",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        },
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 145,
+          "function_name": "non_zero_sum_games",
+          "code": "nash_equilibria()                 # Solution"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "non_zero_sum_games()"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 23,
+          "function_name": "main",
+          "code": "text(\"Summary:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Summary:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 24,
+          "function_name": "main",
+          "code": "text(\"- Simultaneous games: two players move at the same time\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Simultaneous games: two players move at the same time",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 25,
+          "function_name": "main",
+          "code": "text(\"- In general, second player has an advantage (and can play pure strategy)\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- In general, second player has an advantage (and can play pure strategy)",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 26,
+          "function_name": "main",
+          "code": "text(\"- Minimax theorem: if we allow mixed strategies, then both players can play optimally\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Minimax theorem: if we allow mixed strategies, then both players can play optimally",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 27,
+          "function_name": "main",
+          "code": "text(\"- Nash equilibrium: exists for non-zero-sum games (but not unique)\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Nash equilibrium: exists for non-zero-sum games (but not unique)",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "simultaneous_games.py",
+          "line_number": 28,
+          "function_name": "main",
+          "code": "text(\"- Huge literature in game theory / economics\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Huge literature in game theory / economics",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    }
+  ]
+}

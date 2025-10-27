@@ -1,0 +1,3848 @@
+{
+  "files": {
+    "td_learning.py": "from functools import partial\nfrom typing import Any\nfrom edtrace import text, image, link\nimport numpy as np\nfrom reinforcement_learning import SARSA, RLAlgorithm, walk_tram_policy\nfrom mdp import MDP, Policy, FlakyTramMDP, get_action_successors\nfrom collections import defaultdict\nfrom util import set_random_seed\n\n\ndef main():\n    text(\"Last time: two-player zero-sum games\")\n    review_games()\n    text(\"Today: use reinforcement learning (TD learning) to learn the evaluation function!\")\n\n    td_learning_motivation()\n    td_learning()\n    td_learning_for_games()\n    historical_examples()\n\n    text(\"Next:\")\n    text(\"- Turn-based \u2192 simultaneous games\")\n    text(\"- Zero-sum \u2192 non-zero-sum\")\n\n    \ndef review_games():\n    text(\"Principle: minimax (also expectimax, expectiminimax)\")\n    image(\"images/minimax.png\", width=500)\n    text(\"Speeding up minimax\")\n    text(\"- Alpha-beta pruning (exact)\")\n    text(\"- Evaluation functions (approximate)\")\n    image(\"images/eval-functions-chess.png\", width=500)\n    text(\"This was manual heuristics...can we learn the evaluation function?\")\n\n\ndef td_learning_motivation():\n    text(\"V_\u03c0(s): value (expected utility) of following policy \u03c0 from state s\")\n    text(\"Q_\u03c0(s, a): value (expected utility) of taking action a in state s, and then following policy \u03c0\")\n\n    text(\"Recall SARSA from reinforcement learning:\")\n    text(\"- On-policy: estimating Q-values of the current policy Q_\u03c0(s, a)\")\n    text(\"- Bootstrapping: target is immediate reward + estimated future reward\")\n    image(\"images/sarsa-algorithm.png\", width=500)\n    rl = SARSA(exploration_policy=partial(walk_tram_policy, 6), epsilon=0.4, discount=1, learning_rate=0.1)\n    rl.get_action(state=1)\n    rl.incorporate_feedback(state=1, action=\"walk\", reward=-1, next_state=2, is_end=False)\n    rl.get_action(state=2)\n    rl.incorporate_feedback(state=2, action=\"walk\", reward=-1, next_state=3, is_end=False)\n    rl.get_action(state=3)\n    rl.incorporate_feedback(state=3, action=\"tram\", reward=-2, next_state=6, is_end=True)\n    text(\"**Policy improvement**: \u03c0_new(s) = argmax_a Q_\u03c0(s, a)\")\n    text(\"In other words, from Q-values, you can read out a (myopically optimal) policy.\")\n\n    text(\"Recall policy evaluation from MDPs:\")\n    text(\"- V_\u03c0(s) = Q_\u03c0(s, \u03c0(s))\")\n    text(\"- Q_\u03c0(s, a) = \u03a3_s' T(s, a, s') (R(s, a, s') + \u03b3 V_\u03c0(s'))\")\n    text(\"Question: if you only knew V_\u03c0(s), could you compute a policy from V_\u03c0(s)?\")\n    text(\"Answer: \u03c0_new(s) = argmax_a \u03a3_s' T(s, a, s') (R(s, a, s') + \u03b3 V_\u03c0(s'))\")\n    text(\"Note this requires knowledge of the MDP (transitions T, rewards R)!\")\n\n    text(\"However, for games, we do know T and R!\")\n    text(\"Because it's deterministic, it simplifies to:\")\n    text(\"\u03c0_new(s) = argmax_a V_\u03c0(Succ(s, a))\")\n\n    text(\"Wait, if we already know the MDP, why don't we just solve the MDP via value iteration?\")\n    text(\"Because it's too expensive (number of states is exponential)!\")\n\n    text(\"So we'll use reinforcement learning...\")\n    text(\"...not due to unknown MDP (original motivation),\")\n    text(\"...but because the number of states is exponential!\")\n    \n\ndef td_learning():\n    link(\"https://stanford-cs221.github.io/autumn2023/modules/module.html#include=games%2Ftd-learning.js&mode=print6pp\", title=\"[Autumn 2023 lecture]\")\n\n    text(\"TD learning : V_\u03c0 :: SARSA : Q_\u03c0\")\n\n    text(\"SARSA: Q_\u03c0(s, a) tells us how good each action is\")\n    text(\"TD learning: V_\u03c0(s) tells us how good each state is (since action \u2192 next state is known)\")\n\n    text(\"Assume function approximation: V_\u03c0(s) = V(s; w) for some weights w\")\n    text(\"In deep reinforcement learning, V_\u03c0(s) is called a value network.\")\n\n    text(\"Basic idea:\")\n    text(\"- Get piece of experience (s, a, r, s')\")\n    text(\"- Model predicts V(s; w)\")\n    text(\"- Target (bootstrapping): r + \u03b3 * V(s'; w)\")\n    text(\"- Define squared loss: L(w) = (V(s; w) - (r + \u03b3 * V(s'; w))) ^ 2\")\n    text(\"- Take a gradient step: w = w - \u03b1 * \u2207_w L(w)\")\n\n    image(\"images/td-algorithm.png\", width=500)\n\n    text(\"Let's implement TD learning for the flaky tram MDP:\")\n    set_random_seed(1)\n    mdp = FlakyTramMDP(num_locs=6, failure_prob=0.1)\n    policy = partial(walk_tram_policy, 6)\n    # Note that TDLearning needs knowledge of the MDP to compute the policy (for policy improvement)\n    rl = TDLearning(mdp=mdp, exploration_policy=policy, epsilon=0.2, discount=1, learning_rate=0.1)  # @stepover\n    rl.get_action(state=1)\n    rl.incorporate_feedback(state=1, action=\"walk\", reward=-1, next_state=2, is_end=False)\n    rl.get_action(state=2)  # @stepover\n    rl.incorporate_feedback(state=2, action=\"walk\", reward=-1, next_state=3, is_end=False)  # @stepover\n    rl.get_action(state=3)  # @stepover\n    rl.incorporate_feedback(state=3, action=\"tram\", reward=-2, next_state=6, is_end=True)  # @stepover\n\n    text(\"Summary:\")\n    text(\"- TD learning estimates V_\u03c0(s) from experience (s, a, r, s')\")\n    text(\"- On policy (we're not considering other actions)\")\n    text(\"- Uses bootstrapping\")\n\n\nclass TDLearning(RLAlgorithm):\n    \"\"\"Implements the TD learning algorithm.\"\"\"\n    def __init__(self, mdp: MDP, exploration_policy: Policy, epsilon: float, discount: float, learning_rate: float):\n        self.mdp = mdp\n        self.exploration_policy = exploration_policy\n        self.epsilon = epsilon\n        self.discount = discount\n        self.learning_rate = learning_rate\n        self.V = defaultdict(float)\n\n    def get_action(self, state: Any) -> Any:\n        \"\"\"Use MDP to compute Q_\u03c0(s, a) from V_\u03c0(s).\"\"\"\n        if np.random.random() < self.epsilon:\n            return self.exploration_policy(state)\n        else:\n            return self.pi(state)\n\n    def pi(self, state: Any) -> Any:\n        \"\"\"Return the policy corresponding to the current V_\u03c0(s).\"\"\"\n        # Compute Q-value for each action\n        # Note this is the only place where we use knowledge of the MDP\n        q_values = {}  # action -> Q-value  @inspect q_values\n        for action, successors in get_action_successors(self.mdp, state).items():\n            q_values[action] = sum(succ.prob * (succ.reward + self.discount * self.V[succ.state]) for succ in successors)  # @inspect q_values\n\n        # Take the action with the highest Q-value\n        action = max(q_values.keys(), key=lambda action: q_values[action])  # @inspect action\n\n        return action\n\n    def incorporate_feedback(self, state: Any, action: Any, reward: Any, next_state: Any, is_end: bool) -> None:\n        \"\"\"Update V_\u03c0(s) based on the feedback (s, a, r, s').\"\"\"\n        # Predicted\n        predicted = self.V[state]  # @inspect predicted\n\n        # Target\n        target = reward + self.discount * self.V[next_state]  # @inspect target\n\n        # Update\n        self.V[state] += self.learning_rate * (target - predicted)  # @inspect self.V\n\n\ndef td_learning_for_games():\n    text(\"TD learning works for arbitrary MDPs\")\n    text(\"Now we adapt it to games:\")\n    text(\"- Succ(s, a) captures the transition (deterministically)\")\n    text(\"- No utility until the end of the game\")\n    text(\"- Two players: agent and opponent\")\n\n    text(\"Both agent and opponent use the same value function V_\u03c0(s) (**self-play**)\")\n    text(\"...but the agent maximizes and the opponent minimizes.\")\n    text(\"- \u03c0_agent(s) = argmax_a V_\u03c0(Succ(s, a))\")\n    text(\"- \u03c0_opp(s) = argmin_a V_\u03c0(Succ(s, a))\")\n\n    text(\"**Backgammon**\")\n    text(\"Each player tries to move their pieces off the the board:\")\n    image(\"images/backgammon1.jpg\", width=300)\n    text(\"Dice determines how many places the player can move:\")\n    image(\"images/backgammon2.jpg\", width=300)\n    text(\"Other rules:\")\n    text(\"- If land on an point with 1 opponent piece, move it to the bar\")\n    text(\"- Cannot land on point with >1 opponent pieces\")\n\n    text(\"Note that this game has randomness (dice).\")\n    text(\"Roll out the policies:\")\n    text(\"\u03c0_dice \u2192 \u03c0_agent \u2192 \u03c0_dice \u2192 \u03c0_opp \u2192 \u03c0_dice \u2192 \u03c0_agent \u2192 ...\")\n    text(\"We are learning \u03c0_agent and \u03c0_opp, but \u03c0_dice is fixed.\")\n\n    text(\"Let's define the parameterized value function.\")\n    text(\"First define a feature vector for each state:\")\n    image(\"images/backgammon-features.png\", width=400)\n    text(\"Then define a linear value function: V(s; w) = \u03c6(s) * w\")\n    text(\"...or MLP value function: V(s; w) = MLP_w(\u03c6(s))\")\n\n    text(\"Then just apply TD learning!\")\n\n\ndef historical_examples():\n    text(\"### Checkers\")\n    image(\"images/checkers.jpg\", width=200)\n    text(\"Arthur Samuel's checkers program [1959]:\")\n    text(\"- Learned by playing itself repeatedly (self-play)\")\n    text(\"- Smart features, linear evaluation function, use intermediate rewards\")\n    text(\"- Used alpha-beta pruning + search heuristics\")\n    text(\"- Reach human amateur level of play\")\n    text(\"- IBM 701: 9K of memory!\")\n\n    text(\"### Backgammon\")\n    image(\"images/backgammon1.jpg\", width=200)\n    text(\"Gerald Tesauro's TD-Gammon [1992]:\")\n    text(\"- Learned weights by playing itself repeatedly (1 million times)\")\n    text(\"- Dumb features, neural network, no intermediate rewards\")\n    text(\"- Reached human expert level of play, provided new insights into opening\")\n\n    text(\"### Go\")\n    image(\"images/go.jpg\", width=200)\n    text(\"AlphaGo Zero [2017]:\")\n    text(\"- Learned by self-play (4.9 million games)\")\n    text(\"- Dumb features (stone positions), neural network, no intermediate rewards, Monte Carlo Tree Search\")\n    text(\"- Beat AlphaGo, which beat Le Sedol in 2016\")\n    text(\"- Provided new insights into the game\")\n\n\nif __name__ == \"__main__\":\n    main()"
+  },
+  "hidden_line_numbers": {
+    "td_learning.py": []
+  },
+  "steps": [
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 11,
+          "function_name": "main",
+          "code": "def main():"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 12,
+          "function_name": "main",
+          "code": "text(\"Last time: two-player zero-sum games\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Last time: two-player zero-sum games",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 13,
+          "function_name": "main",
+          "code": "review_games()"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 13,
+          "function_name": "main",
+          "code": "review_games()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 26,
+          "function_name": "review_games",
+          "code": "def review_games():"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 13,
+          "function_name": "main",
+          "code": "review_games()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 27,
+          "function_name": "review_games",
+          "code": "text(\"Principle: minimax (also expectimax, expectiminimax)\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Principle: minimax (also expectimax, expectiminimax)",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 13,
+          "function_name": "main",
+          "code": "review_games()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 28,
+          "function_name": "review_games",
+          "code": "image(\"images/minimax.png\", width=500)"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "image",
+          "data": "images/minimax.png",
+          "style": {
+            "width": 500
+          },
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 13,
+          "function_name": "main",
+          "code": "review_games()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 29,
+          "function_name": "review_games",
+          "code": "text(\"Speeding up minimax\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Speeding up minimax",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 13,
+          "function_name": "main",
+          "code": "review_games()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 30,
+          "function_name": "review_games",
+          "code": "text(\"- Alpha-beta pruning (exact)\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Alpha-beta pruning (exact)",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 13,
+          "function_name": "main",
+          "code": "review_games()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 31,
+          "function_name": "review_games",
+          "code": "text(\"- Evaluation functions (approximate)\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Evaluation functions (approximate)",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 13,
+          "function_name": "main",
+          "code": "review_games()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 32,
+          "function_name": "review_games",
+          "code": "image(\"images/eval-functions-chess.png\", width=500)"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "image",
+          "data": "images/eval-functions-chess.png",
+          "style": {
+            "width": 500
+          },
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 13,
+          "function_name": "main",
+          "code": "review_games()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 33,
+          "function_name": "review_games",
+          "code": "text(\"This was manual heuristics...can we learn the evaluation function?\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "This was manual heuristics...can we learn the evaluation function?",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 13,
+          "function_name": "main",
+          "code": "review_games()"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 14,
+          "function_name": "main",
+          "code": "text(\"Today: use reinforcement learning (TD learning) to learn the evaluation function!\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Today: use reinforcement learning (TD learning) to learn the evaluation function!",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "td_learning_motivation()"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "td_learning_motivation()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 36,
+          "function_name": "td_learning_motivation",
+          "code": "def td_learning_motivation():"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "td_learning_motivation()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 37,
+          "function_name": "td_learning_motivation",
+          "code": "text(\"V_\u03c0(s): value (expected utility) of following policy \u03c0 from state s\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "V_\u03c0(s): value (expected utility) of following policy \u03c0 from state s",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "td_learning_motivation()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 38,
+          "function_name": "td_learning_motivation",
+          "code": "text(\"Q_\u03c0(s, a): value (expected utility) of taking action a in state s, and then following policy \u03c0\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Q_\u03c0(s, a): value (expected utility) of taking action a in state s, and then following policy \u03c0",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "td_learning_motivation()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 40,
+          "function_name": "td_learning_motivation",
+          "code": "text(\"Recall SARSA from reinforcement learning:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Recall SARSA from reinforcement learning:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "td_learning_motivation()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 41,
+          "function_name": "td_learning_motivation",
+          "code": "text(\"- On-policy: estimating Q-values of the current policy Q_\u03c0(s, a)\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- On-policy: estimating Q-values of the current policy Q_\u03c0(s, a)",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "td_learning_motivation()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 42,
+          "function_name": "td_learning_motivation",
+          "code": "text(\"- Bootstrapping: target is immediate reward + estimated future reward\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Bootstrapping: target is immediate reward + estimated future reward",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "td_learning_motivation()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 43,
+          "function_name": "td_learning_motivation",
+          "code": "image(\"images/sarsa-algorithm.png\", width=500)"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "image",
+          "data": "images/sarsa-algorithm.png",
+          "style": {
+            "width": 500
+          },
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "td_learning_motivation()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 44,
+          "function_name": "td_learning_motivation",
+          "code": "rl = SARSA(exploration_policy=partial(walk_tram_policy, 6), epsilon=0.4, discount=1, learning_rate=0.1)"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "td_learning_motivation()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 45,
+          "function_name": "td_learning_motivation",
+          "code": "rl.get_action(state=1)"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "td_learning_motivation()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 46,
+          "function_name": "td_learning_motivation",
+          "code": "rl.incorporate_feedback(state=1, action=\"walk\", reward=-1, next_state=2, is_end=False)"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "td_learning_motivation()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 47,
+          "function_name": "td_learning_motivation",
+          "code": "rl.get_action(state=2)"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "td_learning_motivation()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 48,
+          "function_name": "td_learning_motivation",
+          "code": "rl.incorporate_feedback(state=2, action=\"walk\", reward=-1, next_state=3, is_end=False)"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "td_learning_motivation()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 49,
+          "function_name": "td_learning_motivation",
+          "code": "rl.get_action(state=3)"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "td_learning_motivation()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 50,
+          "function_name": "td_learning_motivation",
+          "code": "rl.incorporate_feedback(state=3, action=\"tram\", reward=-2, next_state=6, is_end=True)"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "td_learning_motivation()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 51,
+          "function_name": "td_learning_motivation",
+          "code": "text(\"**Policy improvement**: \u03c0_new(s) = argmax_a Q_\u03c0(s, a)\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "**Policy improvement**: \u03c0_new(s) = argmax_a Q_\u03c0(s, a)",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "td_learning_motivation()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 52,
+          "function_name": "td_learning_motivation",
+          "code": "text(\"In other words, from Q-values, you can read out a (myopically optimal) policy.\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "In other words, from Q-values, you can read out a (myopically optimal) policy.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "td_learning_motivation()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 54,
+          "function_name": "td_learning_motivation",
+          "code": "text(\"Recall policy evaluation from MDPs:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Recall policy evaluation from MDPs:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "td_learning_motivation()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 55,
+          "function_name": "td_learning_motivation",
+          "code": "text(\"- V_\u03c0(s) = Q_\u03c0(s, \u03c0(s))\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- V_\u03c0(s) = Q_\u03c0(s, \u03c0(s))",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "td_learning_motivation()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 56,
+          "function_name": "td_learning_motivation",
+          "code": "text(\"- Q_\u03c0(s, a) = \u03a3_s' T(s, a, s') (R(s, a, s') + \u03b3 V_\u03c0(s'))\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Q_\u03c0(s, a) = \u03a3_s' T(s, a, s') (R(s, a, s') + \u03b3 V_\u03c0(s'))",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "td_learning_motivation()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 57,
+          "function_name": "td_learning_motivation",
+          "code": "text(\"Question: if you only knew V_\u03c0(s), could you compute a policy from V_\u03c0(s)?\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Question: if you only knew V_\u03c0(s), could you compute a policy from V_\u03c0(s)?",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "td_learning_motivation()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 58,
+          "function_name": "td_learning_motivation",
+          "code": "text(\"Answer: \u03c0_new(s) = argmax_a \u03a3_s' T(s, a, s') (R(s, a, s') + \u03b3 V_\u03c0(s'))\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Answer: \u03c0_new(s) = argmax_a \u03a3_s' T(s, a, s') (R(s, a, s') + \u03b3 V_\u03c0(s'))",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "td_learning_motivation()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 59,
+          "function_name": "td_learning_motivation",
+          "code": "text(\"Note this requires knowledge of the MDP (transitions T, rewards R)!\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Note this requires knowledge of the MDP (transitions T, rewards R)!",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "td_learning_motivation()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 61,
+          "function_name": "td_learning_motivation",
+          "code": "text(\"However, for games, we do know T and R!\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "However, for games, we do know T and R!",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "td_learning_motivation()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 62,
+          "function_name": "td_learning_motivation",
+          "code": "text(\"Because it's deterministic, it simplifies to:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Because it's deterministic, it simplifies to:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "td_learning_motivation()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 63,
+          "function_name": "td_learning_motivation",
+          "code": "text(\"\u03c0_new(s) = argmax_a V_\u03c0(Succ(s, a))\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "\u03c0_new(s) = argmax_a V_\u03c0(Succ(s, a))",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "td_learning_motivation()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 65,
+          "function_name": "td_learning_motivation",
+          "code": "text(\"Wait, if we already know the MDP, why don't we just solve the MDP via value iteration?\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Wait, if we already know the MDP, why don't we just solve the MDP via value iteration?",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "td_learning_motivation()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 66,
+          "function_name": "td_learning_motivation",
+          "code": "text(\"Because it's too expensive (number of states is exponential)!\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Because it's too expensive (number of states is exponential)!",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "td_learning_motivation()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 68,
+          "function_name": "td_learning_motivation",
+          "code": "text(\"So we'll use reinforcement learning...\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "So we'll use reinforcement learning...",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "td_learning_motivation()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 69,
+          "function_name": "td_learning_motivation",
+          "code": "text(\"...not due to unknown MDP (original motivation),\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "...not due to unknown MDP (original motivation),",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "td_learning_motivation()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 70,
+          "function_name": "td_learning_motivation",
+          "code": "text(\"...but because the number of states is exponential!\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "...but because the number of states is exponential!",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 16,
+          "function_name": "main",
+          "code": "td_learning_motivation()"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 73,
+          "function_name": "td_learning",
+          "code": "def td_learning():"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 74,
+          "function_name": "td_learning",
+          "code": "link(\"https://stanford-cs221.github.io/autumn2023/modules/module.html#include=games%2Ftd-learning.js&mode=print6pp\", title=\"[Autumn 2023 lecture]\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "link",
+          "data": null,
+          "style": {},
+          "external_link": {
+            "title": "[Autumn 2023 lecture]",
+            "authors": null,
+            "organization": null,
+            "date": null,
+            "url": "https://stanford-cs221.github.io/autumn2023/modules/module.html#include=games%2Ftd-learning.js&mode=print6pp",
+            "description": null,
+            "notes": null
+          },
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 76,
+          "function_name": "td_learning",
+          "code": "text(\"TD learning : V_\u03c0 :: SARSA : Q_\u03c0\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "TD learning : V_\u03c0 :: SARSA : Q_\u03c0",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 78,
+          "function_name": "td_learning",
+          "code": "text(\"SARSA: Q_\u03c0(s, a) tells us how good each action is\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "SARSA: Q_\u03c0(s, a) tells us how good each action is",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 79,
+          "function_name": "td_learning",
+          "code": "text(\"TD learning: V_\u03c0(s) tells us how good each state is (since action \u2192 next state is known)\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "TD learning: V_\u03c0(s) tells us how good each state is (since action \u2192 next state is known)",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 81,
+          "function_name": "td_learning",
+          "code": "text(\"Assume function approximation: V_\u03c0(s) = V(s; w) for some weights w\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Assume function approximation: V_\u03c0(s) = V(s; w) for some weights w",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 82,
+          "function_name": "td_learning",
+          "code": "text(\"In deep reinforcement learning, V_\u03c0(s) is called a value network.\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "In deep reinforcement learning, V_\u03c0(s) is called a value network.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 84,
+          "function_name": "td_learning",
+          "code": "text(\"Basic idea:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Basic idea:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 85,
+          "function_name": "td_learning",
+          "code": "text(\"- Get piece of experience (s, a, r, s')\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Get piece of experience (s, a, r, s')",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 86,
+          "function_name": "td_learning",
+          "code": "text(\"- Model predicts V(s; w)\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Model predicts V(s; w)",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 87,
+          "function_name": "td_learning",
+          "code": "text(\"- Target (bootstrapping): r + \u03b3 * V(s'; w)\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Target (bootstrapping): r + \u03b3 * V(s'; w)",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 88,
+          "function_name": "td_learning",
+          "code": "text(\"- Define squared loss: L(w) = (V(s; w) - (r + \u03b3 * V(s'; w))) ^ 2\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Define squared loss: L(w) = (V(s; w) - (r + \u03b3 * V(s'; w))) ^ 2",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 89,
+          "function_name": "td_learning",
+          "code": "text(\"- Take a gradient step: w = w - \u03b1 * \u2207_w L(w)\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Take a gradient step: w = w - \u03b1 * \u2207_w L(w)",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 91,
+          "function_name": "td_learning",
+          "code": "image(\"images/td-algorithm.png\", width=500)"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "image",
+          "data": "images/td-algorithm.png",
+          "style": {
+            "width": 500
+          },
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 93,
+          "function_name": "td_learning",
+          "code": "text(\"Let's implement TD learning for the flaky tram MDP:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Let's implement TD learning for the flaky tram MDP:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 94,
+          "function_name": "td_learning",
+          "code": "set_random_seed(1)"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 95,
+          "function_name": "td_learning",
+          "code": "mdp = FlakyTramMDP(num_locs=6, failure_prob=0.1)"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 96,
+          "function_name": "td_learning",
+          "code": "policy = partial(walk_tram_policy, 6)"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 98,
+          "function_name": "td_learning",
+          "code": "rl = TDLearning(mdp=mdp, exploration_policy=policy, epsilon=0.2, discount=1, learning_rate=0.1)  # @stepover"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 99,
+          "function_name": "td_learning",
+          "code": "rl.get_action(state=1)"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 99,
+          "function_name": "td_learning",
+          "code": "rl.get_action(state=1)"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 122,
+          "function_name": "get_action",
+          "code": "def get_action(self, state: Any) -> Any:"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 99,
+          "function_name": "td_learning",
+          "code": "rl.get_action(state=1)"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 124,
+          "function_name": "get_action",
+          "code": "if np.random.random() < self.epsilon:"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 99,
+          "function_name": "td_learning",
+          "code": "rl.get_action(state=1)"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 127,
+          "function_name": "get_action",
+          "code": "return self.pi(state)"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 99,
+          "function_name": "td_learning",
+          "code": "rl.get_action(state=1)"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 127,
+          "function_name": "get_action",
+          "code": "return self.pi(state)"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 129,
+          "function_name": "pi",
+          "code": "def pi(self, state: Any) -> Any:"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 99,
+          "function_name": "td_learning",
+          "code": "rl.get_action(state=1)"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 127,
+          "function_name": "get_action",
+          "code": "return self.pi(state)"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 133,
+          "function_name": "pi",
+          "code": "q_values = {}  # action -> Q-value  @inspect q_values"
+        }
+      ],
+      "env": {
+        "q_values": {
+          "type": "dict",
+          "contents": {},
+          "dtype": null,
+          "shape": null
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 99,
+          "function_name": "td_learning",
+          "code": "rl.get_action(state=1)"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 127,
+          "function_name": "get_action",
+          "code": "return self.pi(state)"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 134,
+          "function_name": "pi",
+          "code": "for action, successors in get_action_successors(self.mdp, state).items():"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 99,
+          "function_name": "td_learning",
+          "code": "rl.get_action(state=1)"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 127,
+          "function_name": "get_action",
+          "code": "return self.pi(state)"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 135,
+          "function_name": "pi",
+          "code": "q_values[action] = sum(succ.prob * (succ.reward + self.discount * self.V[succ.state]) for succ in successors)  # @inspect q_values"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 99,
+          "function_name": "td_learning",
+          "code": "rl.get_action(state=1)"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 127,
+          "function_name": "get_action",
+          "code": "return self.pi(state)"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 135,
+          "function_name": "pi",
+          "code": "q_values[action] = sum(succ.prob * (succ.reward + self.discount * self.V[succ.state]) for succ in successors)  # @inspect q_values"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 135,
+          "function_name": "<genexpr>",
+          "code": "q_values[action] = sum(succ.prob * (succ.reward + self.discount * self.V[succ.state]) for succ in successors)  # @inspect q_values"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 99,
+          "function_name": "td_learning",
+          "code": "rl.get_action(state=1)"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 127,
+          "function_name": "get_action",
+          "code": "return self.pi(state)"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 135,
+          "function_name": "pi",
+          "code": "q_values[action] = sum(succ.prob * (succ.reward + self.discount * self.V[succ.state]) for succ in successors)  # @inspect q_values"
+        }
+      ],
+      "env": {
+        "q_values": {
+          "type": "dict",
+          "contents": {
+            "walk": {
+              "type": "float",
+              "contents": -1.0,
+              "dtype": null,
+              "shape": null
+            }
+          },
+          "dtype": null,
+          "shape": null
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 99,
+          "function_name": "td_learning",
+          "code": "rl.get_action(state=1)"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 127,
+          "function_name": "get_action",
+          "code": "return self.pi(state)"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 134,
+          "function_name": "pi",
+          "code": "for action, successors in get_action_successors(self.mdp, state).items():"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 99,
+          "function_name": "td_learning",
+          "code": "rl.get_action(state=1)"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 127,
+          "function_name": "get_action",
+          "code": "return self.pi(state)"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 135,
+          "function_name": "pi",
+          "code": "q_values[action] = sum(succ.prob * (succ.reward + self.discount * self.V[succ.state]) for succ in successors)  # @inspect q_values"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 99,
+          "function_name": "td_learning",
+          "code": "rl.get_action(state=1)"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 127,
+          "function_name": "get_action",
+          "code": "return self.pi(state)"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 135,
+          "function_name": "pi",
+          "code": "q_values[action] = sum(succ.prob * (succ.reward + self.discount * self.V[succ.state]) for succ in successors)  # @inspect q_values"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 135,
+          "function_name": "<genexpr>",
+          "code": "q_values[action] = sum(succ.prob * (succ.reward + self.discount * self.V[succ.state]) for succ in successors)  # @inspect q_values"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 99,
+          "function_name": "td_learning",
+          "code": "rl.get_action(state=1)"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 127,
+          "function_name": "get_action",
+          "code": "return self.pi(state)"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 135,
+          "function_name": "pi",
+          "code": "q_values[action] = sum(succ.prob * (succ.reward + self.discount * self.V[succ.state]) for succ in successors)  # @inspect q_values"
+        }
+      ],
+      "env": {
+        "q_values": {
+          "type": "dict",
+          "contents": {
+            "walk": {
+              "type": "float",
+              "contents": -1.0,
+              "dtype": null,
+              "shape": null
+            },
+            "tram": {
+              "type": "float",
+              "contents": -2.0,
+              "dtype": null,
+              "shape": null
+            }
+          },
+          "dtype": null,
+          "shape": null
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 99,
+          "function_name": "td_learning",
+          "code": "rl.get_action(state=1)"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 127,
+          "function_name": "get_action",
+          "code": "return self.pi(state)"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 134,
+          "function_name": "pi",
+          "code": "for action, successors in get_action_successors(self.mdp, state).items():"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 99,
+          "function_name": "td_learning",
+          "code": "rl.get_action(state=1)"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 127,
+          "function_name": "get_action",
+          "code": "return self.pi(state)"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 138,
+          "function_name": "pi",
+          "code": "action = max(q_values.keys(), key=lambda action: q_values[action])  # @inspect action"
+        }
+      ],
+      "env": {
+        "action": {
+          "type": "str",
+          "contents": "walk",
+          "dtype": null,
+          "shape": null
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 99,
+          "function_name": "td_learning",
+          "code": "rl.get_action(state=1)"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 127,
+          "function_name": "get_action",
+          "code": "return self.pi(state)"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 140,
+          "function_name": "pi",
+          "code": "return action"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 99,
+          "function_name": "td_learning",
+          "code": "rl.get_action(state=1)"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 127,
+          "function_name": "get_action",
+          "code": "return self.pi(state)"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 99,
+          "function_name": "td_learning",
+          "code": "rl.get_action(state=1)"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 100,
+          "function_name": "td_learning",
+          "code": "rl.incorporate_feedback(state=1, action=\"walk\", reward=-1, next_state=2, is_end=False)"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 100,
+          "function_name": "td_learning",
+          "code": "rl.incorporate_feedback(state=1, action=\"walk\", reward=-1, next_state=2, is_end=False)"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 142,
+          "function_name": "incorporate_feedback",
+          "code": "def incorporate_feedback(self, state: Any, action: Any, reward: Any, next_state: Any, is_end: bool) -> None:"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 100,
+          "function_name": "td_learning",
+          "code": "rl.incorporate_feedback(state=1, action=\"walk\", reward=-1, next_state=2, is_end=False)"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 145,
+          "function_name": "incorporate_feedback",
+          "code": "predicted = self.V[state]  # @inspect predicted"
+        }
+      ],
+      "env": {
+        "predicted": {
+          "type": "float",
+          "contents": 0.0,
+          "dtype": null,
+          "shape": null
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 100,
+          "function_name": "td_learning",
+          "code": "rl.incorporate_feedback(state=1, action=\"walk\", reward=-1, next_state=2, is_end=False)"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 148,
+          "function_name": "incorporate_feedback",
+          "code": "target = reward + self.discount * self.V[next_state]  # @inspect target"
+        }
+      ],
+      "env": {
+        "target": {
+          "type": "float",
+          "contents": -1.0,
+          "dtype": null,
+          "shape": null
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 100,
+          "function_name": "td_learning",
+          "code": "rl.incorporate_feedback(state=1, action=\"walk\", reward=-1, next_state=2, is_end=False)"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 151,
+          "function_name": "incorporate_feedback",
+          "code": "self.V[state] += self.learning_rate * (target - predicted)  # @inspect self.V"
+        }
+      ],
+      "env": {
+        "self.V": {
+          "type": "collections.defaultdict",
+          "contents": {
+            "2": {
+              "type": "float",
+              "contents": 0.0,
+              "dtype": null,
+              "shape": null
+            },
+            "1": {
+              "type": "float",
+              "contents": -0.1,
+              "dtype": null,
+              "shape": null
+            }
+          },
+          "dtype": null,
+          "shape": null
+        }
+      },
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 100,
+          "function_name": "td_learning",
+          "code": "rl.incorporate_feedback(state=1, action=\"walk\", reward=-1, next_state=2, is_end=False)"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 101,
+          "function_name": "td_learning",
+          "code": "rl.get_action(state=2)  # @stepover"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 102,
+          "function_name": "td_learning",
+          "code": "rl.incorporate_feedback(state=2, action=\"walk\", reward=-1, next_state=3, is_end=False)  # @stepover"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 103,
+          "function_name": "td_learning",
+          "code": "rl.get_action(state=3)  # @stepover"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 104,
+          "function_name": "td_learning",
+          "code": "rl.incorporate_feedback(state=3, action=\"tram\", reward=-2, next_state=6, is_end=True)  # @stepover"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 106,
+          "function_name": "td_learning",
+          "code": "text(\"Summary:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Summary:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 107,
+          "function_name": "td_learning",
+          "code": "text(\"- TD learning estimates V_\u03c0(s) from experience (s, a, r, s')\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- TD learning estimates V_\u03c0(s) from experience (s, a, r, s')",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 108,
+          "function_name": "td_learning",
+          "code": "text(\"- On policy (we're not considering other actions)\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- On policy (we're not considering other actions)",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 109,
+          "function_name": "td_learning",
+          "code": "text(\"- Uses bootstrapping\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Uses bootstrapping",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 17,
+          "function_name": "main",
+          "code": "td_learning()"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "td_learning_for_games()"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "td_learning_for_games()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 154,
+          "function_name": "td_learning_for_games",
+          "code": "def td_learning_for_games():"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "td_learning_for_games()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 155,
+          "function_name": "td_learning_for_games",
+          "code": "text(\"TD learning works for arbitrary MDPs\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "TD learning works for arbitrary MDPs",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "td_learning_for_games()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 156,
+          "function_name": "td_learning_for_games",
+          "code": "text(\"Now we adapt it to games:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Now we adapt it to games:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "td_learning_for_games()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 157,
+          "function_name": "td_learning_for_games",
+          "code": "text(\"- Succ(s, a) captures the transition (deterministically)\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Succ(s, a) captures the transition (deterministically)",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "td_learning_for_games()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 158,
+          "function_name": "td_learning_for_games",
+          "code": "text(\"- No utility until the end of the game\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- No utility until the end of the game",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "td_learning_for_games()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 159,
+          "function_name": "td_learning_for_games",
+          "code": "text(\"- Two players: agent and opponent\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Two players: agent and opponent",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "td_learning_for_games()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 161,
+          "function_name": "td_learning_for_games",
+          "code": "text(\"Both agent and opponent use the same value function V_\u03c0(s) (**self-play**)\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Both agent and opponent use the same value function V_\u03c0(s) (**self-play**)",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "td_learning_for_games()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 162,
+          "function_name": "td_learning_for_games",
+          "code": "text(\"...but the agent maximizes and the opponent minimizes.\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "...but the agent maximizes and the opponent minimizes.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "td_learning_for_games()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 163,
+          "function_name": "td_learning_for_games",
+          "code": "text(\"- \u03c0_agent(s) = argmax_a V_\u03c0(Succ(s, a))\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- \u03c0_agent(s) = argmax_a V_\u03c0(Succ(s, a))",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "td_learning_for_games()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 164,
+          "function_name": "td_learning_for_games",
+          "code": "text(\"- \u03c0_opp(s) = argmin_a V_\u03c0(Succ(s, a))\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- \u03c0_opp(s) = argmin_a V_\u03c0(Succ(s, a))",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "td_learning_for_games()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 166,
+          "function_name": "td_learning_for_games",
+          "code": "text(\"**Backgammon**\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "**Backgammon**",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "td_learning_for_games()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 167,
+          "function_name": "td_learning_for_games",
+          "code": "text(\"Each player tries to move their pieces off the the board:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Each player tries to move their pieces off the the board:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "td_learning_for_games()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 168,
+          "function_name": "td_learning_for_games",
+          "code": "image(\"images/backgammon1.jpg\", width=300)"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "image",
+          "data": "images/backgammon1.jpg",
+          "style": {
+            "width": 300
+          },
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "td_learning_for_games()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 169,
+          "function_name": "td_learning_for_games",
+          "code": "text(\"Dice determines how many places the player can move:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Dice determines how many places the player can move:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "td_learning_for_games()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 170,
+          "function_name": "td_learning_for_games",
+          "code": "image(\"images/backgammon2.jpg\", width=300)"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "image",
+          "data": "images/backgammon2.jpg",
+          "style": {
+            "width": 300
+          },
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "td_learning_for_games()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 171,
+          "function_name": "td_learning_for_games",
+          "code": "text(\"Other rules:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Other rules:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "td_learning_for_games()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 172,
+          "function_name": "td_learning_for_games",
+          "code": "text(\"- If land on an point with 1 opponent piece, move it to the bar\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- If land on an point with 1 opponent piece, move it to the bar",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "td_learning_for_games()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 173,
+          "function_name": "td_learning_for_games",
+          "code": "text(\"- Cannot land on point with >1 opponent pieces\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Cannot land on point with >1 opponent pieces",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "td_learning_for_games()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 175,
+          "function_name": "td_learning_for_games",
+          "code": "text(\"Note that this game has randomness (dice).\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Note that this game has randomness (dice).",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "td_learning_for_games()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 176,
+          "function_name": "td_learning_for_games",
+          "code": "text(\"Roll out the policies:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Roll out the policies:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "td_learning_for_games()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 177,
+          "function_name": "td_learning_for_games",
+          "code": "text(\"\u03c0_dice \u2192 \u03c0_agent \u2192 \u03c0_dice \u2192 \u03c0_opp \u2192 \u03c0_dice \u2192 \u03c0_agent \u2192 ...\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "\u03c0_dice \u2192 \u03c0_agent \u2192 \u03c0_dice \u2192 \u03c0_opp \u2192 \u03c0_dice \u2192 \u03c0_agent \u2192 ...",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "td_learning_for_games()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 178,
+          "function_name": "td_learning_for_games",
+          "code": "text(\"We are learning \u03c0_agent and \u03c0_opp, but \u03c0_dice is fixed.\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "We are learning \u03c0_agent and \u03c0_opp, but \u03c0_dice is fixed.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "td_learning_for_games()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 180,
+          "function_name": "td_learning_for_games",
+          "code": "text(\"Let's define the parameterized value function.\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Let's define the parameterized value function.",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "td_learning_for_games()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 181,
+          "function_name": "td_learning_for_games",
+          "code": "text(\"First define a feature vector for each state:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "First define a feature vector for each state:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "td_learning_for_games()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 182,
+          "function_name": "td_learning_for_games",
+          "code": "image(\"images/backgammon-features.png\", width=400)"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "image",
+          "data": "images/backgammon-features.png",
+          "style": {
+            "width": 400
+          },
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "td_learning_for_games()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 183,
+          "function_name": "td_learning_for_games",
+          "code": "text(\"Then define a linear value function: V(s; w) = \u03c6(s) * w\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Then define a linear value function: V(s; w) = \u03c6(s) * w",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "td_learning_for_games()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 184,
+          "function_name": "td_learning_for_games",
+          "code": "text(\"...or MLP value function: V(s; w) = MLP_w(\u03c6(s))\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "...or MLP value function: V(s; w) = MLP_w(\u03c6(s))",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "td_learning_for_games()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 186,
+          "function_name": "td_learning_for_games",
+          "code": "text(\"Then just apply TD learning!\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Then just apply TD learning!",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "td_learning_for_games()"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "historical_examples()"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "historical_examples()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 189,
+          "function_name": "historical_examples",
+          "code": "def historical_examples():"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "historical_examples()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 190,
+          "function_name": "historical_examples",
+          "code": "text(\"### Checkers\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "### Checkers",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "historical_examples()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 191,
+          "function_name": "historical_examples",
+          "code": "image(\"images/checkers.jpg\", width=200)"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "image",
+          "data": "images/checkers.jpg",
+          "style": {
+            "width": 200
+          },
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "historical_examples()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 192,
+          "function_name": "historical_examples",
+          "code": "text(\"Arthur Samuel's checkers program [1959]:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Arthur Samuel's checkers program [1959]:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "historical_examples()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 193,
+          "function_name": "historical_examples",
+          "code": "text(\"- Learned by playing itself repeatedly (self-play)\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Learned by playing itself repeatedly (self-play)",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "historical_examples()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 194,
+          "function_name": "historical_examples",
+          "code": "text(\"- Smart features, linear evaluation function, use intermediate rewards\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Smart features, linear evaluation function, use intermediate rewards",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "historical_examples()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 195,
+          "function_name": "historical_examples",
+          "code": "text(\"- Used alpha-beta pruning + search heuristics\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Used alpha-beta pruning + search heuristics",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "historical_examples()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 196,
+          "function_name": "historical_examples",
+          "code": "text(\"- Reach human amateur level of play\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Reach human amateur level of play",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "historical_examples()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 197,
+          "function_name": "historical_examples",
+          "code": "text(\"- IBM 701: 9K of memory!\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- IBM 701: 9K of memory!",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "historical_examples()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 199,
+          "function_name": "historical_examples",
+          "code": "text(\"### Backgammon\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "### Backgammon",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "historical_examples()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 200,
+          "function_name": "historical_examples",
+          "code": "image(\"images/backgammon1.jpg\", width=200)"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "image",
+          "data": "images/backgammon1.jpg",
+          "style": {
+            "width": 200
+          },
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "historical_examples()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 201,
+          "function_name": "historical_examples",
+          "code": "text(\"Gerald Tesauro's TD-Gammon [1992]:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Gerald Tesauro's TD-Gammon [1992]:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "historical_examples()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 202,
+          "function_name": "historical_examples",
+          "code": "text(\"- Learned weights by playing itself repeatedly (1 million times)\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Learned weights by playing itself repeatedly (1 million times)",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "historical_examples()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 203,
+          "function_name": "historical_examples",
+          "code": "text(\"- Dumb features, neural network, no intermediate rewards\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Dumb features, neural network, no intermediate rewards",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "historical_examples()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 204,
+          "function_name": "historical_examples",
+          "code": "text(\"- Reached human expert level of play, provided new insights into opening\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Reached human expert level of play, provided new insights into opening",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "historical_examples()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 206,
+          "function_name": "historical_examples",
+          "code": "text(\"### Go\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "### Go",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "historical_examples()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 207,
+          "function_name": "historical_examples",
+          "code": "image(\"images/go.jpg\", width=200)"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "image",
+          "data": "images/go.jpg",
+          "style": {
+            "width": 200
+          },
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "historical_examples()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 208,
+          "function_name": "historical_examples",
+          "code": "text(\"AlphaGo Zero [2017]:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "AlphaGo Zero [2017]:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "historical_examples()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 209,
+          "function_name": "historical_examples",
+          "code": "text(\"- Learned by self-play (4.9 million games)\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Learned by self-play (4.9 million games)",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "historical_examples()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 210,
+          "function_name": "historical_examples",
+          "code": "text(\"- Dumb features (stone positions), neural network, no intermediate rewards, Monte Carlo Tree Search\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Dumb features (stone positions), neural network, no intermediate rewards, Monte Carlo Tree Search",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "historical_examples()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 211,
+          "function_name": "historical_examples",
+          "code": "text(\"- Beat AlphaGo, which beat Le Sedol in 2016\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Beat AlphaGo, which beat Le Sedol in 2016",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "historical_examples()"
+        },
+        {
+          "path": "td_learning.py",
+          "line_number": 212,
+          "function_name": "historical_examples",
+          "code": "text(\"- Provided new insights into the game\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Provided new insights into the game",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 19,
+          "function_name": "main",
+          "code": "historical_examples()"
+        }
+      ],
+      "env": {},
+      "renderings": []
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 21,
+          "function_name": "main",
+          "code": "text(\"Next:\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "Next:",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 22,
+          "function_name": "main",
+          "code": "text(\"- Turn-based \u2192 simultaneous games\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Turn-based \u2192 simultaneous games",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    },
+    {
+      "stack": [
+        {
+          "path": "td_learning.py",
+          "line_number": 23,
+          "function_name": "main",
+          "code": "text(\"- Zero-sum \u2192 non-zero-sum\")"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "markdown",
+          "data": "- Zero-sum \u2192 non-zero-sum",
+          "style": {},
+          "external_link": null,
+          "internal_link": null
+        }
+      ]
+    }
+  ]
+}

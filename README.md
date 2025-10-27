@@ -56,3 +56,8 @@ To run locally:
 ### Wed Oct 22: games i (lecture 10)
 
 - [games](https://stanford-cs221.github.io/autumn2025-lectures/?trace=games)
+
+### Mon Oct 27: games ii (lecture 11)
+
+- [td_learning](https://stanford-cs221.github.io/autumn2025-lectures/?trace=td_learning)
+- [simultaneous_games](https://stanford-cs221.github.io/autumn2025-lectures/?trace=simultaneous_games)
