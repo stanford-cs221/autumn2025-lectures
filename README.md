@@ -61,3 +61,7 @@ To run locally:
 
 - [td_learning](https://stanford-cs221.github.io/autumn2025-lectures/?trace=td_learning)
 - [simultaneous_games](https://stanford-cs221.github.io/autumn2025-lectures/?trace=simultaneous_games)
+
+### Wed Oct 29: bayes i (lecture 12)
+
+- [bayes](https://stanford-cs221.github.io/autumn2025-lectures/?trace=bayes)

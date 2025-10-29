@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <link href="http://arxiv.org/api/query?search_query%3D%26id_list%3D2502.01236%26start%3D0%26max_results%3D10" rel="self" type="application/atom+xml"/>
+  <title type="html">ArXiv Query: search_query=&amp;id_list=2502.01236&amp;start=0&amp;max_results=10</title>
+  <id>http://arxiv.org/api/UT/6ZCo/dPngWOeV5+u6bhTeA70</id>
+  <updated>2025-10-29T00:00:00-04:00</updated>
+  <opensearch:totalResults xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">1</opensearch:totalResults>
+  <opensearch:startIndex xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">0</opensearch:startIndex>
+  <opensearch:itemsPerPage xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">10</opensearch:itemsPerPage>
+  <entry>
+    <id>http://arxiv.org/abs/2502.01236v1</id>
+    <updated>2025-02-03T10:52:44Z</updated>
+    <published>2025-02-03T10:52:44Z</published>
+    <title>Eliciting Language Model Behaviors with Investigator Agents</title>
+    <summary>  Language models exhibit complex, diverse behaviors when prompted with
+free-form text, making it difficult to characterize the space of possible
+outputs. We study the problem of behavior elicitation, where the goal is to
+search for prompts that induce specific target behaviors (e.g., hallucinations
+or harmful responses) from a target language model. To navigate the
+exponentially large space of possible prompts, we train investigator models to
+map randomly-chosen target behaviors to a diverse distribution of outputs that
+elicit them, similar to amortized Bayesian inference. We do this through
+supervised fine-tuning, reinforcement learning via DPO, and a novel Frank-Wolfe
+training objective to iteratively discover diverse prompting strategies. Our
+investigator models surface a variety of effective and human-interpretable
+prompts leading to jailbreaks, hallucinations, and open-ended aberrant
+behaviors, obtaining a 100% attack success rate on a subset of AdvBench
+(Harmful Behaviors) and an 85% hallucination rate.
+</summary>
+    <author>
+      <name>Xiang Lisa Li</name>
+    </author>
+    <author>
+      <name>Neil Chowdhury</name>
+    </author>
+    <author>
+      <name>Daniel D. Johnson</name>
+    </author>
+    <author>
+      <name>Tatsunori Hashimoto</name>
+    </author>
+    <author>
+      <name>Percy Liang</name>
+    </author>
+    <author>
+      <name>Sarah Schwettmann</name>
+    </author>
+    <author>
+      <name>Jacob Steinhardt</name>
+    </author>
+    <arxiv:comment xmlns:arxiv="http://arxiv.org/schemas/atom">20 pages, 7 figures</arxiv:comment>
+    <link href="http://arxiv.org/abs/2502.01236v1" rel="alternate" type="text/html"/>
+    <link title="pdf" href="http://arxiv.org/pdf/2502.01236v1" rel="related" type="application/pdf"/>
+    <arxiv:primary_category xmlns:arxiv="http://arxiv.org/schemas/atom" term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+  </entry>
+</feed>
