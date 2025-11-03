@@ -532,8 +532,8 @@ def hidden_markov_model():
     E = [None] * num_steps  # Sensor readings @inspect E
 
     for t in range(num_steps):
-        H[t] = (H[t - 1] if t > 0 else 0) + Bernoulli(0.5)  # @stepover
-        E[t] = H[t] + Bernoulli(0.5)  # @stepover
+        H[t] = (H[t - 1] if t > 0 else 0) + Bernoulli(0.5)  # @stepover @inspect H
+        E[t] = H[t] + Bernoulli(0.5)  # @stepover @inspect E
 
     return {"H": H, "E": E}
 

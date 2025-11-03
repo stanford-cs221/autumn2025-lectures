@@ -76,3 +76,9 @@ def one_hot(index: int, length: int) -> torch.Tensor:
 def sample_dict(choices: dict[Any, float]) -> Any:
     """Sample a key from a dictionary of choices based on their probabilities (values)."""
     return np.random.choice(list(choices.keys()), p=list(choices.values()))
+
+
+def normalize_dict(choices: dict[Any, float]) -> dict[Any, float]:
+    """Normalize a dictionary of choices based on their probabilities (values)."""
+    total_prob = sum(choices.values())
+    return {key: prob / total_prob for key, prob in choices.items()}
