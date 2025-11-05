@@ -228,7 +228,8 @@ def markov_blanket():
     text("Notice that p(c | b) shows up in both cases, and does not impact P(A | B = b, C = c).")
     text("So we can just ignore it!")
 
-    text("In general, we need to only include variables that touch the variable we're sampling.")
+    text("In general, we need to only include local conditional probabilities that involve the variable we're sampling.")
+    text("Evaluating these local conditional probabilities requires knowing all involved variables.")
     text("This set of variables is called the **Markov blanket**.")
     text("The Markov blanket of a variable is all its children and parents.")
     text("MarkovBlanket(A) = {B}")
@@ -240,9 +241,9 @@ def markov_blanket():
     def markov_prob(x, var, value):
         y = x | {var: value}
         if var == "A":
-            return p_a.p[y["A"]] * p_b_given_a.p[y["B"], y["A"]]  # no p(c | b)
+            return p_a.p[y["A"]] * p_b_given_a.p[y["A"], y["B"]]  # no p(c | b)
         elif var == "B":
-            return p_b_given_a.p[y["B"], y["A"]] * p_c_given_b.p[y["C"], y["B"]]  # no p(a)
+            return p_b_given_a.p[y["A"], y["B"]] * p_c_given_b.p[y["B"], y["C"]]  # no p(a)
         else:
             raise ValueError(f"Unknown variable: {var}")
 
@@ -407,9 +408,8 @@ def introduce_conditional_independence():
     image("images/medical-bayes.png", width=200)
     text("C and A are independent")
     text("C and I are independent")
-    text("C and H are independent given A")
     text("C and I are independent given A")
-    text("C and I are independent given H, A")
+    text("C and I are independent given A, H")
     
 
 if __name__ == "__main__":
