@@ -73,3 +73,11 @@ To run locally:
 ### Wed Nov 5: learning (lecture 14)
 
 - [bayes_learning](https://stanford-cs221.github.io/autumn2025-lectures/?trace=bayes_learning)
+
+### Mon Nov 10: learning (lecture 15)
+
+- [propositional_logic](https://stanford-cs221.github.io/autumn2025-lectures/?trace=propositional_logic)
+
+### Wed Nov 12: learning (lecture 16)
+
+- [first_order_logic](https://stanford-cs221.github.io/autumn2025-lectures/?trace=first_order_logic): under construction
