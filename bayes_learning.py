@@ -10,9 +10,9 @@ def main():
     text("### Lecture 14: learning parameters of Bayesian networks")
     review_bayesian_networks()
 
-    introduce_fully_observed_setting()
-    introduce_laplace_smoothing()
-    introduce_expectation_maximization()
+    introduce_fully_observable_setting()    # Fully observable setting: all variables are observed
+    introduce_laplace_smoothing()         # Prevent overfitting
+    introduce_expectation_maximization()  # Partially-observable setting: some variables are unobserved
 
     text("Summary:")
     text("- Learning task: given training data, estimate the parameters of the Bayesian network")
@@ -65,7 +65,7 @@ def review_bayesian_networks():
     text("This class: where do all these probabilities come from?")
 
 
-def introduce_fully_observed_setting():
+def introduce_fully_observable_setting():
     link("https://stanford-cs221.github.io/autumn2023/modules/module.html#include=bayesian-networks%2Fsupervised-learning.js&level=0&mode=print6pp", title="[Autumn 2023 lecture]")
 
     text("Learning task:")
@@ -132,13 +132,13 @@ def two_variables():
         counts_g[x["G"]] += 1  # @inspect counts_g
         counts_gr[x["G"]][x["R"]] += 1  # @inspect counts_gr
 
-    text("2. **Normalize** to get probabilities:")
+    text("2. **Normalize** to get probabilities:")  # @clear x
     p_g = normalize_dict(counts_g)  # @inspect p_g @stepover
     p_r_given_g = {}
     for g in counts_g:  # @inspect g
         p_r_given_g[g] = normalize_dict(counts_gr[g])  # @inspect p_r_given_g @stepover
 
-    text("Notes:")
+    text("Notes:")  # @clear g
     text("- To estimate a local conditional distribution, just ignore the other variables!")
     text("- Count + normalize!")
 
@@ -170,14 +170,14 @@ def v_structure():
         counts_a[x["A"]] += 1  # @inspect counts_a
         counts_gar[(x["G"], x["A"])][x["R"]] += 1  # @inspect counts_gar
 
-    text("2. **Normalize** to get probabilities:")
+    text("2. **Normalize** to get probabilities:")  # @clear x
     p_g = normalize_dict(counts_g)  # @inspect p_g @stepover
     p_a = normalize_dict(counts_a)  # @inspect p_a @stepover
     p_r_given_ga = {}
     for ga in counts_gar:  # @inspect ga
         p_r_given_ga[ga] = normalize_dict(counts_gar[ga])  # @inspect p_r_given_ga @stepover
 
-    text("There's nothing special about v-structures here.")
+    text("There's nothing special about v-structures here.")  # @clear ga
     text("Remember to condition on all parents simultaneously.")
 
 
@@ -208,7 +208,7 @@ def inverted_v_structure():
         counts_gr1[x["G"]][x["R1"]] += 1  # @inspect counts_gr1
         counts_gr2[x["G"]][x["R2"]] += 1  # @inspect counts_gr2
 
-    text("2. **Normalize** to get probabilities:")
+    text("2. **Normalize** to get probabilities:")  # @clear x
     p_g = normalize_dict(counts_g)  # @inspect p_g @stepover
     p_r1_given_g = {}
     for g in counts_g:  # @inspect g
@@ -250,13 +250,13 @@ def parameter_sharing():
         counts_gr[x["G"]][x["R1"]] += 1  # @inspect counts_gr
         counts_gr[x["G"]][x["R2"]] += 1  # @inspect counts_gr
 
-    text("2. **Normalize** to get probabilities:")
+    text("2. **Normalize** to get probabilities:")  # @clear x
     p_g = normalize_dict(counts_g)  # @inspect p_g @stepover
     p_r_given_g = {}
     for g in counts_g:  # @inspect g
         p_r_given_g[g] = normalize_dict(counts_gr[g])  # @inspect p_r_given_g @stepover
 
-    text("In probabilistic inference, we're only **reading** from the local conditional distributions")
+    text("In probabilistic inference, we're only **reading** from the local conditional distributions")  # @clear g
     text("...so we don't care whether p(r1 | g) and p(r2 | g) are the same distribution or not.")
 
     text("But when we're learning the parameters, we are **writing** to the local conditional distributions")
@@ -274,7 +274,7 @@ def hidden_markov_model():
     text("- E_t ∈ {0, 1}: sensor reading at time t")
     image("images/pgm-hmm.png", width=250)
     text("P(H = h, E = e) =")
-    text("p_start(h_1) p_E(e_1 | h_1) p_trans(h_2 | h_1) p_emit(e_2 | h_2) p_trans(h_3 | h_2) p_emit(e_3 | h_3)")
+    text("p_start(h_1) p_emit(e_1 | h_1) p_trans(h_2 | h_1) p_emit(e_2 | h_2) p_trans(h_3 | h_2) p_emit(e_3 | h_3)")
     text("Parameters: θ = (p_start, p_trans, p_emit)")
 
     text("Training data:")
@@ -295,7 +295,7 @@ def hidden_markov_model():
         counts_trans[x["H2"]][x["H3"]] += 1  # @inspect counts_trans
         counts_emit[x["H3"]][x["E3"]] += 1  # @inspect counts_emit
 
-    text("2. **Normalize** to get probabilities:")
+    text("2. **Normalize** to get probabilities:")  # @clear x
     p_start = normalize_dict(counts_start)  # @inspect p_start @stepover
     p_trans = {}
     for h in counts_trans:  # @inspect h
@@ -337,11 +337,11 @@ def general_bayesian_networks():
         "E3": ("emit", ["H3"]),
     }
 
-    # Learn the parameters
-    theta = supervised_learning(network_structure, training_data)  # @inspect theta
+    # Learn the parameters (we are in the fully observed setting)
+    theta = fully_observable_learning(network_structure, training_data)  # @inspect theta
 
 
-def supervised_learning(network_structure, training_data, pseudocounts=None):
+def fully_observable_learning(network_structure, training_data, pseudocounts=None):
     """Perform supervised learning on a Bayesian network.
     Args:
         network_structure: variable name -> (parameter name, parent variable names)
@@ -368,7 +368,7 @@ def supervised_learning(network_structure, training_data, pseudocounts=None):
             counts[parameter_name][parents_value][value] += 1  # @inspect counts
 
     # Normalize
-    theta = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))  # @inspect theta
+    theta = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))  # @inspect theta @clear x var value parameter_name parent_vars parents_value
     for parameter_name in counts:  # @inspect parameter_name
         for parents_value in counts[parameter_name]:  # @inspect parents_value
             theta[parameter_name][parents_value] = normalize_dict(counts[parameter_name][parents_value])  # @inspect theta @stepover
@@ -412,8 +412,8 @@ def maximum_likelihood_one_variable():
 
     text("Sketch:")
     text("- Introduce Lagrange multiplier for the sum-to-one constraint")
-    text("Set gradient of objective to 0 and solve")
-    text("Result: p_R(1) = 1/3, p_R(5) = 2/3")
+    text("- Set gradient of objective to 0 and solve")
+    text("- Result: p_R(1) = 1/3, p_R(5) = 2/3")
 
 def maximum_likelihood_two_variables():
     text("Consider the two variable case:")
@@ -448,7 +448,7 @@ def introduce_laplace_smoothing():
 
     network_structure = {"R": ("R", [])}
     training_data = [{"R": 1}, {"R": 4}]
-    theta = supervised_learning(network_structure, training_data)  # @inspect theta @stepover
+    theta = fully_observable_learning(network_structure, training_data)  # @inspect theta @stepover
     text("Do we really believe that p_R(2) = 0?")
 
     text("Solution: **Laplace smoothing**")
@@ -457,19 +457,19 @@ def introduce_laplace_smoothing():
         # Return the pseudocounts given Laplace smoothing with λ (lam)
         return {"R": {(): {1: smoothing, 2: smoothing, 3: smoothing, 4: smoothing, 5: smoothing}}}
     pseudocounts = get_pseudocounts(smoothing=1)  # @inspect pseudocounts @stepover
-    theta = supervised_learning(network_structure, training_data, pseudocounts)  # @inspect theta @stepover
+    theta = fully_observable_learning(network_structure, training_data, pseudocounts)  # @inspect theta @stepover
 
     text("As smoothing λ → 0, we get back to the original maximum likelihood estimate.")
     pseudocounts = get_pseudocounts(smoothing=0)  # @inspect pseudocounts @stepover
-    theta = supervised_learning(network_structure, training_data, pseudocounts)  # @inspect theta @stepover
+    theta = fully_observable_learning(network_structure, training_data, pseudocounts)  # @inspect theta @stepover
 
     text("As smoothing λ → ∞, we get a uniform distribution.")
     pseudocounts = get_pseudocounts(smoothing=20)  # @inspect pseudocounts @stepover
-    theta = supervised_learning(network_structure, training_data, pseudocounts)  # @inspect theta @stepover
+    theta = fully_observable_learning(network_structure, training_data, pseudocounts)  # @inspect theta @stepover
 
     text("No matter what the smoothing λ is, as we get more data, it gets washed out:")
     training_data = [{"R": 4}] * 1000
-    theta = supervised_learning(network_structure, training_data, pseudocounts)  # @inspect theta @stepover
+    theta = fully_observable_learning(network_structure, training_data, pseudocounts)  # @inspect theta @stepover
 
     text("Summary:")
     text("- Laplace smoothing: add pseudocounts λ to all the counts")
@@ -493,7 +493,7 @@ def introduce_expectation_maximization():
         "R1": ("R1", ["G"]),
         "R2": ("R2", ["G"]),
     }
-    theta = supervised_learning(network_structure, training_data)  # @inspect theta @stepover
+    theta = fully_observable_learning(network_structure, training_data)  # @inspect theta @stepover
 
     text("Partially-observed setting:")
     image("images/pgm-g-r1-r2.png", width=150)
@@ -510,7 +510,7 @@ def introduce_expectation_maximization():
     text("max_θ Σ_{r1,r2} log P(R1 = r1, R2 = r2; θ)")
     text("max_θ Σ_{r1,r2} log Σ_g P(G = g, R1 = r1, R2 = r2; θ)")
 
-    text("The players")
+    text("The players:")
     text("- Observed variables: R1, R2")
     text("- Unobserved variables: G")
     text("- Parameters: θ")
@@ -561,11 +561,11 @@ def expectation_maximization(training_data, num_iterations: int):
 
     # Iterate
     for iteration in range(num_iterations):  # @inspect iteration
-        # E-step: compute q(g) = P(G = g | R1 = r1, R2 = r2; θ)
+        # E-step: guess the hidden variables and weight the training data accordingly
         weighted_training_data = []  # Hallucinated training data  @inspect weighted_training_data
         for x in training_data:
             # First compute P(G = g, R1 = r1, R2 = r2; θ)
-            q = {}  # @inspect q
+            q = {}  # q(g) = P(G = g | R1 = r1, R2 = r2; θ) @inspect q
             for g in p_g:
                 q[g] = p_g[g] * p_r_given_g[g][x["R1"]] * p_r_given_g[g][x["R2"]]  # @inspect q
             # Normalize to get P(G = g | R1 = r1, R2 = r2; θ)
