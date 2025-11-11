@@ -1,6 +1,6 @@
 {
   "files": {
-    "propositional_logic.py": "from edtrace import text, image, link\nfrom z3 import Bool, BoolRef, ExprRef, Not, And, Or, Implies, is_not, is_and, is_or, is_implies, is_eq, Solver, sat\nimport itertools\nfrom bayes import ProbTable\n\nPropositionalSymbol = BoolRef\nFormula = ExprRef\nModel = dict[PropositionalSymbol, bool]\n\n\ndef main():\n    text(\"### Lecture 15: Propositional logic\")\n\n    motivation()\n    introduce_propositional_logic()\n\n    text(\"Summary:\")\n    text(\"- Syntax, semantics, inference rules\")\n    text(\"- Models, interpretation function, knowledge base\")\n    text(\"- Semantics: Entailment, contradiction, contingency, satisfiability\")\n    text(\"- Connect syntax and semantics: soundness, completeness\")\n\n    text(\"Next time: first-order logic (fancy stuff)\")\n\n\ndef motivation():\n    image(\"images/perceive-reason-act-learn.png\", width=400)\n    text(\"Focus: reasoning\")\n    text(\"Last time: probabilistic reasoning (Bayesian networks)\")\n    text(\"This time: logical reasoning (propositional logic, first-order logic)\")\n\n    link(\"https://stanford-cs221.github.io/autumn2023/modules/module.html#include=logic%2Foverview.js&mode=print6pp\", title=\"[Autumn 2023 lecture]\")\n\n    text(\"Problem: If A + B = 10 and A - B = 4, what is A?\")\n\n    text(\"How did you solve this?\")\n    text(\"Certainly not by searching through all possible values of A and B...\")\n    text(\"Instead you use algebra.\")\n    text(\"This is an example of symbolic or logical reasoning!\")\n\n    text(\"Historical note:\")\n    text(\"- Logic was the dominant paradigm in AI before 1990s\")\n    text(\"- Problem 1: deterministic, didn't handle **uncertainty** (probability addresses this)\")\n    text(\"- Problem 2: rule-based, didn't leverage **data** (machine learning addresses this)\")\n    text(\"- Then why are we studying it?\")\n    text(\"- Strength: provides **expressivity** in a compact way (we'll see what this means)\")\n\n    text(\"The way to think about **logic** is a language.\")\n\n    text(\"Two goals of a logical language:\")\n    text(\"1. Represent knowledge about the world\")\n    text(\"2. Reason with that knowledge\")\n\n    why_not_natural_language()\n    types_of_languages()\n    ingredients_of_a_logic()\n    syntax_versus_semantics()\n\n    text(\"Summary:\")\n    text(\"- Logic enables expressive representation/reasoning\")\n    text(\"- Think a logic as a language\")\n    text(\"- Defined by syntax, semantics, and inference rules\")\n    \n    text(\"Next: propositional logic\")\n    text(\"Later: first-order logic\")\n\n\ndef why_not_natural_language():\n    text(\"Why not use natural language?\")\n\n    text(\"Example 1:\")\n    text(\"- A dime is better than a nickel.\")\n    text(\"- A nickel is better than a penny.\")\n    text(\"- Therefore, a dime is better than a penny.\")\n\n    text(\"Example 2:\")\n    text(\"- A penny is better than nothing.\")\n    text(\"- Nothing is better than world peace.\")\n    text(\"- Therefore, a penny is better than world peace??\")\n\n    text(\"Natural language is slippery...\")\n\n\ndef types_of_languages():\n    text(\"Natural languages (informal):\")\n    text(\"- English: Two divides even numbers.\")\n    text(\"- German: Zwei dividieren geraden zahlen.\")\n\n    text(\"Programming languages (formal):\")\n    text(\"- Python: `def even(x): return x % 2 == 0`\")\n    text(\"- C++: `bool even(int x) { return x % 2 == 0; }`\")\n\n    text(\"Logical languages (formal):\")\n    text(\"- First-order-logic: `\u2200x. Even(x) \u2192 Divides(x, 2)`\")\n    text(\"- Description logic: `Even \u2291 \u2200 Divides.2`\")\n\n\ndef ingredients_of_a_logic():\n    image(\"images/syntax-semantics-rules.png\", width=600)\n    text(\"1. **Syntax**: defines a set of valid formulas\")\n    text(\"2. **Semantics**: defines the meaning of these formulas\")\n    text(\"3. **Inference rules**: how to derive new valid formulas from existing ones\")\n\n\ndef syntax_versus_semantics():\n    text(\"Syntax: what are valid expressions in the language?\")\n    text(\"Semantics: what is the meaning of these expressions?\")\n\n    text(\"Different syntax, same semantics:\")\n    text(\"- Syntax: `2 + 3`, semantics: 5\")\n    text(\"- Syntax: `3 + 2`, semantics: 5\")\n    \n    text(\"Same syntax, different semantics:\")\n    text(\"- Syntax: `3 / 2`, semantics: 1 (Python 2.7)\")\n    text(\"- Syntax: `3 / 2`, semantics: 1.5 (Python 3)\")\n\n\ndef introduce_propositional_logic():\n    text(\"We now present propositional logic, the simplest form of logic.\")\n    text(\"We will also introduce all the general concepts (e.g., entailment, soundness).\")\n\n    image(\"images/syntax-semantics-rules.png\", width=600)\n    propositional_logic_syntax()\n    propositional_logic_semantics()\n    propositional_logic_inference_rules()\n\n\ndef propositional_logic_syntax():\n    text(\"Syntax: what are valid formulas?\")\n\n    # Base case\n    text(\"Propositional symbols (atomic formulas):\")\n    P = Bool(\"P\")        # P\n    Q = Bool(\"Q\")        # Q\n    Rain = Bool(\"Rain\")  # Rain\n    Wet = Bool(\"Wet\")    # Wet\n\n    # Inductive case\n    text(\"Logical connectives: \u2227, \u2228, \u00ac, \u2192, \u2194\")\n    text(\"Let f and g be any propositional formulas.\")\n    f = Rain\n    g = Wet\n    text(\"Then the following are also propositional formulas:\")\n    h1 = Not(f)          # \u00acf\n    h2 = And(f, g)       # f \u2227 g\n    h3 = Or(f, g)        # f \u2228 g\n    h4 = Implies(f, g)   # f \u2192 g\n    h5 = f == g          # f \u2194 g\n\n    text(\"Nothing else is a formula.\")\n\n    text(\"Examples of formulas:\")\n    f = P                          # P\n    f = Not(P)                     # \u00acP\n    f = Or(Not(P), Q)              # \u00acP \u2228 Q\n    f = Implies(P, Or(Q, Not(P)))  # P \u2192 (Q \u2228 \u00acP)\n\n    text(\"Non-formulas (in propositional logic):\")\n    text(\"- P \u00acQ\")\n    text(\"- P + Q\")\n    text(\"- P(A) \u2228 Q(B)\")\n\n    text(\"Now we know what are the set of valid formulas.\")\n    text(\"But what do all these formulas mean?\")\n\n\ndef propositional_logic_semantics():\n    text(\"Formulas by themselves are just symbols (syntax).\")\n    text(\"They don't have any meaning yet (semantics).\")\n\n    text(\"There are a lot of concepts to introduce.\")\n\n    define_model()                           # State of world\n    define_interpretation_function()         # Connects formulas (syntax) to models (semantics)\n    define_models()                          # Formula -> models (possible worlds)\n    define_knowledge_base()                  # Set of formulas\n    entailment_contradiction_contingency()   # Relationships between knowledge base and new formula\n    ask_tell()                               # Operate on a knowledge base\n    connection_to_bayesian_networks()        # Connection to Bayesian networks\n    satisfiability()                         # Reduce Ask/Tell to satisfiability\n\n\ndef define_model():\n    text(\"A model (in logic) represents a state of the world.\")\n\n    text(\"Definition: a **model** w in propositional logic is\")\n    text(\"...an assignment of truth values to the propositional symbols.\")\n\n    text(\"**Example**:\")\n    text(\"Three propositional symbols:\")\n    A = Bool(\"A\")  # A\n    B = Bool(\"B\")  # B\n    C = Bool(\"C\")  # C\n\n    text(\"2^3 = 8 possible models:\")\n    models = [\n        {A: False, B: False, C: False},\n        {A: False, B: False, C: True},\n        {A: False, B: True,  C: False},\n        {A: False, B: True,  C: True},\n        {A: True,  B: False, C: False},\n        {A: True,  B: False, C: True},\n        {A: True,  B: True,  C: False},\n        {A: True,  B: True,  C: True},\n    ]\n\n\ndef define_interpretation_function():\n    text(\"The interpretation function connects a formula (syntax) and a model (semantics).\")\n\n    text(\"Definition: **interpretation function** \u2110\")\n    text(\"...maps a formula f and a model w either:\")\n    text(\"- true (1): w satisfies f, or\")\n    text(\"- false (0): w does not satisfy f\")\n    image(\"images/logic-fw.png\", width=300)\n\n    text(\"**Example**:\")\n    A = Bool(\"A\")\n    B = Bool(\"B\")\n    C = Bool(\"C\")\n\n    f = And(Not(A), B) == C  # (\u00acA \u2227 B) \u2194 C\n    w = {A: True, B: True, C: False}\n    image(\"images/logic-i-tree.png\", width=600)\n    result = I(f, w)  # @inspect result\n\n\ndef I(f: Formula, w: Model) -> bool:  # @inspect f w\n    \"\"\"Interpretation function: given a formula f and a model w, compute whether w satisfies f.\"\"\"\n    if f.num_args() == 0:\n        result = w[f]  # @inspect result\n\n    elif f.num_args() == 1:\n        g = f.arg(0)\n        if is_not(f):\n            result = not I(g, w)  # @inspect result\n        else:\n            raise ValueError(f\"Unsupported formula: {f}\")\n\n    elif f.num_args() == 2:\n        g, h = f.arg(0), f.arg(1)\n        if is_and(f):  # f = And(g, h)\n            result = I(g, w) and I(h, w)  # @inspect result\n        elif is_or(f):  # f = Or(g, h)\n            result = I(g, w) or I(h, w)  # @inspect result\n        elif is_implies(f):  # f = Implies(g, h)\n            result = not I(g, w) or I(h, w)  # @inspect result\n        elif is_eq(f):  # f = (g == h)\n            result = I(g, w) == I(h, w)  # @inspect result\n        else:\n            raise ValueError(f\"Unsupported formula: {f}\")\n\n    return result\n\ndef define_models():\n    text(\"Recall the interpretation function \u2110(f, w) maps a formula f and a model w to a truth value (true/false).\")\n\n    text(\"Definition: the **models** of a formula f, denoted M(f), are the models w such that \u2110(f, w) = true.\")\n    image(\"images/logic-models.png\", width=400)\n\n    text(\"**Example**:\")\n    Rain = Bool(\"Rain\")\n    Wet = Bool(\"Wet\")\n    f1 = Or(Rain, Wet)  # @inspect f1\n    models1 = get_models(f1, [Rain, Wet])  # @inspect models1\n    f2 = And(Rain, Wet)  # @inspect f2\n    models2 = get_models(f2, [Rain, Wet])  # @inspect models2 @stepover\n\n    text(\"A (small) formula **compactly** represents a (potentially large) set of models.\")\n\n\ndef get_models(f: Formula, symbols: list[PropositionalSymbol]) -> list[Model]:\n    \"\"\"Return all the models that satisfy the formula f.\"\"\"\n    models = []  # @inspect models\n    for values in itertools.product([False, True], repeat=len(symbols)):\n        # For every model (assignment of truth values to the symbols)...\n        w = dict(zip(symbols, values))  # @inspect w\n        if I(f, w):  # Does f satisfy the model w? @stepover\n            models.append(w)  # @inspect models\n    return models\n\n\ndef define_knowledge_base():\n    text(\"Definition: a **knowledge base** (KB) is a set of formulas.\")\n    text(\"Think of the KB as a set of facts that you add to over time.\")\n\n    text(\"Semantics: **models M(KB)** are the models that satisfy every formula in KB.\")\n    text(\"These are the possible worlds we could be in given our knowledge KB.\")\n\n    Rain = Bool(\"Rain\")\n    Wet = Bool(\"Wet\")\n    symbols = [Rain, Wet]\n\n    kb = [Rain, Implies(Rain, Wet)]\n    text(\"Models of a KB is the intersection of the models of its formulas:\")\n    models_rain = get_models(Rain, [Rain, Wet])  # M(Rain) @inspect models_rain @stepover\n    models_rain_implies_wet = get_models(Implies(Rain, Wet), [Rain, Wet])  # M(Rain \u2192 Wet) @inspect models_rain_implies_wet @stepover\n    models_kb = intersect(models_rain, models_rain_implies_wet)  # M({Rain, Rain \u2192 Wet}) @inspect models_kb @stepover\n\n    text(\"Semantically, a KB is equivalent to the conjunction of its formulas:\")\n    f = to_formula(kb)  # Rain \u2227 (Rain \u2192 Wet) @inspect f @stepover\n    f_models = get_models(f, symbols)  # M(Rain \u2227 (Rain \u2192 Wet)) @inspect f_models @stepover\n\n\ndef intersect(list1: list[Model], list2: list[Model]) -> list[Model]:\n    \"\"\"Return the intersection of two lists of models.\"\"\"\n    return [m for m in list1 if m in list2]\n\n\ndef to_formula(kb: list[Formula]) -> Formula:\n    \"\"\"Convert a list of formulas to a single formula.\"\"\"\n    f = kb[0]  # @inspect f\n    for g in kb[1:]:  # @inspect g\n        f = And(f, g)  # @inspect f\n    return f\n\n\ndef entailment_contradiction_contingency():\n    text(\"Adding more formulas to the KB: KB \u2286 (KB \u222a {f})...\")\n    text(\"...shrinks the set of models: M(KB \u222a {f}) \u2286 M(KB).\")\n    text(\"Intuition: as we gain knowledge, we narrow down the possible worlds we might be in.\")\n\n    Rain = Bool(\"Rain\")\n    Wet = Bool(\"Wet\")\n    symbols = [Rain, Wet]\n\n    # Helper function to get the models of a KB\n    def M(kb: list[Formula]) -> list[Model]:\n        return get_models(to_formula(kb), symbols)\n\n    text(\"How much does M(KB) shrink?\")\n\n    text(\"**Entailment**:\")\n    text(\"- Definition: KB entails f (KB \u22a7 f) iff M(KB \u222a {f}) = M(KB).\")\n    image(\"images/logic-entailment.png\", width=300)\n    text(\"- Intuition: f adds no more information.\")\n    def entails(kb: list[Formula], f: Formula) -> bool:  # @inspect kb f\n        old_models = M(kb)  # M(KB) @inspect old_models @stepover\n        new_models = M(kb + [f])  # M(KB \u222a {f}) @inspect new_models @stepover\n        return new_models == old_models\n    assert entails([Rain, Implies(Rain, Wet)], Rain)\n\n    text(\"**Contradiction**:\")\n    text(\"- Definition: KB contradicts f iff M(KB \u222a {f}) = \u2205.\")\n    text(\"- Intuition: f is not compatible with KB.\")\n    image(\"images/logic-contradiction.png\", width=300)\n    def contradicts(kb: list[Formula], f: Formula) -> bool:  # @inspect kb f\n        old_models = M(kb)  # M(KB) @inspect old_models @stepover\n        new_models = M(kb + [f])  # M(KB \u222a {f}) @inspect new_models @stepover\n        return new_models == []\n    assert contradicts([Rain, Wet], Not(Wet))\n\n    text(\"**Contingency**:\")\n    text(\"- Definition: f is contingent with respect to KB iff \u2205 \u2260 M(KB \u222a {f}) \u2260 M(KB).\")\n    text(\"- Intuition: shrinks the set of models but not completely.\")\n    image(\"images/logic-contingency.png\", width=300)\n    def contingent(kb: list[Formula], f: Formula) -> bool:  # @inspect kb f\n        old_models = M(kb)  # M(KB) @inspect old_models @stepover\n        new_models = M(kb + [f])  # M(KB \u222a {f}) @inspect new_models @stepover\n        return new_models != [] and new_models != old_models\n    assert contingent([Rain], Wet)\n\n    text(\"Relationship between entailment and contradiction:\")\n    text(\"- KB contradicts f iff KB \u22a7 \u00acf\")\n\n    text(\"Summary:\")\n    text(\"- Compare to M(KB \u222a {f}) with M(KB).\")\n    text(\"- Entailment (no change): M(KB \u222a {f}) = M(KB).\")\n    text(\"- Contradiction (empty set): M(KB \u222a {f}) = \u2205.\")\n    text(\"- Contingency (shrinks the set): \u2205 \u2260 M(KB \u222a {f}) \u2260 M(KB).\")\n\n\ndef ask_tell():\n    text(\"Now let's explore what you can do with a knowledge base.\")\n    \n    Rain = Bool(\"Rain\")\n    Wet = Bool(\"Wet\")\n    symbols = [Rain, Wet]\n\n    text(\"Suppose we have a knowledge base KB.\")\n    kb = [Rain, Implies(Rain, Wet)]\n\n    # Helper function to get the models of a KB\n    def M(kb: list[Formula]) -> list[Model]:\n        return get_models(to_formula(kb), symbols)\n\n    text(\"What can we do with it?\")\n    text(\"- Ask yes/no questions of the KB: Ask[f]\")\n    text(\"- Tell the KB new statements: Tell[f]\")\n\n    text(\"What are the possible responses?\")\n    text(\"Depends on the relationship between KB and f.\")\n\n    text(\"### Ask\")\n    text(\"Let's begin by asking yes/no questions of the KB.\")\n    text(\"There are three possible responses: yes, no, and I don't know.\")\n\n    def ask(kb: list[Formula], f: Formula) -> str:\n        old_models = M(kb)  # M(KB) @inspect old_models @stepover\n        new_models = M(kb + [f])  # M(KB \u222a {f}) @inspect new_models @stepover\n\n        if new_models == old_models:  # KB entails f\n            return \"Yes\"\n\n        if new_models == []:  # KB contradicts f\n            return \"No\"\n\n        return \"I don't know\"         # KB is contingent with respect to f\n\n    kb = [Rain, Wet]  # It's raining and wet\n    result = ask(kb, Or(Rain, Wet))  # Is it raining or wet?  @inspect result\n\n    kb = [Not(Rain), Wet]  # It's not raining\n    result = ask(kb, Rain)  # Is it raining?  @inspect result\n\n    kb = [Rain]\n    result = ask(kb, Wet)  # Is it wet?  @inspect result\n\n    text(\"### Tell\")\n    text(\"Now let's add new information to the KB.\")\n    text(\"There are three possible responses: I already knew that, I don't buy that, and I learned something new.\")\n\n    def tell(kb: list[Formula], f: Formula) -> list[Formula]:\n        old_models = M(kb)  # M(KB) @inspect old_models @stepover\n        new_models = M(kb + [f])  # M(KB \u222a {f}) @inspect new_models @stepover\n\n        if new_models == old_models:  # KB entails f\n            return kb, \"I already knew that\"\n\n        if new_models == []:  # KB contradicts f\n            return kb, \"I don't buy that\"\n\n        return kb + [f], \"I learned something new\"  # KB is contingent with respect to f\n\n    kb = [Rain, Implies(Rain, Wet)]  # It's raining, and if it's raining, it's wet.\n    new_kb, result = tell(kb, Wet)  # It's wet  @inspect new_kb result\n\n    kb = [Rain, Wet]  # It's raining and wet\n    new_kb, result = tell(kb, Not(Rain))  # It's not raining  @inspect new_kb result\n    \n    kb = [Rain]  # It's raining\n    new_kb, result = tell(kb, Not(Wet))  # It's not wet  @inspect new_kb result\n\n    text(\"Summary:\")\n    text(\"- Ask: queries a knowledge base\")\n    text(\"- Tell: adds new information to a knowledge base\")\n    text(\"- Entailment (Ask: yes, Tell: I already knew that)\")\n    text(\"- Contradiction (Ask: no, Tell: I don't buy that)\")\n    text(\"- Contingency (Ask: I don't know, Tell: I learned something new)\")\n\n\ndef connection_to_bayesian_networks():\n    text(\"Recall that a Bayesian network defines a joint distribution over a set of variables.\")\n    P = ProbTable(\"Rain Wet\", [[0.5, 0.1], [0.1, 0.3]])  # P(Rain, Wet) @inspect P @stepover\n    text(\"For every assignment, we have a probability (between 0 and 1).\")\n    \n    text(\"Translating terminology between Bayesian networks \u2194 propositional logic\")\n    text(\"- Random variables \u2194 propositional symbols\")\n    text(\"- Models \u2194 assignments\")\n\n    text(\"Recall probabilistic inference: P(query | evidence)\")\n    text(\"- Evidence \u2194 knowledge base KB\")\n    text(\"- Query \u2194 thing we're Ask[]'ing about\")\n    text(\"P(Rain | Wet = 1) \u2194 Tell[Wet]; Ask[Rain]\")\n\n    text(\"Key difference:\")\n    text(\"- In Bayesian networks, query and evidence are just simple assignments to variables (e.g., Rain = 1, Wet = 0).\")\n    text(\"- In propositional logic, query and evidence are arbitrary formulas (e.g., (Rain \u2227 Wet) \u2228 (Rain \u2227 \u00acSnow)).\")\n\n    text(\"P(KB) = \u03a3_{w \u2208 M(KB)} P(W = w)\")\n    text(\"P(KB \u222a {f}) = \u03a3_{w \u2208 M(KB \u222a {f})} P(W = w)\")\n    text(\"P(f | KB) = P(KB \u222a {f}) / P(KB)\")\n    text(\"This provides a number between 0 and 1 that generalizes the yes/no/I don't know responses.\")\n    image(\"images/logic-01.png\", width=400)\n\n\ndef satisfiability():\n    text(\"So far: Ask[f] and Tell[f] implemented in terms of entailment, contradiction, and contingency.\")\n    text(\"How do we implement entailment, contradiction, and contingency efficiently?\")\n    text(\"Currently, we enumerate all the models M(KB) and M(KB \u222a {f}), which will be exponentially large.\")\n\n    text(\"To get faster algorithms, let's reduce to a single operation.\")\n    text(\"Definition: KB is **satisfiable** iff M(KB) \u2260 \u2205.\")\n\n    text(\"Let's reduce entailment/contradiction/contingency to satisfiability.\")\n\n    text(\"Call satisfiability checker on KB \u222a {f}.\")\n    text(\"If not satisfiable, then return contradiction.\")\n    text(\"But if satisfiable, could be entailment or contingency.\")\n\n    text(\"Recall KB entails f iff KB contradicts \u00acf.\")\n    text(\"Call the satisfiability checker on KB \u222a {\u00acf}.\")\n    text(\"If not satisfiable, then return entailment.\")\n\n    image(\"images/logic-satisfiability.png\", width=400)\n    text(\"Note that we need two calls because one call only gives us 1 bit of information and we have 3 outcomes.\")\n\n    text(\"**Model checking**: task for determining if a KB is satisfiable.\")\n    text(\"- Input: a KB\")\n    text(\"- Output: whether KB is satisfiable\")\n\n    text(\"We can use Z3's solver to check satisfiability.\")\n    Rain = Bool(\"Rain\")\n    Wet = Bool(\"Wet\")\n    kb = [Rain, Wet]\n    solver = Solver()\n    for f in kb:  # @inspect f\n        solver.add(f)\n    \n    # Perform model checking\n    result = solver.check()  # @inspect result @clear f\n\n    # If satisfiable, return some model in M(KB)\n    if result == sat:\n        w = solver.model()  # @inspect w\n\n    text(\"Under the hood: SAT solvers\")\n    text(\"- DPLL algorithm (exhaustive search)\")\n    text(\"- Conflict-driven clause learning (CDCL)\")\n\n    text(\"Summary:\")\n    text(\"- Entailment, contradiction, and contingency can be reduced to satisfiability\")\n    text(\"- Use model checking to compute satisfiability\")\n\n\ndef propositional_logic_inference_rules():\n    text(\"We have defined the syntax and semantics of propositional logic.\")\n    text(\"We can do logical inference (Ask/Tell) via satisfiability via model checking.\")\n\n    text(\"But remember the problem: If A + B = 10 and A - B = 4, what is A?\")\n    text(\"We didn't do model checking, but rather manipulated symbols.\")\n    text(\"This is what you normally do as a human (e.g., for math).\")\n\n    forward_inference()\n    soundness_completeness()\n\n\ndef forward_inference():\n    text(\"Example of an inference:\")\n    text(\"- It is raining (Rain).\")\n    text(\"- If it is raining, then it is wet (Rain \u2192 Wet).\")\n    text(\"- Therefore, it is wet (Wet).\")\n\n    image(\"images/logic-modus-ponens-rain-wet.png\", width=300)\n\n    text(\"General modus ponens: p, p \u2192 q \u22a2 q\")\n\n    text(\"General inference rule:\")\n    text(\"- Premises: set of formulas f_1, ..., f_n\")\n    text(\"- Conclusion: formula g\")\n\n    text(\"Rules operate on the **syntax**, not the **semantics**.\")\n\n    text(\"**Forward inference**\")\n    text(\"Input:\")\n    text(\"- set of inference rules (Rules)\")\n    text(\"- initial knowledge base (KB)\")\n    text(\"While there are no changes to KB:\")\n    text(\"- Choose a set of formulas f_1, ..., f_n \u2208 KB\")\n    text(\"- If matching rule f_1, ..., f_n \u22a2 g \u2208 Rules, then add g to KB.\")\n\n    text(\"We say that KB derives/proves f (KB \u22a2 f) if f eventually gets added to KB.\")\n\n    text(\"Example:\")\n    image(\"images/logic-modus-ponens-example.png\", width=600)\n    text(\"Can't derive some formulas: \u00acWet, Rain \u2192 Slippery\")\n\n\ndef soundness_completeness():\n    text(\"Syntax: KB proves/derives f (KB \u22a2 f)\")\n    text(\"Semantics: KB entails f (KB \u22a7 f)\")\n\n    text(\"What is the relationship?\")\n    text(\"In particular, compare:\")\n    text(\"Syntax: { f: KB \u22a2 f }\")\n    text(\"Semantics: { f: KB \u22a7 f }\")\n\n    text(\"Truth: { f: KB \u22a7 f }\")\n    image(\"images/empty-water-glass.jpg\", width=200)\n\n    text(\"Soundness: { f: KB \u22a2 f } \u2286 { f: KB \u22a7 f }\")\n    image(\"images/half-water-glass.jpg\", width=200)\n\n    text(\"Completeness: { f: KB \u22a7 f } \u2286 { f: KB \u22a2 f }\")\n    image(\"images/full-water-glass.jpg\", width=200)\n\n    text(\"What we want is ideally:\")\n    text(\"- *The truth, the whole truth, and nothing but the truth*\")\n    text(\"- Soundness: nothing but the truth\")\n    text(\"- Completeness: the whole truth\")\n\n    text(\"Examples:\")\n    image(\"images/logic-soundness1.png\", width=600)\n    image(\"images/logic-soundness2.png\", width=600)\n\n\nif __name__ == \"__main__\":\n    main()"
+    "propositional_logic.py": "from edtrace import text, image, link\nfrom z3 import Bool, BoolRef, ExprRef, Not, And, Or, Implies, is_not, is_and, is_or, is_implies, is_eq, Solver, sat\nimport itertools\nfrom bayes import ProbTable\n\nPropositionalSymbol = BoolRef\nFormula = ExprRef\nModel = dict[PropositionalSymbol, bool]\n\n\ndef main():\n    text(\"### Lecture 15: Propositional logic\")\n\n    motivation()\n    introduce_propositional_logic()\n\n    text(\"Summary:\")\n    text(\"- Syntax, semantics, inference rules\")\n    text(\"- Models, interpretation function, knowledge base\")\n    text(\"- Semantics: Entailment, contradiction, contingency, satisfiability\")\n    text(\"- Connect syntax and semantics: soundness, completeness\")\n\n    text(\"Next time: first-order logic (fancy stuff)\")\n\n\ndef motivation():\n    image(\"images/perceive-reason-act-learn.png\", width=400)\n    text(\"Focus: reasoning\")\n    text(\"Last time: probabilistic reasoning (Bayesian networks)\")\n    text(\"This time: logical reasoning (propositional logic, first-order logic)\")\n\n    link(\"https://stanford-cs221.github.io/autumn2023/modules/module.html#include=logic%2Foverview.js&mode=print6pp\", title=\"[Autumn 2023 lecture]\")\n\n    text(\"Problem: If A + B = 10 and A - B = 4, what is A?\")\n\n    text(\"How did you solve this?\")\n    text(\"Certainly not by searching through all possible values of A and B...\")\n    text(\"Instead you use algebra.\")\n    text(\"This is an example of symbolic or logical reasoning!\")\n\n    text(\"Historical note:\")\n    text(\"- Logic was the dominant paradigm in AI before 1990s\")\n    text(\"- Problem 1: deterministic, didn't handle **uncertainty** (probability addresses this)\")\n    text(\"- Problem 2: rule-based, didn't leverage **data** (machine learning addresses this)\")\n    text(\"- Then why are we studying it?\")\n    text(\"- Strength: provides **expressivity** in a compact way (we'll see what this means)\")\n\n    text(\"The way to think about **logic** is a language.\")\n\n    text(\"Two goals of a logical language:\")\n    text(\"1. Represent knowledge about the world\")\n    text(\"2. Reason with that knowledge\")\n\n    why_not_natural_language()\n    types_of_languages()\n    ingredients_of_a_logic()\n    syntax_versus_semantics()\n\n    text(\"Summary:\")\n    text(\"- Logic enables expressive representation/reasoning\")\n    text(\"- Think a logic as a language\")\n    text(\"- Defined by syntax, semantics, and inference rules\")\n    \n    text(\"Next: propositional logic\")\n    text(\"Later: first-order logic\")\n\n\ndef why_not_natural_language():\n    text(\"Why not use natural language?\")\n\n    text(\"Example 1:\")\n    text(\"- A dime is better than a nickel.\")\n    text(\"- A nickel is better than a penny.\")\n    text(\"- Therefore, a dime is better than a penny.\")\n\n    text(\"Example 2:\")\n    text(\"- A penny is better than nothing.\")\n    text(\"- Nothing is better than world peace.\")\n    text(\"- Therefore, a penny is better than world peace??\")\n\n    text(\"Natural language is slippery...\")\n\n\ndef types_of_languages():\n    text(\"Natural languages (informal):\")\n    text(\"- English: Two divides even numbers.\")\n    text(\"- German: Zwei dividieren geraden zahlen.\")\n\n    text(\"Programming languages (formal):\")\n    text(\"- Python: `def even(x): return x % 2 == 0`\")\n    text(\"- C++: `bool even(int x) { return x % 2 == 0; }`\")\n\n    text(\"Logical languages (formal):\")\n    text(\"- First-order-logic: `\u2200x. Even(x) \u2192 Divides(x, 2)`\")\n    text(\"- Description logic: `Even \u2291 \u2200 Divides.2`\")\n\n\ndef ingredients_of_a_logic():\n    image(\"images/syntax-semantics-rules.png\", width=600)\n    text(\"1. **Syntax**: defines a set of valid formulas\")\n    text(\"2. **Semantics**: defines the meaning of these formulas\")\n    text(\"3. **Inference rules**: how to derive new valid formulas from existing ones\")\n\n\ndef syntax_versus_semantics():\n    text(\"Syntax: what are valid expressions in the language?\")\n    text(\"Semantics: what is the meaning of these expressions?\")\n\n    text(\"Different syntax, same semantics:\")\n    text(\"- Syntax: `2 + 3`, semantics: 5\")\n    text(\"- Syntax: `3 + 2`, semantics: 5\")\n    \n    text(\"Same syntax, different semantics:\")\n    text(\"- Syntax: `3 / 2`, semantics: 1 (Python 2.7)\")\n    text(\"- Syntax: `3 / 2`, semantics: 1.5 (Python 3)\")\n\n\ndef introduce_propositional_logic():\n    text(\"We now present propositional logic, the simplest form of logic.\")\n    text(\"We will also introduce all the general concepts (e.g., entailment, soundness).\")\n\n    image(\"images/syntax-semantics-rules.png\", width=600)\n    propositional_logic_syntax()\n    propositional_logic_semantics()\n    propositional_logic_inference_rules()\n\n\ndef propositional_logic_syntax():\n    text(\"Syntax: what are valid formulas?\")\n\n    # Base case\n    text(\"Propositional symbols (atomic formulas):\")\n    P = Bool(\"P\")        # P\n    Q = Bool(\"Q\")        # Q\n    Rain = Bool(\"Rain\")  # Rain\n    Wet = Bool(\"Wet\")    # Wet\n\n    # Inductive case\n    text(\"Logical connectives: \u2227, \u2228, \u00ac, \u2192, \u2194\")\n    text(\"Let f and g be any propositional formulas.\")\n    f = Rain\n    g = Wet\n    text(\"Then the following are also propositional formulas:\")\n    h1 = Not(f)          # \u00acf\n    h2 = And(f, g)       # f \u2227 g\n    h3 = Or(f, g)        # f \u2228 g\n    h4 = Implies(f, g)   # f \u2192 g\n    h5 = f == g          # f \u2194 g\n\n    text(\"Nothing else is a formula.\")\n\n    text(\"Examples of formulas:\")\n    f = P                          # P\n    f = Not(P)                     # \u00acP\n    f = Or(Not(P), Q)              # \u00acP \u2228 Q\n    f = Implies(P, Or(Q, Not(P)))  # P \u2192 (Q \u2228 \u00acP)\n\n    text(\"Non-formulas (in propositional logic):\")\n    text(\"- P \u00acQ\")\n    text(\"- P + Q\")\n    text(\"- P(A) \u2228 Q(B)\")\n\n    text(\"Now we know what are the set of valid formulas.\")\n    text(\"But what do all these formulas mean?\")\n\n\ndef propositional_logic_semantics():\n    text(\"Formulas by themselves are just symbols (syntax).\")\n    text(\"They don't have any meaning yet (semantics).\")\n\n    text(\"There are a lot of concepts to introduce.\")\n\n    define_model()                           # State of world\n    define_interpretation_function()         # Connects formulas (syntax) to models (semantics)\n    define_models()                          # Formula -> models (possible worlds)\n    define_knowledge_base()                  # Set of formulas\n    entailment_contradiction_contingency()   # Relationships between knowledge base and new formula\n    ask_tell()                               # Operate on a knowledge base\n    connection_to_bayesian_networks()        # Connection to Bayesian networks\n    satisfiability()                         # Reduce Ask/Tell to satisfiability\n\n\ndef define_model():\n    text(\"A model (in logic) represents a state of the world.\")\n\n    text(\"Definition: a **model** w in propositional logic is\")\n    text(\"...an assignment of truth values to the propositional symbols.\")\n\n    text(\"**Example**:\")\n    text(\"Three propositional symbols:\")\n    A = Bool(\"A\")  # A\n    B = Bool(\"B\")  # B\n    C = Bool(\"C\")  # C\n\n    text(\"2^3 = 8 possible models:\")\n    models = [\n        {A: False, B: False, C: False},\n        {A: False, B: False, C: True},\n        {A: False, B: True,  C: False},\n        {A: False, B: True,  C: True},\n        {A: True,  B: False, C: False},\n        {A: True,  B: False, C: True},\n        {A: True,  B: True,  C: False},\n        {A: True,  B: True,  C: True},\n    ]\n\n\ndef define_interpretation_function():\n    text(\"The interpretation function connects a formula (syntax) and a model (semantics).\")\n\n    text(\"Definition: **interpretation function** \u2110\")\n    text(\"...maps a formula f and a model w either:\")\n    text(\"- true (1): means that f is true in w, or\")\n    text(\"- false (0): means that f is false in w.\")\n    image(\"images/logic-fw.png\", width=300)\n\n    text(\"**Example**:\")\n    A = Bool(\"A\")\n    B = Bool(\"B\")\n    C = Bool(\"C\")\n\n    f = And(Not(A), B) == C  # (\u00acA \u2227 B) \u2194 C\n    w = {A: True, B: True, C: False}\n    image(\"images/logic-i-tree.png\", width=600)\n    result = I(f, w)  # @inspect result\n\n\ndef I(f: Formula, w: Model) -> bool:  # @inspect f w\n    \"\"\"Interpretation function: given a formula f and a model w, compute whether w satisfies f.\"\"\"\n    if f.num_args() == 0:\n        result = w[f]  # @inspect result\n\n    elif f.num_args() == 1:\n        g = f.arg(0)\n        if is_not(f):\n            result = not I(g, w)  # @inspect result\n        else:\n            raise ValueError(f\"Unsupported formula: {f}\")\n\n    elif f.num_args() == 2:\n        g, h = f.arg(0), f.arg(1)  # @inspect g h\n        if is_and(f):  # f = And(g, h)\n            result = I(g, w) and I(h, w)  # @inspect result\n        elif is_or(f):  # f = Or(g, h)\n            result = I(g, w) or I(h, w)  # @inspect result\n        elif is_implies(f):  # f = Implies(g, h)\n            result = not I(g, w) or I(h, w)  # @inspect result\n        elif is_eq(f):  # f = (g == h)\n            result = I(g, w) == I(h, w)  # @inspect result\n        else:\n            raise ValueError(f\"Unsupported formula: {f}\")\n\n    return result\n\ndef define_models():\n    text(\"Recall the interpretation function \u2110(f, w) maps a formula f and a model w to a truth value (true/false).\")\n\n    text(\"Definition: the **models** of a formula f, denoted M(f), are the models w such that \u2110(f, w) = true.\")\n    image(\"images/logic-models.png\", width=400)\n\n    text(\"**Example**:\")\n    Rain = Bool(\"Rain\")\n    Wet = Bool(\"Wet\")\n    f1 = Or(Rain, Wet)  # @inspect f1\n    models1 = get_models(f1, [Rain, Wet])  # @inspect models1\n    f2 = And(Rain, Wet)  # @inspect f2\n    models2 = get_models(f2, [Rain, Wet])  # @inspect models2 @stepover\n\n    text(\"A (small) formula **compactly** represents a (potentially large) set of models.\")\n\n\ndef get_models(f: Formula, symbols: list[PropositionalSymbol]) -> list[Model]:\n    \"\"\"Return all the models that satisfy the formula f.\"\"\"\n    models = []  # @inspect models\n    for values in itertools.product([False, True], repeat=len(symbols)):\n        # For every model (assignment of truth values to the symbols)...\n        w = dict(zip(symbols, values))  # @inspect w\n        if I(f, w):  # Does f satisfy the model w? @stepover\n            models.append(w)  # @inspect models\n    return models\n\n\ndef define_knowledge_base():\n    text(\"Definition: a **knowledge base** (KB) is a set of formulas.\")\n    text(\"Think of the KB as a set of facts that you add to over time.\")\n\n    text(\"Semantics: **models M(KB)** are the models that satisfy every formula in KB.\")\n    text(\"These are the possible worlds we could be in given our knowledge KB.\")\n\n    Rain = Bool(\"Rain\")\n    Wet = Bool(\"Wet\")\n    symbols = [Rain, Wet]\n\n    kb = [Rain, Implies(Rain, Wet)]\n    text(\"Models of a KB is the intersection of the models of its formulas:\")\n    models_rain = get_models(Rain, [Rain, Wet])  # M(Rain) @inspect models_rain @stepover\n    models_rain_implies_wet = get_models(Implies(Rain, Wet), [Rain, Wet])  # M(Rain \u2192 Wet) @inspect models_rain_implies_wet @stepover\n    models_kb = intersect(models_rain, models_rain_implies_wet)  # M({Rain, Rain \u2192 Wet}) @inspect models_kb @stepover\n\n    text(\"Semantically, a KB is equivalent to the conjunction of its formulas:\")\n    f = to_formula(kb)  # Rain \u2227 (Rain \u2192 Wet) @inspect f @stepover\n    f_models = get_models(f, symbols)  # M(Rain \u2227 (Rain \u2192 Wet)) @inspect f_models @stepover\n\n\ndef intersect(list1: list[Model], list2: list[Model]) -> list[Model]:\n    \"\"\"Return the intersection of two lists of models.\"\"\"\n    return [m for m in list1 if m in list2]\n\n\ndef to_formula(kb: list[Formula]) -> Formula:\n    \"\"\"Convert a list of formulas to a single formula.\"\"\"\n    f = kb[0]  # @inspect f\n    for g in kb[1:]:  # @inspect g\n        f = And(f, g)  # @inspect f\n    return f\n\n\ndef entailment_contradiction_contingency():\n    text(\"Adding more formulas to the KB: KB \u2286 (KB \u222a {f})...\")\n    text(\"...shrinks the set of models: M(KB \u222a {f}) \u2286 M(KB).\")\n    text(\"Intuition: as we gain knowledge, we narrow down the possible worlds we might be in.\")\n\n    Rain = Bool(\"Rain\")\n    Wet = Bool(\"Wet\")\n    symbols = [Rain, Wet]\n\n    # Helper function to get the models of a KB\n    def M(kb: list[Formula]) -> list[Model]:\n        return get_models(to_formula(kb), symbols)\n\n    text(\"How much does M(KB) shrink?\")\n\n    text(\"**Entailment**:\")\n    text(\"- Definition: KB entails f (KB \u22a7 f) iff M(KB \u222a {f}) = M(KB).\")\n    image(\"images/logic-entailment.png\", width=300)\n    text(\"- Intuition: f adds no more information.\")\n    def entails(kb: list[Formula], f: Formula) -> bool:  # @inspect kb f\n        old_models = M(kb)  # M(KB) @inspect old_models @stepover\n        new_models = M(kb + [f])  # M(KB \u222a {f}) @inspect new_models @stepover\n        return new_models == old_models\n    assert entails([Rain, Implies(Rain, Wet)], Rain)\n\n    text(\"**Contradiction**:\")\n    text(\"- Definition: KB contradicts f iff M(KB \u222a {f}) = \u2205.\")\n    text(\"- Intuition: f is not compatible with KB.\")\n    image(\"images/logic-contradiction.png\", width=300)\n    def contradicts(kb: list[Formula], f: Formula) -> bool:  # @inspect kb f\n        old_models = M(kb)  # M(KB) @inspect old_models @stepover\n        new_models = M(kb + [f])  # M(KB \u222a {f}) @inspect new_models @stepover\n        return new_models == []\n    assert contradicts([Rain, Wet], Not(Wet))\n\n    text(\"**Contingency**:\")\n    text(\"- Definition: f is contingent with respect to KB iff \u2205 \u2260 M(KB \u222a {f}) \u2260 M(KB).\")\n    text(\"- Intuition: shrinks the set of models but not completely.\")\n    image(\"images/logic-contingency.png\", width=300)\n    def contingent(kb: list[Formula], f: Formula) -> bool:  # @inspect kb f\n        old_models = M(kb)  # M(KB) @inspect old_models @stepover\n        new_models = M(kb + [f])  # M(KB \u222a {f}) @inspect new_models @stepover\n        return new_models != [] and new_models != old_models\n    assert contingent([Rain], Wet)\n\n    text(\"Relationship between entailment and contradiction:\")\n    text(\"- KB contradicts f iff KB \u22a7 \u00acf\")\n\n    text(\"Summary:\")\n    text(\"- Compare to M(KB \u222a {f}) with M(KB).\")\n    text(\"- Entailment (no change): M(KB \u222a {f}) = M(KB).\")\n    text(\"- Contradiction (empty set): M(KB \u222a {f}) = \u2205.\")\n    text(\"- Contingency (shrinks the set): \u2205 \u2260 M(KB \u222a {f}) \u2260 M(KB).\")\n\n\ndef ask_tell():\n    text(\"Now let's explore what you can do with a knowledge base.\")\n    \n    Rain = Bool(\"Rain\")\n    Wet = Bool(\"Wet\")\n    symbols = [Rain, Wet]\n\n    text(\"Suppose we have a knowledge base KB.\")\n    kb = [Rain, Implies(Rain, Wet)]\n\n    # Helper function to get the models of a KB\n    def M(kb: list[Formula]) -> list[Model]:\n        return get_models(to_formula(kb), symbols)\n\n    text(\"What can we do with it?\")\n    text(\"- Ask yes/no questions of the KB: Ask[f]\")\n    text(\"- Tell the KB new statements: Tell[f]\")\n\n    text(\"What are the possible responses?\")\n    text(\"Depends on the relationship between KB and f.\")\n\n    text(\"### Ask\")\n    text(\"Let's begin by asking yes/no questions of the KB.\")\n    text(\"There are three possible responses: yes, no, and I don't know.\")\n\n    def ask(kb: list[Formula], f: Formula) -> str:\n        old_models = M(kb)  # M(KB) @inspect old_models @stepover\n        new_models = M(kb + [f])  # M(KB \u222a {f}) @inspect new_models @stepover\n\n        if new_models == old_models:  # KB entails f\n            return \"Yes\"\n\n        if new_models == []:  # KB contradicts f\n            return \"No\"\n\n        return \"I don't know\"         # KB is contingent with respect to f\n\n    kb = [Rain, Wet]  # It's raining and wet.\n    result = ask(kb, Or(Rain, Wet))  # Is it raining or wet?  @inspect result\n\n    kb = [Wet, Not(Rain)]  # It is wet and not raining.\n    result = ask(kb, Rain)  # Is it raining?  @inspect result\n\n    kb = [Rain]  # It's raining.\n    result = ask(kb, Wet)  # Is it wet?  @inspect result\n\n    text(\"### Tell\")\n    text(\"Now let's add new information to the KB.\")\n    text(\"There are three possible responses: I already knew that, I don't buy that, and I learned something new.\")\n\n    def tell(kb: list[Formula], f: Formula) -> list[Formula]:\n        old_models = M(kb)  # M(KB) @inspect old_models @stepover\n        new_models = M(kb + [f])  # M(KB \u222a {f}) @inspect new_models @stepover\n\n        if new_models == old_models:  # KB entails f\n            return kb, \"I already knew that\"\n\n        if new_models == []:  # KB contradicts f\n            return kb, \"I don't buy that\"\n\n        return kb + [f], \"I learned something new\"  # KB is contingent with respect to f\n\n    kb = [Rain, Implies(Rain, Wet)]  # It is raining, and if it is raining, it is wet.\n    new_kb, result = tell(kb, Wet)  # It is wet.  @inspect new_kb result\n\n    kb = [Rain, Wet]  # It is raining and wet.\n    new_kb, result = tell(kb, Not(Rain))  # It is not raining.  @inspect new_kb result\n    \n    kb = [Rain]  # It is raining.\n    new_kb, result = tell(kb, Not(Wet))  # It is not wet.  @inspect new_kb result\n\n    text(\"Summary:\")\n    text(\"- Ask: queries a knowledge base\")\n    text(\"- Tell: adds new information to a knowledge base\")\n    text(\"- Entailment (Ask: yes, Tell: I already knew that)\")\n    text(\"- Contradiction (Ask: no, Tell: I don't buy that)\")\n    text(\"- Contingency (Ask: I don't know, Tell: I learned something new)\")\n\n\ndef connection_to_bayesian_networks():\n    text(\"Recall that a Bayesian network defines a joint distribution over a set of variables.\")\n    P = ProbTable(\"Rain Wet\", [[0.5, 0.1], [0.1, 0.3]])  # P(Rain, Wet) @inspect P @stepover\n    text(\"For every assignment, we have a probability (between 0 and 1).\")\n    \n    text(\"Translating terminology between Bayesian networks \u2194 propositional logic\")\n    text(\"- Random variables \u2194 propositional symbols\")\n    text(\"- Models \u2194 assignments\")\n\n    text(\"Recall probabilistic inference: P(query | evidence)\")\n    text(\"- Evidence \u2194 knowledge base KB\")\n    text(\"- Query \u2194 thing we're Ask[]'ing about\")\n    text(\"P(Rain | Wet = 1) \u2194 Tell[Wet]; Ask[Rain]\")\n\n    text(\"Key difference:\")\n    text(\"- In Bayesian networks, query and evidence are just simple assignments to variables (e.g., Rain = 1, Wet = 0).\")\n    text(\"- In propositional logic, query and evidence are arbitrary formulas (e.g., (Rain \u2227 Wet) \u2228 (Rain \u2227 \u00acSnow)).\")\n\n    text(\"P(KB) = \u03a3_{w \u2208 M(KB)} P(W = w)\")\n    text(\"P(KB \u222a {f}) = \u03a3_{w \u2208 M(KB \u222a {f})} P(W = w)\")\n    text(\"P(f | KB) = P(KB \u222a {f}) / P(KB)\")\n    text(\"This provides a number between 0 and 1 that generalizes the yes/no/I don't know responses.\")\n    image(\"images/logic-01.png\", width=400)\n\n\ndef satisfiability():\n    text(\"So far: Ask[f] and Tell[f] implemented in terms of entailment, contradiction, and contingency.\")\n    text(\"How do we implement entailment, contradiction, and contingency efficiently?\")\n    text(\"Currently, we enumerate all the models M(KB) and M(KB \u222a {f}), which will be exponentially large.\")\n\n    text(\"To get faster algorithms, let's reduce to a single operation.\")\n    text(\"Definition: KB is **satisfiable** iff M(KB) \u2260 \u2205.\")\n\n    text(\"Let's reduce entailment/contradiction/contingency to satisfiability.\")\n\n    text(\"Call satisfiability checker on KB \u222a {f}.\")\n    text(\"If not satisfiable, then return contradiction.\")\n    text(\"But if satisfiable, could be entailment or contingency.\")\n\n    text(\"Recall KB entails f iff KB contradicts \u00acf.\")\n    text(\"Call the satisfiability checker on KB \u222a {\u00acf}.\")\n    text(\"If not satisfiable, then return entailment.\")\n\n    image(\"images/logic-satisfiability.png\", width=400)\n    text(\"Note that we need two calls because one call only gives us 1 bit of information and we have 3 outcomes.\")\n\n    text(\"**Model checking**: task for determining if a KB is satisfiable.\")\n    text(\"- Input: a KB\")\n    text(\"- Output: whether KB is satisfiable\")\n\n    text(\"We can use Z3's solver to check satisfiability.\")\n    Rain = Bool(\"Rain\")\n    Wet = Bool(\"Wet\")\n    kb = [Rain, Wet]\n    solver = Solver()\n    for f in kb:  # @inspect f\n        solver.add(f)\n    \n    # Perform model checking\n    result = solver.check()  # @inspect result @clear f\n\n    # If satisfiable, return some model in M(KB)\n    if result == sat:\n        w = solver.model()  # @inspect w\n\n    text(\"Under the hood: SAT solvers\")\n    text(\"- DPLL algorithm (exhaustive search)\")\n    text(\"- Conflict-driven clause learning (CDCL)\")\n\n    text(\"Summary:\")\n    text(\"- Entailment, contradiction, and contingency can be reduced to satisfiability\")\n    text(\"- Use model checking to compute satisfiability\")\n\n\ndef propositional_logic_inference_rules():\n    text(\"We have defined the syntax and semantics of propositional logic.\")\n    text(\"We can do logical inference (Ask/Tell) via satisfiability via model checking.\")\n\n    text(\"But remember the problem: If A + B = 10 and A - B = 4, what is A?\")\n    text(\"We didn't do model checking, but rather manipulated symbols.\")\n    text(\"This is what you normally do as a human (e.g., for math).\")\n\n    forward_inference()\n    soundness_completeness()\n\n\ndef forward_inference():\n    text(\"Example of an inference:\")\n    text(\"- It is raining (Rain).\")\n    text(\"- If it is raining, then it is wet (Rain \u2192 Wet).\")\n    text(\"- Therefore, it is wet (Wet).\")\n\n    image(\"images/logic-modus-ponens-rain-wet.png\", width=300)\n\n    text(\"General modus ponens: p, p \u2192 q \u22a2 q\")\n\n    text(\"General inference rule:\")\n    text(\"- Premises: set of formulas f_1, ..., f_n\")\n    text(\"- Conclusion: formula g\")\n\n    text(\"Rules operate on the **syntax**, not the **semantics**.\")\n\n    text(\"**Forward inference**\")\n    text(\"Input:\")\n    text(\"- set of inference rules (Rules)\")\n    text(\"- initial knowledge base (KB)\")\n    text(\"Until there are no more changes to KB:\")\n    text(\"- Choose a set of formulas f_1, ..., f_n \u2208 KB\")\n    text(\"- If matching rule f_1, ..., f_n \u22a2 g \u2208 Rules, then add g to KB.\")\n\n    text(\"We say that KB derives/proves f (KB \u22a2 f) if f eventually gets added to KB.\")\n\n    text(\"Example:\")\n    image(\"images/logic-modus-ponens-example.png\", width=600)\n    text(\"Can't derive some formulas: \u00acWet, Rain \u2192 Slippery\")\n\n\ndef soundness_completeness():\n    text(\"Syntax: KB proves/derives f (KB \u22a2 f)\")\n    text(\"Semantics: KB entails f (KB \u22a7 f)\")\n\n    text(\"What is the relationship?\")\n    text(\"In particular, compare:\")\n    text(\"Syntax: { f: KB \u22a2 f } (formulas that can be derived from KB)\")\n    text(\"Semantics: { f: KB \u22a7 f } (formulas that are are entailed by KB)\")\n\n    text(\"Truth: { f: KB \u22a7 f }\")\n    image(\"images/empty-water-glass.jpg\", width=200)\n\n    text(\"Soundness: { f: KB \u22a2 f } \u2286 { f: KB \u22a7 f }\")\n    image(\"images/half-water-glass.jpg\", width=200)\n\n    text(\"Completeness: { f: KB \u22a7 f } \u2286 { f: KB \u22a2 f }\")\n    image(\"images/full-water-glass.jpg\", width=200)\n\n    text(\"What we want is ideally:\")\n    text(\"- *The truth, the whole truth, and nothing but the truth*\")\n    text(\"- Soundness: nothing but the truth\")\n    text(\"- Completeness: the whole truth\")\n\n    text(\"Examples:\")\n    image(\"images/logic-soundness1.png\", width=600)\n    image(\"images/logic-soundness2.png\", width=600)\n\n\nif __name__ == \"__main__\":\n    main()"
   },
   "hidden_line_numbers": {
     "propositional_logic.py": []
@@ -3942,14 +3942,14 @@
           "path": "propositional_logic.py",
           "line_number": 213,
           "function_name": "define_interpretation_function",
-          "code": "text(\"- true (1): w satisfies f, or\")"
+          "code": "text(\"- true (1): means that f is true in w, or\")"
         }
       ],
       "env": {},
       "renderings": [
         {
           "type": "markdown",
-          "data": "- true (1): w satisfies f, or",
+          "data": "- true (1): means that f is true in w, or",
           "style": {},
           "external_link": null,
           "internal_link": null
@@ -3980,14 +3980,14 @@
           "path": "propositional_logic.py",
           "line_number": 214,
           "function_name": "define_interpretation_function",
-          "code": "text(\"- false (0): w does not satisfy f\")"
+          "code": "text(\"- false (0): means that f is false in w.\")"
         }
       ],
       "env": {},
       "renderings": [
         {
           "type": "markdown",
-          "data": "- false (0): w does not satisfy f",
+          "data": "- false (0): means that f is false in w.",
           "style": {},
           "external_link": null,
           "internal_link": null
@@ -4498,10 +4498,23 @@
           "path": "propositional_logic.py",
           "line_number": 241,
           "function_name": "I",
-          "code": "g, h = f.arg(0), f.arg(1)"
+          "code": "g, h = f.arg(0), f.arg(1)  # @inspect g h"
         }
       ],
-      "env": {},
+      "env": {
+        "g": {
+          "type": "z3.z3.BoolRef",
+          "contents": "And(Not(A), B)",
+          "dtype": null,
+          "shape": null
+        },
+        "h": {
+          "type": "z3.z3.BoolRef",
+          "contents": "C",
+          "dtype": null,
+          "shape": null
+        }
+      },
       "renderings": []
     },
     {
@@ -4920,10 +4933,23 @@
           "path": "propositional_logic.py",
           "line_number": 241,
           "function_name": "I",
-          "code": "g, h = f.arg(0), f.arg(1)"
+          "code": "g, h = f.arg(0), f.arg(1)  # @inspect g h"
         }
       ],
-      "env": {},
+      "env": {
+        "g": {
+          "type": "z3.z3.BoolRef",
+          "contents": "Not(A)",
+          "dtype": null,
+          "shape": null
+        },
+        "h": {
+          "type": "z3.z3.BoolRef",
+          "contents": "B",
+          "dtype": null,
+          "shape": null
+        }
+      },
       "renderings": []
     },
     {
@@ -7026,10 +7052,23 @@
           "path": "propositional_logic.py",
           "line_number": 241,
           "function_name": "I",
-          "code": "g, h = f.arg(0), f.arg(1)"
+          "code": "g, h = f.arg(0), f.arg(1)  # @inspect g h"
         }
       ],
-      "env": {},
+      "env": {
+        "g": {
+          "type": "z3.z3.BoolRef",
+          "contents": "Rain",
+          "dtype": null,
+          "shape": null
+        },
+        "h": {
+          "type": "z3.z3.BoolRef",
+          "contents": "Wet",
+          "dtype": null,
+          "shape": null
+        }
+      },
       "renderings": []
     },
     {
@@ -8366,10 +8405,23 @@
           "path": "propositional_logic.py",
           "line_number": 241,
           "function_name": "I",
-          "code": "g, h = f.arg(0), f.arg(1)"
+          "code": "g, h = f.arg(0), f.arg(1)  # @inspect g h"
         }
       ],
-      "env": {},
+      "env": {
+        "g": {
+          "type": "z3.z3.BoolRef",
+          "contents": "Rain",
+          "dtype": null,
+          "shape": null
+        },
+        "h": {
+          "type": "z3.z3.BoolRef",
+          "contents": "Wet",
+          "dtype": null,
+          "shape": null
+        }
+      },
       "renderings": []
     },
     {
@@ -12673,7 +12725,7 @@
           "path": "propositional_logic.py",
           "line_number": 410,
           "function_name": "ask_tell",
-          "code": "kb = [Rain, Wet]  # It's raining and wet"
+          "code": "kb = [Rain, Wet]  # It's raining and wet."
         }
       ],
       "env": {},
@@ -13004,7 +13056,7 @@
           "path": "propositional_logic.py",
           "line_number": 413,
           "function_name": "ask_tell",
-          "code": "kb = [Not(Rain), Wet]  # It's not raining"
+          "code": "kb = [Wet, Not(Rain)]  # It is wet and not raining."
         }
       ],
       "env": {},
@@ -13351,7 +13403,7 @@
           "path": "propositional_logic.py",
           "line_number": 416,
           "function_name": "ask_tell",
-          "code": "kb = [Rain]"
+          "code": "kb = [Rain]  # It's raining."
         }
       ],
       "env": {},
@@ -13881,7 +13933,7 @@
           "path": "propositional_logic.py",
           "line_number": 435,
           "function_name": "ask_tell",
-          "code": "kb = [Rain, Implies(Rain, Wet)]  # It's raining, and if it's raining, it's wet."
+          "code": "kb = [Rain, Implies(Rain, Wet)]  # It is raining, and if it is raining, it is wet."
         }
       ],
       "env": {},
@@ -13911,7 +13963,7 @@
           "path": "propositional_logic.py",
           "line_number": 436,
           "function_name": "ask_tell",
-          "code": "new_kb, result = tell(kb, Wet)  # It's wet  @inspect new_kb result"
+          "code": "new_kb, result = tell(kb, Wet)  # It is wet.  @inspect new_kb result"
         }
       ],
       "env": {},
@@ -13941,7 +13993,7 @@
           "path": "propositional_logic.py",
           "line_number": 436,
           "function_name": "ask_tell",
-          "code": "new_kb, result = tell(kb, Wet)  # It's wet  @inspect new_kb result"
+          "code": "new_kb, result = tell(kb, Wet)  # It is wet.  @inspect new_kb result"
         },
         {
           "path": "propositional_logic.py",
@@ -13977,7 +14029,7 @@
           "path": "propositional_logic.py",
           "line_number": 436,
           "function_name": "ask_tell",
-          "code": "new_kb, result = tell(kb, Wet)  # It's wet  @inspect new_kb result"
+          "code": "new_kb, result = tell(kb, Wet)  # It is wet.  @inspect new_kb result"
         },
         {
           "path": "propositional_logic.py",
@@ -14040,7 +14092,7 @@
           "path": "propositional_logic.py",
           "line_number": 436,
           "function_name": "ask_tell",
-          "code": "new_kb, result = tell(kb, Wet)  # It's wet  @inspect new_kb result"
+          "code": "new_kb, result = tell(kb, Wet)  # It is wet.  @inspect new_kb result"
         },
         {
           "path": "propositional_logic.py",
@@ -14103,7 +14155,7 @@
           "path": "propositional_logic.py",
           "line_number": 436,
           "function_name": "ask_tell",
-          "code": "new_kb, result = tell(kb, Wet)  # It's wet  @inspect new_kb result"
+          "code": "new_kb, result = tell(kb, Wet)  # It is wet.  @inspect new_kb result"
         },
         {
           "path": "propositional_logic.py",
@@ -14139,7 +14191,7 @@
           "path": "propositional_logic.py",
           "line_number": 436,
           "function_name": "ask_tell",
-          "code": "new_kb, result = tell(kb, Wet)  # It's wet  @inspect new_kb result"
+          "code": "new_kb, result = tell(kb, Wet)  # It is wet.  @inspect new_kb result"
         },
         {
           "path": "propositional_logic.py",
@@ -14175,7 +14227,7 @@
           "path": "propositional_logic.py",
           "line_number": 436,
           "function_name": "ask_tell",
-          "code": "new_kb, result = tell(kb, Wet)  # It's wet  @inspect new_kb result"
+          "code": "new_kb, result = tell(kb, Wet)  # It is wet.  @inspect new_kb result"
         }
       ],
       "env": {
@@ -14231,7 +14283,7 @@
           "path": "propositional_logic.py",
           "line_number": 438,
           "function_name": "ask_tell",
-          "code": "kb = [Rain, Wet]  # It's raining and wet"
+          "code": "kb = [Rain, Wet]  # It is raining and wet."
         }
       ],
       "env": {},
@@ -14261,7 +14313,7 @@
           "path": "propositional_logic.py",
           "line_number": 439,
           "function_name": "ask_tell",
-          "code": "new_kb, result = tell(kb, Not(Rain))  # It's not raining  @inspect new_kb result"
+          "code": "new_kb, result = tell(kb, Not(Rain))  # It is not raining.  @inspect new_kb result"
         }
       ],
       "env": {},
@@ -14291,7 +14343,7 @@
           "path": "propositional_logic.py",
           "line_number": 439,
           "function_name": "ask_tell",
-          "code": "new_kb, result = tell(kb, Not(Rain))  # It's not raining  @inspect new_kb result"
+          "code": "new_kb, result = tell(kb, Not(Rain))  # It is not raining.  @inspect new_kb result"
         },
         {
           "path": "propositional_logic.py",
@@ -14327,7 +14379,7 @@
           "path": "propositional_logic.py",
           "line_number": 439,
           "function_name": "ask_tell",
-          "code": "new_kb, result = tell(kb, Not(Rain))  # It's not raining  @inspect new_kb result"
+          "code": "new_kb, result = tell(kb, Not(Rain))  # It is not raining.  @inspect new_kb result"
         },
         {
           "path": "propositional_logic.py",
@@ -14390,7 +14442,7 @@
           "path": "propositional_logic.py",
           "line_number": 439,
           "function_name": "ask_tell",
-          "code": "new_kb, result = tell(kb, Not(Rain))  # It's not raining  @inspect new_kb result"
+          "code": "new_kb, result = tell(kb, Not(Rain))  # It is not raining.  @inspect new_kb result"
         },
         {
           "path": "propositional_logic.py",
@@ -14433,7 +14485,7 @@
           "path": "propositional_logic.py",
           "line_number": 439,
           "function_name": "ask_tell",
-          "code": "new_kb, result = tell(kb, Not(Rain))  # It's not raining  @inspect new_kb result"
+          "code": "new_kb, result = tell(kb, Not(Rain))  # It is not raining.  @inspect new_kb result"
         },
         {
           "path": "propositional_logic.py",
@@ -14469,7 +14521,7 @@
           "path": "propositional_logic.py",
           "line_number": 439,
           "function_name": "ask_tell",
-          "code": "new_kb, result = tell(kb, Not(Rain))  # It's not raining  @inspect new_kb result"
+          "code": "new_kb, result = tell(kb, Not(Rain))  # It is not raining.  @inspect new_kb result"
         },
         {
           "path": "propositional_logic.py",
@@ -14505,7 +14557,7 @@
           "path": "propositional_logic.py",
           "line_number": 439,
           "function_name": "ask_tell",
-          "code": "new_kb, result = tell(kb, Not(Rain))  # It's not raining  @inspect new_kb result"
+          "code": "new_kb, result = tell(kb, Not(Rain))  # It is not raining.  @inspect new_kb result"
         },
         {
           "path": "propositional_logic.py",
@@ -14541,7 +14593,7 @@
           "path": "propositional_logic.py",
           "line_number": 439,
           "function_name": "ask_tell",
-          "code": "new_kb, result = tell(kb, Not(Rain))  # It's not raining  @inspect new_kb result"
+          "code": "new_kb, result = tell(kb, Not(Rain))  # It is not raining.  @inspect new_kb result"
         }
       ],
       "env": {
@@ -14597,7 +14649,7 @@
           "path": "propositional_logic.py",
           "line_number": 441,
           "function_name": "ask_tell",
-          "code": "kb = [Rain]  # It's raining"
+          "code": "kb = [Rain]  # It is raining."
         }
       ],
       "env": {},
@@ -14627,7 +14679,7 @@
           "path": "propositional_logic.py",
           "line_number": 442,
           "function_name": "ask_tell",
-          "code": "new_kb, result = tell(kb, Not(Wet))  # It's not wet  @inspect new_kb result"
+          "code": "new_kb, result = tell(kb, Not(Wet))  # It is not wet.  @inspect new_kb result"
         }
       ],
       "env": {},
@@ -14657,7 +14709,7 @@
           "path": "propositional_logic.py",
           "line_number": 442,
           "function_name": "ask_tell",
-          "code": "new_kb, result = tell(kb, Not(Wet))  # It's not wet  @inspect new_kb result"
+          "code": "new_kb, result = tell(kb, Not(Wet))  # It is not wet.  @inspect new_kb result"
         },
         {
           "path": "propositional_logic.py",
@@ -14693,7 +14745,7 @@
           "path": "propositional_logic.py",
           "line_number": 442,
           "function_name": "ask_tell",
-          "code": "new_kb, result = tell(kb, Not(Wet))  # It's not wet  @inspect new_kb result"
+          "code": "new_kb, result = tell(kb, Not(Wet))  # It is not wet.  @inspect new_kb result"
         },
         {
           "path": "propositional_logic.py",
@@ -14775,7 +14827,7 @@
           "path": "propositional_logic.py",
           "line_number": 442,
           "function_name": "ask_tell",
-          "code": "new_kb, result = tell(kb, Not(Wet))  # It's not wet  @inspect new_kb result"
+          "code": "new_kb, result = tell(kb, Not(Wet))  # It is not wet.  @inspect new_kb result"
         },
         {
           "path": "propositional_logic.py",
@@ -14838,7 +14890,7 @@
           "path": "propositional_logic.py",
           "line_number": 442,
           "function_name": "ask_tell",
-          "code": "new_kb, result = tell(kb, Not(Wet))  # It's not wet  @inspect new_kb result"
+          "code": "new_kb, result = tell(kb, Not(Wet))  # It is not wet.  @inspect new_kb result"
         },
         {
           "path": "propositional_logic.py",
@@ -14874,7 +14926,7 @@
           "path": "propositional_logic.py",
           "line_number": 442,
           "function_name": "ask_tell",
-          "code": "new_kb, result = tell(kb, Not(Wet))  # It's not wet  @inspect new_kb result"
+          "code": "new_kb, result = tell(kb, Not(Wet))  # It is not wet.  @inspect new_kb result"
         },
         {
           "path": "propositional_logic.py",
@@ -14910,7 +14962,7 @@
           "path": "propositional_logic.py",
           "line_number": 442,
           "function_name": "ask_tell",
-          "code": "new_kb, result = tell(kb, Not(Wet))  # It's not wet  @inspect new_kb result"
+          "code": "new_kb, result = tell(kb, Not(Wet))  # It is not wet.  @inspect new_kb result"
         },
         {
           "path": "propositional_logic.py",
@@ -14946,7 +14998,7 @@
           "path": "propositional_logic.py",
           "line_number": 442,
           "function_name": "ask_tell",
-          "code": "new_kb, result = tell(kb, Not(Wet))  # It's not wet  @inspect new_kb result"
+          "code": "new_kb, result = tell(kb, Not(Wet))  # It is not wet.  @inspect new_kb result"
         }
       ],
       "env": {
@@ -18242,14 +18294,14 @@
           "path": "propositional_logic.py",
           "line_number": 558,
           "function_name": "forward_inference",
-          "code": "text(\"While there are no changes to KB:\")"
+          "code": "text(\"Until there are no more changes to KB:\")"
         }
       ],
       "env": {},
       "renderings": [
         {
           "type": "markdown",
-          "data": "While there are no changes to KB:",
+          "data": "Until there are no more changes to KB:",
           "style": {},
           "external_link": null,
           "internal_link": null
@@ -18740,14 +18792,14 @@
           "path": "propositional_logic.py",
           "line_number": 575,
           "function_name": "soundness_completeness",
-          "code": "text(\"Syntax: { f: KB \u22a2 f }\")"
+          "code": "text(\"Syntax: { f: KB \u22a2 f } (formulas that can be derived from KB)\")"
         }
       ],
       "env": {},
       "renderings": [
         {
           "type": "markdown",
-          "data": "Syntax: { f: KB \u22a2 f }",
+          "data": "Syntax: { f: KB \u22a2 f } (formulas that can be derived from KB)",
           "style": {},
           "external_link": null,
           "internal_link": null
@@ -18778,14 +18830,14 @@
           "path": "propositional_logic.py",
           "line_number": 576,
           "function_name": "soundness_completeness",
-          "code": "text(\"Semantics: { f: KB \u22a7 f }\")"
+          "code": "text(\"Semantics: { f: KB \u22a7 f } (formulas that are are entailed by KB)\")"
         }
       ],
       "env": {},
       "renderings": [
         {
           "type": "markdown",
-          "data": "Semantics: { f: KB \u22a7 f }",
+          "data": "Semantics: { f: KB \u22a7 f } (formulas that are are entailed by KB)",
           "style": {},
           "external_link": null,
           "internal_link": null

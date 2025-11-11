@@ -210,8 +210,8 @@ def define_interpretation_function():
 
     text("Definition: **interpretation function** ℐ")
     text("...maps a formula f and a model w either:")
-    text("- true (1): w satisfies f, or")
-    text("- false (0): w does not satisfy f")
+    text("- true (1): means that f is true in w, or")
+    text("- false (0): means that f is false in w.")
     image("images/logic-fw.png", width=300)
 
     text("**Example**:")
@@ -238,7 +238,7 @@ def I(f: Formula, w: Model) -> bool:  # @inspect f w
             raise ValueError(f"Unsupported formula: {f}")
 
     elif f.num_args() == 2:
-        g, h = f.arg(0), f.arg(1)
+        g, h = f.arg(0), f.arg(1)  # @inspect g h
         if is_and(f):  # f = And(g, h)
             result = I(g, w) and I(h, w)  # @inspect result
         elif is_or(f):  # f = Or(g, h)
@@ -407,13 +407,13 @@ def ask_tell():
 
         return "I don't know"         # KB is contingent with respect to f
 
-    kb = [Rain, Wet]  # It's raining and wet
+    kb = [Rain, Wet]  # It's raining and wet.
     result = ask(kb, Or(Rain, Wet))  # Is it raining or wet?  @inspect result
 
-    kb = [Not(Rain), Wet]  # It's not raining
+    kb = [Wet, Not(Rain)]  # It is wet and not raining.
     result = ask(kb, Rain)  # Is it raining?  @inspect result
 
-    kb = [Rain]
+    kb = [Rain]  # It's raining.
     result = ask(kb, Wet)  # Is it wet?  @inspect result
 
     text("### Tell")
@@ -432,14 +432,14 @@ def ask_tell():
 
         return kb + [f], "I learned something new"  # KB is contingent with respect to f
 
-    kb = [Rain, Implies(Rain, Wet)]  # It's raining, and if it's raining, it's wet.
-    new_kb, result = tell(kb, Wet)  # It's wet  @inspect new_kb result
+    kb = [Rain, Implies(Rain, Wet)]  # It is raining, and if it is raining, it is wet.
+    new_kb, result = tell(kb, Wet)  # It is wet.  @inspect new_kb result
 
-    kb = [Rain, Wet]  # It's raining and wet
-    new_kb, result = tell(kb, Not(Rain))  # It's not raining  @inspect new_kb result
+    kb = [Rain, Wet]  # It is raining and wet.
+    new_kb, result = tell(kb, Not(Rain))  # It is not raining.  @inspect new_kb result
     
-    kb = [Rain]  # It's raining
-    new_kb, result = tell(kb, Not(Wet))  # It's not wet  @inspect new_kb result
+    kb = [Rain]  # It is raining.
+    new_kb, result = tell(kb, Not(Wet))  # It is not wet.  @inspect new_kb result
 
     text("Summary:")
     text("- Ask: queries a knowledge base")
@@ -555,7 +555,7 @@ def forward_inference():
     text("Input:")
     text("- set of inference rules (Rules)")
     text("- initial knowledge base (KB)")
-    text("While there are no changes to KB:")
+    text("Until there are no more changes to KB:")
     text("- Choose a set of formulas f_1, ..., f_n ∈ KB")
     text("- If matching rule f_1, ..., f_n ⊢ g ∈ Rules, then add g to KB.")
 
@@ -572,8 +572,8 @@ def soundness_completeness():
 
     text("What is the relationship?")
     text("In particular, compare:")
-    text("Syntax: { f: KB ⊢ f }")
-    text("Semantics: { f: KB ⊧ f }")
+    text("Syntax: { f: KB ⊢ f } (formulas that can be derived from KB)")
+    text("Semantics: { f: KB ⊧ f } (formulas that are are entailed by KB)")
 
     text("Truth: { f: KB ⊧ f }")
     image("images/empty-water-glass.jpg", width=200)
