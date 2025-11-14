@@ -58,7 +58,7 @@ def motivation():
 
     text("Summary:")
     text("- Logic enables expressive representation/reasoning")
-    text("- Think a logic as a language")
+    text("- Think of a logic as a language")
     text("- Defined by syntax, semantics, and inference rules")
     
     text("Next: propositional logic")
@@ -573,7 +573,7 @@ def soundness_completeness():
     text("What is the relationship?")
     text("In particular, compare:")
     text("Syntax: { f: KB ⊢ f } (formulas that can be derived from KB)")
-    text("Semantics: { f: KB ⊧ f } (formulas that are are entailed by KB)")
+    text("Semantics: { f: KB ⊧ f } (formulas that are entailed by KB)")
 
     text("Truth: { f: KB ⊧ f }")
     image("images/empty-water-glass.jpg", width=200)

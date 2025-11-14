@@ -343,12 +343,10 @@ def first_order_logic_semantics():
     predicates = {
         Knows: {
             ("o1", "o3"): True,
-            ("o2", "o3"): False,
+            ("o2", "o3"): True,
         },
         Student: {
             "o1": True,
-            "o2": False,
-            "o3": False,
         },
     }
 
@@ -377,9 +375,9 @@ def first_order_logic_semantics():
     text("- Semantics defined by interpretation function ℐ(f, w)")
     text("- Model w = (domain, interpretation)")
     text("- Interpretation maps symbols (constants, functions, predicates) to objects in the domain")
-    text("- Recursively interpret formulas and terms")
+    text("- Recursively interpret larger formulas and terms")
 
-    text("How can we perform logical inference (Ask/Tell → entailment/contradiction/contingency → satisfiability)?")
+    text("How can we perform logical inference with respect to these semantics?")
 
 
 @dataclass(frozen=True)
@@ -439,7 +437,7 @@ def interpret_formula(f: Formula, w: FirstOrderLogicModel, subst: dict[Variable,
             predicate, arg = f.decl(), f.arg(0)  # @inspect func arg
             predicate_value = w.interpretation.predicates[predicate]  # @inspect predicate_value
             arg_value = interpret_term(arg, w, subst)  # @inspect arg_value
-            result = predicate_value[arg_value] # @inspect result
+            result = predicate_value.get(arg_value, False) # @inspect result
 
     elif f.num_args() == 2:
         if is_and(f):
@@ -460,7 +458,7 @@ def interpret_formula(f: Formula, w: FirstOrderLogicModel, subst: dict[Variable,
             predicate_value = w.interpretation.predicates[predicate]  # @inspect predicate_value
             arg1_value = interpret_term(arg1, w, subst)  # @inspect arg1_value
             arg2_value = interpret_term(arg2, w, subst)  # @inspect arg2_value
-            result = predicate_value[(arg1_value, arg2_value)] # @inspect result
+            result = predicate_value.get((arg1_value, arg2_value), False) # @inspect result
 
     return result
 
@@ -487,6 +485,8 @@ def interpret_term(t: Term, w: FirstOrderLogicModel, subst: dict[Variable, str])
 
 def propositionalization():
     text("How do we perform inference in first-order logic?")
+
+    text("Suppose we have the following knowledge base:")
     kb = [
         Student(alice),
         Student(bob),
@@ -497,9 +497,9 @@ def propositionalization():
     text("Let's reduce to propositional logic.")
     text("We can't do this in general (because first-order logic is more powerful).")
 
-    image("images/unique-names-domain-closure.png", width=600)
     text("But we can do it if we assume two things about the model:")
-    text("- Unique names: each constant maps to each object corresponds to **at most one** constant (not w_2).")
+    image("images/unique-names-domain-closure.png", width=600)
+    text("- Unique names: each object corresponds to **at most one** constant (not w_2).")
     text("- Domain closure: each object corresponds to **at least one** constant (not w_3).")
 
     text("In this case, we can **propositionalize** the knowledge base.")
@@ -518,20 +518,24 @@ def propositionalization():
     text("In this regime, first-order logic is syntactic sugar for propositional logic.")
     text("In other words, it's the same expressivity, but easier to read/write.")
 
+    text("But what if we don't have these assumptions?")
+
 
 def first_order_logic_inference_rules():
     text("Recall that inference rules match formulas in the KB and produce new formulas.")
     text("Let us now define the modus ponens inference rule.")
 
-    text("This rule assumes a special type of formulas.")
+    text("This rule operate a special type of formula called a definite clause.")
 
     text("Definition: a **definite clause** is a formula of the following form:")
     text("∀ x_1 ... x_n. (a_1 ∧ ... ∧ a_k) → b")
     text("...where x_1, ..., x_n are variables, a_1, ..., a_k, b are atomic formulas.")
     
-    text("Example:")
-    # ∀ x, y, z. (Takes(x, y) ∧ Covers(y, z)) → Knows(x, z)
-    formula = ForAll([x, y, z], Implies(And(Knows(x, y), Covers(y, z)), Knows(x, z)))
+    text("Example: ∀ x, y, z. (Takes(x, y) ∧ Covers(y, z)) → Knows(x, z)")
+    text("Here:")
+    text("- Variables are x, y, z")
+    text("- Atomic formulas are a_1 = Takes(x, y), a_2 = Covers(y, z), b = Knows(x, z)")
+    formula = ForAll([x, y, z], Implies(And(Takes(x, y), Covers(y, z)), Knows(x, z)))
 
     text("Non-example (disjunction):")
     formula = Or(Student(alice), Student(bob))
@@ -539,22 +543,25 @@ def first_order_logic_inference_rules():
 
     text("Attempt 1: modus ponens with exact match")
     text("Premises:")
-    text("- a_1, ..., a_k")
+    text("- a_1")
+    text("- ...")
+    text("- a_k")
     text("- ∀ x_1 ... x_n. (a_1 ∧ ... ∧ a_k) → b")
     text("Conclusion:")
     text("- b")
 
     kb = [
-        # Takes(alice, cs221)
+        # a_1: Takes(alice, cs221)
         Takes(alice, cs221),
-        # Covers(cs221, logic)
+        # a_2: Covers(cs221, logic)
         Covers(cs221, logic),
         # ∀ x, y, z. (Takes(x, y) ∧ Covers(y, z)) → Knows(x, z)
         ForAll([x, y, z], Implies(And(Takes(x, y), Covers(y, z)), Knows(x, z))),
     ]
+    text("We would like conclude b: Knows(alice, logic)")
 
     text("However, Takes(alice, cs221) ≠ Takes(x, y)")
-    text("So we can't apply the rule.")
+    text("So we can't apply the rule (no exact match).")
 
     text("Solution: substitution and unification")
     introduce_substitution()
@@ -562,29 +569,35 @@ def first_order_logic_inference_rules():
 
     text("**Attempt 2**: modus ponens with substitution and unification")
     text("Premises:")
-    text("- a_1', ..., a_k'")
+    text("- a_1'")
+    text("- ...")
+    text("- a_k'")
     text("- ∀ x_1 ... x_n. (a_1 ∧ ... ∧ a_k) → b")
     text("- θ = unify(a_1' ∧ ... ∧ a_k', a_1 ∧ ... ∧ a_k)")
     text("Conclusion:")
     text("- substitute(b, θ) = b'")
 
     kb = [
-        # Takes(alice, cs221)
+        # a_1': Takes(alice, cs221)
         Takes(alice, cs221),
-        # Covers(cs221, logic)
+        # a_2': Covers(cs221, logic)
         Covers(cs221, logic),
         # ∀ x, y, z. (Takes(x, y) ∧ Covers(y, z)) → Knows(x, z)
         ForAll([x, y, z], Implies(And(Takes(x, y), Covers(y, z)), Knows(x, z))),
     ]
 
-    theta = unify(And(Takes(alice, cs221), Covers(cs221, logic)), And(Takes(x, y), Covers(y, z)), {})  # @inspect theta
+    text("Find the substitution to make a_1' ∧ a_2' equal to a_1 ∧ a_2")
+    theta = unify(  # @inspect theta
+        And(Takes(alice, cs221), Covers(cs221, logic)),
+        And(Takes(x, y), Covers(y, z)),
+    {})
     if theta is not None:
         result = substitute(Knows(x, z), theta) # @inspect result @stepover
 
     text("Complexity:")
     text("- Each application of Modus ponens produces an aotmic formula (e.g., Knows(alice, logic))")
-    text("- If no functions, then complexity is num-constant-symbols^(maximum-predicate-arity)")
-    text("- If functions, then complexity then possibly infinite:")
+    text("- If we have no functions, then complexity is num-constant-symbols^(maximum-predicate-arity)")
+    text("- If we have functions, then complexity then possibly infinite:")
     Knows(alice, logic)
     Knows(father(alice), logic)
     Knows(father(father(alice)), logic)
@@ -597,7 +610,7 @@ def first_order_logic_inference_rules():
 
     text("Summary:")
     text("- Modus ponens: works on definite clauses")
-    text("- Intuition: no disjunction (or) allowed")
+    text("- Intuition: no disjunction (or, exists) allowed")
     text("- Substitution: search and replace on terms in a formula")
     text("- Unification: find a substitution that makes two terms equal")
 
@@ -633,6 +646,7 @@ def introduce_unification():
 
 
 def unify(f1: Formula, f2: Formula, subst: dict[Variable, Term]) -> dict[Variable, Term]:  # @inspect f1 f2 subst
+    """Given two formulas `f1` and `f2`, find a substitution (adding to `subst`) that makes them equal."""
     if f1 == f2:
         return subst
     elif is_variable(f1):  # @stepover
@@ -685,8 +699,8 @@ def natural_language_to_first_order_logic():
     text("*Some object is either not a student or knows arithmetic.*")
 
     text("*There is some course that every student has taken.*")
-    # ∃x. ∀y. Student(y) → Takes(y, x)
-    formula = Exists([x], ForAll([y], Implies(Student(y), Takes(y, x))))
+    # ∃x. Course(x) ∧ ∀y. Student(y) → Takes(y, x)
+    formula = Exists([x], And(Course(x), ForAll([y], Implies(Student(y), Takes(y, x)))))
 
     text("*Every even integer greater than 2 is the sum of two prime numbers.*")
     # ∀x. Even(x) ∧ GreaterThan(x, two) → ∃y, z. Prime(y) ∧ Prime(z) ∧ add(y, z) == x
@@ -695,8 +709,6 @@ def natural_language_to_first_order_logic():
     text("*If a student takes a course and the course covers a concept, then the student knows the concept.*")
     # ∀x, y, z. Student(x) ∧ Takes(x, y) ∧ Course(y) ∧ Covers(y, z) ∧ Concept(z) → Knows(x, z)
     formula = ForAll([x, y, z], Implies(And(Student(x), Takes(x, y), Course(y), Covers(y, z), Concept(z)), Knows(x, z)))
-
-    motivating_example()
 
 
 if __name__ == "__main__":
