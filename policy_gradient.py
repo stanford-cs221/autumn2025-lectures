@@ -67,7 +67,7 @@ def review_rl():
     text("To model or not to model?")
     text("- Model-based: estimate the MDP, then compute the optimal policy")
     text("- Value-based (model-free): don't estimate the MDP, just estimate Q-values directly")
-    
+
     text("General form for model-free methods (for model-free Monte Carlo, SARSA, Q-learning):")
     text("- Current model estimate: Q(s, a)")
     text("- Target (estimate of utility)")
@@ -480,7 +480,7 @@ def policy_gradient_enhancements():
     text("2. Use returns-to-go instead of utility")
     text("J(θ, 𝜏) = Σ_t log π_θ(a_t | s_{t-1}) * (r_t + γ r_{t+1} + γ^2 r_{t+2} + ... - b(s_{t-1}))")
     text("3. Use a **biased** estimate of the value function Q(s, a) instead of utility(𝜏) (bootstrapping).")
-    text("J(θ, 𝜏) = Σ_t log π_θ(a_t | s_{t-1}) * (Q(s_t, a_t) - b(s_{t-1}))")
+    text("J(θ, 𝜏) = Σ_t log π_θ(a_t | s_{t-1}) * (Q(s_{t-1}, a_t) - b(s_{t-1}))")
 
     text("Summary:")
     text("- The game: find a low-bias, low-variance estimate of E_θ[∇_θ log π_θ(𝜏) * utility(𝜏)]")
