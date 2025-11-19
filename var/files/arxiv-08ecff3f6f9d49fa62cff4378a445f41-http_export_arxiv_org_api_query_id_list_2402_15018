@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:arxiv="http://arxiv.org/schemas/atom" xmlns="http://www.w3.org/2005/Atom">
+  <id>https://arxiv.org/api/HQ35l8OfKHeMDudiEE7h1Nm9fBo</id>
+  <title>arXiv Query: search_query=&amp;id_list=2402.15018&amp;start=0&amp;max_results=10</title>
+  <updated>2025-11-19T19:15:41Z</updated>
+  <link href="https://arxiv.org/api/query?search_query=&amp;start=0&amp;max_results=10&amp;id_list=2402.15018" type="application/atom+xml"/>
+  <opensearch:itemsPerPage>10</opensearch:itemsPerPage>
+  <opensearch:totalResults>1</opensearch:totalResults>
+  <opensearch:startIndex>0</opensearch:startIndex>
+  <entry>
+    <id>http://arxiv.org/abs/2402.15018v2</id>
+    <title>Unintended Impacts of LLM Alignment on Global Representation</title>
+    <updated>2024-06-06T22:31:48Z</updated>
+    <link href="https://arxiv.org/abs/2402.15018v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2402.15018v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Before being deployed for user-facing applications, developers align Large Language Models (LLMs) to user preferences through a variety of procedures, such as Reinforcement Learning From Human Feedback (RLHF) and Direct Preference Optimization (DPO). Current evaluations of these procedures focus on benchmarks of instruction following, reasoning, and truthfulness. However, human preferences are not universal, and aligning to specific preference sets may have unintended effects. We explore how alignment impacts performance along three axes of global representation: English dialects, multilingualism, and opinions from and about countries worldwide. Our results show that current alignment procedures create disparities between English dialects and global opinions. We find alignment improves capabilities in several languages. We conclude by discussing design decisions that led to these unintended impacts and recommendations for more equitable preference tuning. We make our code and data publicly available on Github.</summary>
+    <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CY" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-02-22T23:31:22Z</published>
+    <arxiv:comment>Accepted to ACL 2024 main conference</arxiv:comment>
+    <arxiv:primary_category term="cs.CL"/>
+    <author>
+      <name>Michael J. Ryan</name>
+    </author>
+    <author>
+      <name>William Held</name>
+    </author>
+    <author>
+      <name>Diyi Yang</name>
+    </author>
+  </entry>
+</feed>

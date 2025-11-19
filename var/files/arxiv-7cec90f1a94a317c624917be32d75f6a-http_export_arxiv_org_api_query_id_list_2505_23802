@@ -1,0 +1,265 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:arxiv="http://arxiv.org/schemas/atom" xmlns="http://www.w3.org/2005/Atom">
+  <id>https://arxiv.org/api/9/jYjXLWeP8WuxygunQAqZqtlJM</id>
+  <title>arXiv Query: search_query=&amp;id_list=2505.23802&amp;start=0&amp;max_results=10</title>
+  <updated>2025-11-19T17:07:08Z</updated>
+  <link href="https://arxiv.org/api/query?search_query=&amp;start=0&amp;max_results=10&amp;id_list=2505.23802" type="application/atom+xml"/>
+  <opensearch:itemsPerPage>10</opensearch:itemsPerPage>
+  <opensearch:totalResults>1</opensearch:totalResults>
+  <opensearch:startIndex>0</opensearch:startIndex>
+  <entry>
+    <id>http://arxiv.org/abs/2505.23802v2</id>
+    <title>MedHELM: Holistic Evaluation of Large Language Models for Medical Tasks</title>
+    <updated>2025-06-02T04:19:10Z</updated>
+    <link href="https://arxiv.org/abs/2505.23802v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2505.23802v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>While large language models (LLMs) achieve near-perfect scores on medical licensing exams, these evaluations inadequately reflect the complexity and diversity of real-world clinical practice. We introduce MedHELM, an extensible evaluation framework for assessing LLM performance for medical tasks with three key contributions. First, a clinician-validated taxonomy spanning 5 categories, 22 subcategories, and 121 tasks developed with 29 clinicians. Second, a comprehensive benchmark suite comprising 35 benchmarks (17 existing, 18 newly formulated) providing complete coverage of all categories and subcategories in the taxonomy. Third, a systematic comparison of LLMs with improved evaluation methods (using an LLM-jury) and a cost-performance analysis. Evaluation of 9 frontier LLMs, using the 35 benchmarks, revealed significant performance variation. Advanced reasoning models (DeepSeek R1: 66% win-rate; o3-mini: 64% win-rate) demonstrated superior performance, though Claude 3.5 Sonnet achieved comparable results at 40% lower estimated computational cost. On a normalized accuracy scale (0-1), most models performed strongly in Clinical Note Generation (0.73-0.85) and Patient Communication &amp; Education (0.78-0.83), moderately in Medical Research Assistance (0.65-0.75), and generally lower in Clinical Decision Support (0.56-0.72) and Administration &amp; Workflow (0.53-0.63). Our LLM-jury evaluation method achieved good agreement with clinician ratings (ICC = 0.47), surpassing both average clinician-clinician agreement (ICC = 0.43) and automated baselines including ROUGE-L (0.36) and BERTScore-F1 (0.44). Claude 3.5 Sonnet achieved comparable performance to top models at lower estimated cost. These findings highlight the importance of real-world, task-specific evaluation for medical use of LLMs and provides an open source framework to enable this.</summary>
+    <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-05-26T22:55:49Z</published>
+    <arxiv:primary_category term="cs.CL"/>
+    <author>
+      <name>Suhana Bedi</name>
+    </author>
+    <author>
+      <name>Hejie Cui</name>
+    </author>
+    <author>
+      <name>Miguel Fuentes</name>
+    </author>
+    <author>
+      <name>Alyssa Unell</name>
+    </author>
+    <author>
+      <name>Michael Wornow</name>
+    </author>
+    <author>
+      <name>Juan M. Banda</name>
+    </author>
+    <author>
+      <name>Nikesh Kotecha</name>
+    </author>
+    <author>
+      <name>Timothy Keyes</name>
+    </author>
+    <author>
+      <name>Yifan Mai</name>
+    </author>
+    <author>
+      <name>Mert Oez</name>
+    </author>
+    <author>
+      <name>Hao Qiu</name>
+    </author>
+    <author>
+      <name>Shrey Jain</name>
+    </author>
+    <author>
+      <name>Leonardo Schettini</name>
+    </author>
+    <author>
+      <name>Mehr Kashyap</name>
+    </author>
+    <author>
+      <name>Jason Alan Fries</name>
+    </author>
+    <author>
+      <name>Akshay Swaminathan</name>
+    </author>
+    <author>
+      <name>Philip Chung</name>
+    </author>
+    <author>
+      <name>Fateme Nateghi</name>
+    </author>
+    <author>
+      <name>Asad Aali</name>
+    </author>
+    <author>
+      <name>Ashwin Nayak</name>
+    </author>
+    <author>
+      <name>Shivam Vedak</name>
+    </author>
+    <author>
+      <name>Sneha S. Jain</name>
+    </author>
+    <author>
+      <name>Birju Patel</name>
+    </author>
+    <author>
+      <name>Oluseyi Fayanju</name>
+    </author>
+    <author>
+      <name>Shreya Shah</name>
+    </author>
+    <author>
+      <name>Ethan Goh</name>
+    </author>
+    <author>
+      <name>Dong-han Yao</name>
+    </author>
+    <author>
+      <name>Brian Soetikno</name>
+    </author>
+    <author>
+      <name>Eduardo Reis</name>
+    </author>
+    <author>
+      <name>Sergios Gatidis</name>
+    </author>
+    <author>
+      <name>Vasu Divi</name>
+    </author>
+    <author>
+      <name>Robson Capasso</name>
+    </author>
+    <author>
+      <name>Rachna Saralkar</name>
+    </author>
+    <author>
+      <name>Chia-Chun Chiang</name>
+    </author>
+    <author>
+      <name>Jenelle Jindal</name>
+    </author>
+    <author>
+      <name>Tho Pham</name>
+    </author>
+    <author>
+      <name>Faraz Ghoddusi</name>
+    </author>
+    <author>
+      <name>Steven Lin</name>
+    </author>
+    <author>
+      <name>Albert S. Chiou</name>
+    </author>
+    <author>
+      <name>Christy Hong</name>
+    </author>
+    <author>
+      <name>Mohana Roy</name>
+    </author>
+    <author>
+      <name>Michael F. Gensheimer</name>
+    </author>
+    <author>
+      <name>Hinesh Patel</name>
+    </author>
+    <author>
+      <name>Kevin Schulman</name>
+    </author>
+    <author>
+      <name>Dev Dash</name>
+    </author>
+    <author>
+      <name>Danton Char</name>
+    </author>
+    <author>
+      <name>Lance Downing</name>
+    </author>
+    <author>
+      <name>Francois Grolleau</name>
+    </author>
+    <author>
+      <name>Kameron Black</name>
+    </author>
+    <author>
+      <name>Bethel Mieso</name>
+    </author>
+    <author>
+      <name>Aydin Zahedivash</name>
+    </author>
+    <author>
+      <name>Wen-wai Yim</name>
+    </author>
+    <author>
+      <name>Harshita Sharma</name>
+    </author>
+    <author>
+      <name>Tony Lee</name>
+    </author>
+    <author>
+      <name>Hannah Kirsch</name>
+    </author>
+    <author>
+      <name>Jennifer Lee</name>
+    </author>
+    <author>
+      <name>Nerissa Ambers</name>
+    </author>
+    <author>
+      <name>Carlene Lugtu</name>
+    </author>
+    <author>
+      <name>Aditya Sharma</name>
+    </author>
+    <author>
+      <name>Bilal Mawji</name>
+    </author>
+    <author>
+      <name>Alex Alekseyev</name>
+    </author>
+    <author>
+      <name>Vicky Zhou</name>
+    </author>
+    <author>
+      <name>Vikas Kakkar</name>
+    </author>
+    <author>
+      <name>Jarrod Helzer</name>
+    </author>
+    <author>
+      <name>Anurang Revri</name>
+    </author>
+    <author>
+      <name>Yair Bannett</name>
+    </author>
+    <author>
+      <name>Roxana Daneshjou</name>
+    </author>
+    <author>
+      <name>Jonathan Chen</name>
+    </author>
+    <author>
+      <name>Emily Alsentzer</name>
+    </author>
+    <author>
+      <name>Keith Morse</name>
+    </author>
+    <author>
+      <name>Nirmal Ravi</name>
+    </author>
+    <author>
+      <name>Nima Aghaeepour</name>
+    </author>
+    <author>
+      <name>Vanessa Kennedy</name>
+    </author>
+    <author>
+      <name>Akshay Chaudhari</name>
+    </author>
+    <author>
+      <name>Thomas Wang</name>
+    </author>
+    <author>
+      <name>Sanmi Koyejo</name>
+    </author>
+    <author>
+      <name>Matthew P. Lungren</name>
+    </author>
+    <author>
+      <name>Eric Horvitz</name>
+    </author>
+    <author>
+      <name>Percy Liang</name>
+    </author>
+    <author>
+      <name>Mike Pfeffer</name>
+    </author>
+    <author>
+      <name>Nigam H. Shah</name>
+    </author>
+  </entry>
+</feed>

@@ -1,0 +1,98 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:arxiv="http://arxiv.org/schemas/atom" xmlns="http://www.w3.org/2005/Atom">
+  <id>https://arxiv.org/api/wzLQuwOyw8eIXSD6z1YBJ0NGxZA</id>
+  <title>arXiv Query: search_query=&amp;id_list=2403.07918&amp;start=0&amp;max_results=10</title>
+  <updated>2025-11-19T21:23:56Z</updated>
+  <link href="https://arxiv.org/api/query?search_query=&amp;start=0&amp;max_results=10&amp;id_list=2403.07918" type="application/atom+xml"/>
+  <opensearch:itemsPerPage>10</opensearch:itemsPerPage>
+  <opensearch:totalResults>1</opensearch:totalResults>
+  <opensearch:startIndex>0</opensearch:startIndex>
+  <entry>
+    <id>http://arxiv.org/abs/2403.07918v1</id>
+    <title>On the Societal Impact of Open Foundation Models</title>
+    <updated>2024-02-27T16:49:53Z</updated>
+    <link href="https://arxiv.org/abs/2403.07918v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2403.07918v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Foundation models are powerful technologies: how they are released publicly directly shapes their societal impact. In this position paper, we focus on open foundation models, defined here as those with broadly available model weights (e.g. Llama 2, Stable Diffusion XL). We identify five distinctive properties (e.g. greater customizability, poor monitoring) of open foundation models that lead to both their benefits and risks. Open foundation models present significant benefits, with some caveats, that span innovation, competition, the distribution of decision-making power, and transparency. To understand their risks of misuse, we design a risk assessment framework for analyzing their marginal risk. Across several misuse vectors (e.g. cyberattacks, bioweapons), we find that current research is insufficient to effectively characterize the marginal risk of open foundation models relative to pre-existing technologies. The framework helps explain why the marginal risk is low in some cases, clarifies disagreements about misuse risks by revealing that past work has focused on different subsets of the framework with different assumptions, and articulates a way forward for more constructive debate. Overall, our work helps support a more grounded assessment of the societal impact of open foundation models by outlining what research is needed to empirically validate their theoretical benefits and risks.</summary>
+    <category term="cs.CY" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-02-27T16:49:53Z</published>
+    <arxiv:primary_category term="cs.CY"/>
+    <author>
+      <name>Sayash Kapoor</name>
+    </author>
+    <author>
+      <name>Rishi Bommasani</name>
+    </author>
+    <author>
+      <name>Kevin Klyman</name>
+    </author>
+    <author>
+      <name>Shayne Longpre</name>
+    </author>
+    <author>
+      <name>Ashwin Ramaswami</name>
+    </author>
+    <author>
+      <name>Peter Cihon</name>
+    </author>
+    <author>
+      <name>Aspen Hopkins</name>
+    </author>
+    <author>
+      <name>Kevin Bankston</name>
+    </author>
+    <author>
+      <name>Stella Biderman</name>
+    </author>
+    <author>
+      <name>Miranda Bogen</name>
+    </author>
+    <author>
+      <name>Rumman Chowdhury</name>
+    </author>
+    <author>
+      <name>Alex Engler</name>
+    </author>
+    <author>
+      <name>Peter Henderson</name>
+    </author>
+    <author>
+      <name>Yacine Jernite</name>
+    </author>
+    <author>
+      <name>Seth Lazar</name>
+    </author>
+    <author>
+      <name>Stefano Maffulli</name>
+    </author>
+    <author>
+      <name>Alondra Nelson</name>
+    </author>
+    <author>
+      <name>Joelle Pineau</name>
+    </author>
+    <author>
+      <name>Aviya Skowron</name>
+    </author>
+    <author>
+      <name>Dawn Song</name>
+    </author>
+    <author>
+      <name>Victor Storchan</name>
+    </author>
+    <author>
+      <name>Daniel Zhang</name>
+    </author>
+    <author>
+      <name>Daniel E. Ho</name>
+    </author>
+    <author>
+      <name>Percy Liang</name>
+    </author>
+    <author>
+      <name>Arvind Narayanan</name>
+    </author>
+  </entry>
+</feed>

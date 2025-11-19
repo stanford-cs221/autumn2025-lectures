@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:arxiv="http://arxiv.org/schemas/atom" xmlns="http://www.w3.org/2005/Atom">
+  <id>https://arxiv.org/api/ru4wfLnc7iDcRh3V+yHDxw3dnEE</id>
+  <title>arXiv Query: search_query=&amp;id_list=2505.12546&amp;start=0&amp;max_results=10</title>
+  <updated>2025-11-19T21:23:55Z</updated>
+  <link href="https://arxiv.org/api/query?search_query=&amp;start=0&amp;max_results=10&amp;id_list=2505.12546" type="application/atom+xml"/>
+  <opensearch:itemsPerPage>10</opensearch:itemsPerPage>
+  <opensearch:totalResults>1</opensearch:totalResults>
+  <opensearch:startIndex>0</opensearch:startIndex>
+  <entry>
+    <id>http://arxiv.org/abs/2505.12546v3</id>
+    <title>Extracting memorized pieces of (copyrighted) books from open-weight language models</title>
+    <updated>2025-09-17T21:06:31Z</updated>
+    <link href="https://arxiv.org/abs/2505.12546v3" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2505.12546v3" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Plaintiffs and defendants in copyright lawsuits over generative AI often make sweeping, opposing claims about the extent to which large language models (LLMs) have memorized plaintiffs' protected expression in their training data. Drawing on both machine learning and copyright law, we show that these polarized positions dramatically oversimplify the relationship between memorization and copyright. To do so, we extend a recent probabilistic extraction technique to measure memorization of 50 books in 17 open-weight LLMs. Through thousands of experiments, we show that the extent of memorization varies both by model and by book. With respect to our specific extraction methodology, we find that most LLMs do not memorize most books -- either in whole or in part. However, we also find that Llama 3.1 70B entirely memorizes some books, like the first Harry Potter book and 1984. In fact, the first Harry Potter is so memorized that, using a seed prompt consisting of just the first few tokens of the first chapter, we can deterministically generate the entire book near-verbatim. We discuss why our results have significant implications for copyright cases, though not ones that unambiguously favor either side.</summary>
+    <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CY" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-05-18T21:06:32Z</published>
+    <arxiv:primary_category term="cs.CL"/>
+    <author>
+      <name>A. Feder Cooper</name>
+    </author>
+    <author>
+      <name>Aaron Gokaslan</name>
+    </author>
+    <author>
+      <name>Ahmed Ahmed</name>
+    </author>
+    <author>
+      <name>Amy B. Cyphert</name>
+    </author>
+    <author>
+      <name>Christopher De Sa</name>
+    </author>
+    <author>
+      <name>Mark A. Lemley</name>
+    </author>
+    <author>
+      <name>Daniel E. Ho</name>
+    </author>
+    <author>
+      <name>Percy Liang</name>
+    </author>
+  </entry>
+</feed>

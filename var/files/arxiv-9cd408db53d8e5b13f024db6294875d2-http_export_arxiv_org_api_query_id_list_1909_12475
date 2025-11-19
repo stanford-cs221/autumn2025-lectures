@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:arxiv="http://arxiv.org/schemas/atom" xmlns="http://www.w3.org/2005/Atom">
+  <id>https://arxiv.org/api/hXLSOiXxD16VeVbnp/l6BwuCmZM</id>
+  <title>arXiv Query: search_query=&amp;id_list=1909.12475&amp;start=0&amp;max_results=10</title>
+  <updated>2025-11-19T19:16:19Z</updated>
+  <link href="https://arxiv.org/api/query?search_query=&amp;start=0&amp;max_results=10&amp;id_list=1909.12475" type="application/atom+xml"/>
+  <opensearch:itemsPerPage>10</opensearch:itemsPerPage>
+  <opensearch:totalResults>1</opensearch:totalResults>
+  <opensearch:startIndex>0</opensearch:startIndex>
+  <entry>
+    <id>http://arxiv.org/abs/1909.12475v2</id>
+    <title>Hidden Stratification Causes Clinically Meaningful Failures in Machine Learning for Medical Imaging</title>
+    <updated>2019-11-15T09:44:33Z</updated>
+    <link href="https://arxiv.org/abs/1909.12475v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/1909.12475v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Machine learning models for medical image analysis often suffer from poor performance on important subsets of a population that are not identified during training or testing. For example, overall performance of a cancer detection model may be high, but the model still consistently misses a rare but aggressive cancer subtype. We refer to this problem as hidden stratification, and observe that it results from incompletely describing the meaningful variation in a dataset. While hidden stratification can substantially reduce the clinical efficacy of machine learning models, its effects remain difficult to measure. In this work, we assess the utility of several possible techniques for measuring and describing hidden stratification effects, and characterize these effects on multiple medical imaging datasets. We find evidence that hidden stratification can occur in unidentified imaging subsets with low prevalence, low label quality, subtle distinguishing features, or spurious correlates, and that it can result in relative performance differences of over 20% on clinically important subsets. Finally, we explore the clinical implications of our findings, and suggest that evaluation of hidden stratification should be a critical component of any machine learning deployment in medical imaging.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2019-09-27T02:42:58Z</published>
+    <arxiv:comment>Machine Learning for Health (ML4H) at NeurIPS 2019 - Extended Abstract</arxiv:comment>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Luke Oakden-Rayner</name>
+    </author>
+    <author>
+      <name>Jared Dunnmon</name>
+    </author>
+    <author>
+      <name>Gustavo Carneiro</name>
+    </author>
+    <author>
+      <name>Christopher Ré</name>
+    </author>
+  </entry>
+</feed>

@@ -1,0 +1,60 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:arxiv="http://arxiv.org/schemas/atom" xmlns="http://www.w3.org/2005/Atom">
+  <id>https://arxiv.org/api/f7YK47yhxbAFpvi1n/srIowLtDU</id>
+  <title>arXiv Query: search_query=&amp;id_list=2402.05070&amp;start=0&amp;max_results=10</title>
+  <updated>2025-11-19T19:46:03Z</updated>
+  <link href="https://arxiv.org/api/query?search_query=&amp;start=0&amp;max_results=10&amp;id_list=2402.05070" type="application/atom+xml"/>
+  <opensearch:itemsPerPage>10</opensearch:itemsPerPage>
+  <opensearch:totalResults>1</opensearch:totalResults>
+  <opensearch:startIndex>0</opensearch:startIndex>
+  <entry>
+    <id>http://arxiv.org/abs/2402.05070v3</id>
+    <title>A Roadmap to Pluralistic Alignment</title>
+    <updated>2024-08-20T19:14:31Z</updated>
+    <link href="https://arxiv.org/abs/2402.05070v3" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2402.05070v3" rel="related" type="application/pdf" title="pdf"/>
+    <summary>With increased power and prevalence of AI systems, it is ever more critical that AI systems are designed to serve all, i.e., people with diverse values and perspectives. However, aligning models to serve pluralistic human values remains an open research question. In this piece, we propose a roadmap to pluralistic alignment, specifically using language models as a test bed. We identify and formalize three possible ways to define and operationalize pluralism in AI systems: 1) Overton pluralistic models that present a spectrum of reasonable responses; 2) Steerably pluralistic models that can steer to reflect certain perspectives; and 3) Distributionally pluralistic models that are well-calibrated to a given population in distribution. We also formalize and discuss three possible classes of pluralistic benchmarks: 1) Multi-objective benchmarks, 2) Trade-off steerable benchmarks, which incentivize models to steer to arbitrary trade-offs, and 3) Jury-pluralistic benchmarks which explicitly model diverse human ratings. We use this framework to argue that current alignment techniques may be fundamentally limited for pluralistic AI; indeed, we highlight empirical evidence, both from our own experiments and from other work, that standard alignment procedures might reduce distributional pluralism in models, motivating the need for further research on pluralistic alignment.</summary>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.IR" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-02-07T18:21:17Z</published>
+    <arxiv:comment>ICML 2024</arxiv:comment>
+    <arxiv:primary_category term="cs.AI"/>
+    <author>
+      <name>Taylor Sorensen</name>
+    </author>
+    <author>
+      <name>Jared Moore</name>
+    </author>
+    <author>
+      <name>Jillian Fisher</name>
+    </author>
+    <author>
+      <name>Mitchell Gordon</name>
+    </author>
+    <author>
+      <name>Niloofar Mireshghallah</name>
+    </author>
+    <author>
+      <name>Christopher Michael Rytting</name>
+    </author>
+    <author>
+      <name>Andre Ye</name>
+    </author>
+    <author>
+      <name>Liwei Jiang</name>
+    </author>
+    <author>
+      <name>Ximing Lu</name>
+    </author>
+    <author>
+      <name>Nouha Dziri</name>
+    </author>
+    <author>
+      <name>Tim Althoff</name>
+    </author>
+    <author>
+      <name>Yejin Choi</name>
+    </author>
+  </entry>
+</feed>

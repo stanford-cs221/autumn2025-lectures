@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:arxiv="http://arxiv.org/schemas/atom" xmlns="http://www.w3.org/2005/Atom">
+  <id>https://arxiv.org/api/4AIkh/Rv/DcV/RxnxYtrZcoY9H0</id>
+  <title>arXiv Query: search_query=&amp;id_list=2407.12929&amp;start=0&amp;max_results=10</title>
+  <updated>2025-11-19T21:23:56Z</updated>
+  <link href="https://arxiv.org/api/query?search_query=&amp;start=0&amp;max_results=10&amp;id_list=2407.12929" type="application/atom+xml"/>
+  <opensearch:itemsPerPage>10</opensearch:itemsPerPage>
+  <opensearch:totalResults>1</opensearch:totalResults>
+  <opensearch:startIndex>0</opensearch:startIndex>
+  <entry>
+    <id>http://arxiv.org/abs/2407.12929v2</id>
+    <title>The 2024 Foundation Model Transparency Index</title>
+    <updated>2025-03-04T21:07:55Z</updated>
+    <link href="https://arxiv.org/abs/2407.12929v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2407.12929v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Foundation models are increasingly consequential yet extremely opaque. To characterize the status quo, the Foundation Model Transparency Index (FMTI) was launched in October 2023 to measure the transparency of leading foundation model developers. FMTI 2023 assessed 10 major foundation model developers (e.g. OpenAI, Google) on 100 transparency indicators (e.g. does the developer disclose the wages it pays for data labor?). At the time, developers publicly disclosed very limited information with the average score being 37 out of 100. To understand how the status quo has changed, we conduct a follow-up study after 6 months: we score 14 developers against the same 100 indicators. While in FMTI 2023 we searched for publicly available information, in FMTI 2024 developers submit reports on the 100 transparency indicators, potentially including information that was not previously public. We find that developers now score 58 out of 100 on average, a 21 point improvement over FMTI 2023. Much of this increase is driven by developers disclosing information during the FMTI 2024 process: on average, developers disclosed information related to 16.6 indicators that was not previously public. We observe regions of sustained (i.e. across 2023 and 2024) and systemic (i.e. across most or all developers) opacity such as on copyright status, data access, data labor, and downstream impact. We publish transparency reports for each developer that consolidate information disclosures: these reports are based on the information disclosed to us via developers. Our findings demonstrate that transparency can be improved in this nascent ecosystem, the Foundation Model Transparency Index likely contributes to these improvements, and policymakers should consider interventions in areas where transparency has not improved.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CY" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-07-17T18:03:37Z</published>
+    <arxiv:comment>Published in TMLR 2025. Project page: https://crfm.stanford.edu/fmti</arxiv:comment>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Rishi Bommasani</name>
+    </author>
+    <author>
+      <name>Kevin Klyman</name>
+    </author>
+    <author>
+      <name>Sayash Kapoor</name>
+    </author>
+    <author>
+      <name>Shayne Longpre</name>
+    </author>
+    <author>
+      <name>Betty Xiong</name>
+    </author>
+    <author>
+      <name>Nestor Maslej</name>
+    </author>
+    <author>
+      <name>Percy Liang</name>
+    </author>
+  </entry>
+</feed>
