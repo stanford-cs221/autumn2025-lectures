@@ -74,10 +74,14 @@ To run locally:
 
 - [bayes_learning](https://stanford-cs221.github.io/autumn2025-lectures/?trace=bayes_learning)
 
-### Mon Nov 10: learning (lecture 15)
+### Mon Nov 10: logic i (lecture 15)
 
 - [propositional_logic](https://stanford-cs221.github.io/autumn2025-lectures/?trace=propositional_logic)
 
-### Wed Nov 12: learning (lecture 16)
+### Wed Nov 12: logic ii (lecture 16)
 
 - [first_order_logic](https://stanford-cs221.github.io/autumn2025-lectures/?trace=first_order_logic)
+
+### Mon Nov 17: introduction to language models (lecture 17)
+
+- [first_order_logic](https://stanford-cs221.github.io/autumn2025-lectures/langauge_models.pdf)
