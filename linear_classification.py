@@ -1,43 +1,45 @@
 import numpy as np
-from typing import Callable
 from dataclasses import dataclass
 from edtrace import text, link, plot, image
 from altair import Chart, Data
 from einops import reduce
-import functools
 import tiktoken
 from util import make_plot
 
-def main():
-    image("images/survey1.png", width=800)
+DECISION_BOUNDARY_COLOR = "#5c3a1e"  # Dark brown
 
+def main():
+    text("# Linear classification")
     text("Last unit: linear regression")
-    text("- Prediction task (regression): input → output: real number")
+    text("- Prediction task (regression): [input: vector] → [output: number]")
     text("- Hypothesis class: linear functions")
 
     text("This unit: linear classification")
-    text("- Prediction task: input → output (class, label): one of K discrete choices")
+    text("- Prediction task: [input: vector] → [output (a.k.a. class, label): one of K discrete choices]")
     text("- Hypothesis class: (thresholded) linear functions")
-
-    link("https://stanford-cs221.github.io/autumn2023/modules/module.html#include=machine-learning%2Flinear-classification.js&mode=print6pp", title="[Autumn 2023 lecture]")
 
     text("Let's walk through the same steps as for linear regression and see what changes...")
 
     prediction_task()
     machine_learning_problem()
 
-    hypothesis_class()
-    zero_one_loss_function()
-    zero_one_loss_optimization()
-    logistic_loss_function()
-    logistic_loss_optimization()
+    hypothesis_class()              # 1. What predictors are we considering?
 
+    # Take 1
+    zero_one_loss_function()        # 2. How good is a predictor?
+    zero_one_loss_optimization()    # 3. How do we find a good predictor?
+
+    # Take 2
+    logistic_loss_function()        # 2. How good is a predictor?         
+    logistic_loss_optimization()    # 3. How do we find a good predictor?
+
+    # Extensions
     multiclass_classification()
     representing_text()
 
-    text("Summary")
-    text("- Linear classification: linear functions → one of K choices")
-    text("- Zero-one loss: leads to zero-gradients almost everywhere")
+    text("Summary:")
+    text("- Linear classification: linear function → one of $K$ choices")
+    text("- Zero-one loss: leads to zero gradients almost everywhere")
     text("- Logistic loss: classifier outputs probabilities, leads to non-zero gradients")
     text("- Multiclass classification: one logit per class, convert to probabilities with softmax")
     text("- Representing text as tensors: tokenize + convert tokens to indices (one-hot vectors)")
@@ -45,30 +47,32 @@ def main():
 
 def prediction_task():
     text("Example task: image classification")
-    text("- **Input**: an image; e.g.")
+    text("- **Input** $x$: an image; e.g.")
     image("https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Felis_catus-cat_on_snow.jpg/1920px-Felis_catus-cat_on_snow.jpg", width=200)
-    text("- **Output**: what kind of object it is (e.g., cat)")
+    text("- **Output** $y$: what kind of object it is (e.g., cat)")
 
     text("Example task: sentiment classification")
-    text("- **Input**: a document")
-    text("- **Output**: the sentiment of the document (e.g., positive)")
+    text("- **Input** $x$: a document")
+    text("- **Output** $y$: the sentiment of the document (e.g., positive)")
 
     text("What's the type of the **input**?")
-    text("- Image: width x height x 3 (RGB) tensor")
-    text("- Text: a string (hmm, not a tensor...we'll come back to this later)")
+    text(r"- Image: $x \in \mathbb R^{W \times H \times 3}$ is width x height x 3 (RGB) tensor")
+    text(r"- Text: $x \in \text{Strings}$ is a string (hmm, not a tensor...we'll come back to this later)")
 
     text("What's the type of the **output**?")
-    text("- Binary classification (two choices): usually {-1, 1}")
-    text("- Multiclass classification (K choices): usually {0, 1, ..., K-1}")
+    text(r"- Binary classification (two choices): usually $y \in \\{-1, +1\\}$")
+    text(r"- Multiclass classification ($K$ choices): usually $y \in \\{0, 1, \dots, K-1\\}$")
 
     text("A **predictor** is a function that takes an input and produces a predicted output.")
-    text("Here's an example predictor for binary classification:")
+    text(r"In math: predictor $f : \mathcal X \to \mathcal Y$ maps an input $x \in \mathcal X$ to a predicted output $f(x) \in \mathcal Y$")
+    text(r"Here's an example predictor for binary classification ($x \in \mathbb R^d$, $y \in \\{-1, +1\\}$):")
     def simple_binary_classifier(x: np.ndarray) -> int:  # @inspect x
+        # logit represents the raw score encoding the prediction
         logit = x[0] - x[1] - 1  # @inspect logit
         if logit > 0:
-            predicted_y = 1  # @inspect predicted_y
+            predicted_y = 1  # Positive label @inspect predicted_y
         else:
-            predicted_y = -1  # @inspect predicted_y
+            predicted_y = -1  # Negative label @inspect predicted_y
         return predicted_y
 
     text("Given an input, call the predictor on it:")
@@ -76,19 +80,27 @@ def prediction_task():
     predicted_y_a = simple_binary_classifier(x_a)  # @inspect predicted_y_a
     x_b = np.array([2, 0])  #  @inspect x_b
     predicted_y_b = simple_binary_classifier(x_b)  # @inspect predicted_y_b
+    x_c = np.array([0, 0])  #  @inspect x_c
+    predicted_y_c = simple_binary_classifier(x_c)  # @inspect predicted_y_c @stepover
 
-    text("The points where logit = x[0] - x[1] - 1 = 0 is the **decision boundary**.")
-    plot(make_plot("decision boundary", "x0", "x1", lambda x0: x0 - 1, points=[example_to_point(Example(x=x_a, target_y=predicted_y_a)), example_to_point(Example(x=x_b, target_y=predicted_y_b))]))  # @stepover
+    text("Predictor returns +1 (positive) or -1 (negative) depending on the sign of the logit.")
+    text("Note: when logit = 0, we break ties arbitrarily (return -1).")
+
+    text("A predictor divides the input space into two regions:")
+    text("- Positive inputs (logit > 0)")
+    text("- Negative inputs (logit < 0)")
+    text("...separated by the **decision boundary** (logit = 0).")
+    plot(make_plot(None, "x0", "x1", lambda x0: x0 - 1, points=[example_to_point(Example(x=x_a, target_y=predicted_y_a)), example_to_point(Example(x=x_b, target_y=predicted_y_b)), example_to_point(Example(x=x_c, target_y=predicted_y_c))], line_color=DECISION_BOUNDARY_COLOR, above_color="blue", below_color="red", arrow=((0, -1), (1, -2)), domain=(-4, 4)))  # @stepover
 
     text("But how do we get the predictor?")
 
 
 def machine_learning_problem():
-    text("The **training data** is a set of examples that demonstrate the task.")
-    text("Each **example** consists of an (input x, target output y) pair.")
-    training_data = get_training_data()  # @inspect training_data
+    text(r"The **training data** $\mathcal D$ is a set of examples that demonstrate the task.")
+    text(r"Each **example** $(x, y)$ consists of an input $x \in \mathbb R^d$ and a target output $y \in \\{-1, +1\\}$.")
+    training_data = get_training_data()  # @inspect training_data @stepover
 
-    data = [example_to_point(example) for example in training_data]  # @stepover
+    data = [example_to_point(example) for example in training_data]  # @stepover @hide
     plot(make_plot("training data", "x0", "x1", f=None, points=data))  # @stepover
 
     text("A **learning algorithm** takes the training data and produces a predictor.")
@@ -117,20 +129,32 @@ def hypothesis_class():
     text("Which predictors (classifiers) are possible?")
 
     text("As before, we will parameterize our predictors.")
-    text("For linear classifiers, each set of parameters has a **weight vector** and a **bias**.")
+    text(r"For linear classifiers, each set of parameters $\theta = (\mathbf w, b)$ has:")
+    text(r"- a **weight vector** $\mathbf w \in \mathbb R^d$ (`params.weight`), and")
+    text(r"- a **bias** $b \in \mathbb R$ (`params.bias`).")
     params = Parameters(weight=np.array([1, -1]), bias=-1)
+
+    text(r"Suppose we have an input $x \in \mathbb R^d$.")
     x = np.array([1, 1])  #  @inspect x
+
+    text(r"We make a prediction by first computing the **logit**: $\mathbf w \cdot \mathbf x + b$")
+    text("Then the classifier is defined by the sign of the logit:")
+    text(r"**Linear classifier**: $f_{\mathbf w, b}(\mathbf x) = \text{sign}(\mathbf w \cdot \mathbf x + b) = \begin{cases} +1 & \text{if } \mathbf w \cdot \mathbf x + b > 0 \\\\ -1 & \text{if } \mathbf w \cdot \mathbf x + b \le 0 \end{cases}$")
     predicted_y = binary_classifier(params, x)  # @inspect predicted_y
-    plot(make_plot("binary classifier", "x0", "x1", lambda x0: x0 - 1, points=[example_to_point(Example(x=x, target_y=predicted_y))]))  # @stepover
+    plot(make_plot("binary classifier", "x0", "x1", lambda x0: x0 - 1, points=[example_to_point(Example(x=x, target_y=predicted_y))], line_color=DECISION_BOUNDARY_COLOR, above_color="blue", below_color="red", arrow=((0, params.bias), (params.weight[0], params.weight[1] + params.bias)), domain=(-4, 4)))  # @stepover
 
     text("Here's another predictor:")  # @clear params x predicted_y
-    params = Parameters(weight=np.array([1, -1]), bias=1)
+    params = Parameters(weight=np.array([-2, 1]), bias=0)
     x = np.array([1, 1])  #  @inspect x
     predicted_y = binary_classifier(params, x)  # @inspect predicted_y
-    plot(make_plot("binary classifier", "x0", "x1", lambda x0: x0 + 1, points=[example_to_point(Example(x=x, target_y=predicted_y))]))  # @stepover
+    plot(make_plot("binary classifier", "x0", "x1", lambda x0: -(params.weight[0] * x0 + params.bias) / params.weight[1], points=[example_to_point(Example(x=x, target_y=predicted_y))], line_color=DECISION_BOUNDARY_COLOR, above_color="red" if params.weight[1] > 0 else "blue", below_color="blue" if params.weight[1] > 0 else "red", arrow=((0, -params.bias / params.weight[1]), (params.weight[0], params.weight[1] - params.bias / params.weight[1])), domain=(-4, 4)))  # @stepover
 
-    text("The **hypothesis class** is the set of all predictors you can get by choosing parameters (weight, bias).")
-    text("The decision boundaries are any \"straight-line cuts\" of the input space.")
+    text(r"The **hypothesis class** $\mathcal F = \\{ f_\theta \\}$ is the set of all predictors you can get by choosing parameters.")
+    text(r"For linear classification: $\mathcal F = \\{f_{\mathbf w, b} : \mathbf w \in \mathbb R^d, b \in \mathbb R\\}$")
+
+    text(r"**Decision boundary** of $f_{\mathbf w, b}$ is the points that are infinitessimally close to more than one label.")
+    text(r"For linear classification, decision boundary of $f_{\mathbf w, b}$ is $\\{\mathbf x : \mathbf w \cdot \mathbf x + b = 0\\}$.")
+    text("This is a \"straight cut\" but the boundary could be curved or disconnected in general.")
 
 
 @dataclass(frozen=True)
@@ -152,32 +176,46 @@ def binary_classifier(params: Parameters, x: np.ndarray) -> float:  # @inspect p
 def zero_one_loss_function():
     text("The next design decision is how to judge each of the infinitely many possible predictors.")
 
-    text("Let's consider a predictor:")
-    params = Parameters(weight=np.array([1, -1]), bias=-1)  # @inspect params
+    text(r"Let's consider a predictor $f_\theta$:")
+    params = Parameters(weight=np.array([1, 1]), bias=-1)  # @inspect params
 
-    text("Recall the training data:")
+    text(r"Recall the training data $\mathcal D$:")
     training_data = get_training_data()  # @inspect training_data @stepover
+    points = [example_to_point(example) for example in training_data]  # @stepover @hide
+    plot(make_plot(None, "x0", "x1", lambda x0: -(params.weight[0] * x0 + params.bias) / params.weight[1], points=points, line_color=DECISION_BOUNDARY_COLOR, above_color="red", below_color="blue", arrow=((0, -params.bias / params.weight[1]), (params.weight[0], params.weight[1] - params.bias / params.weight[1])), domain=(-4, 4)))  # @stepover
 
-    text("How well does `params` fit `training_data`?")
-    text("We define a loss function that measures how unhappy one point is based on params.")
+    text(r"How well does `params` ($\theta$) fit `training_data` ($\mathcal D$)?")
+    text("We define a loss function that measures how unhappy we are with `params` on a single example.")
 
     text("Recall that for regression, we used the squared loss.")
     text("Intuition: how far away the prediction is from the target.")
-    loss = squared_loss(training_data[0], params)  # @inspect loss
+    text(r"In math: $\text{Loss}(\mathbf x, y, \theta) = (\mathbf w \cdot \mathbf x + b - y)^2$")
+    ex = training_data[0]  # @inspect ex
+    loss = squared_loss(ex, params)  # @inspect loss
     plot(make_plot("squared loss", "residual", "loss", lambda residual: residual ** 2))  # @stepover
-    text("This loss is okay (is 0 when predicted = target), but we're classifying, not precise values...")
+    text("This loss is consistent (in the sense that it is 0 when predicted = target).")
+    text("But we're classifying, so we don't need precise values like in regression...")
 
-    text("For binary classification, we use the zero-one loss.")  # @clear loss
+    text("For binary classification, we use the **zero-one loss**.")  # @clear loss
     text("Intuition: whether the prediction has the same sign as the target.")
-    loss = zero_one_loss(Example(x=np.array([2, 0]), target_y=1), params)  # @inspect loss
-    loss = zero_one_loss(Example(x=np.array([0, -2]), target_y=-1), params)  # @inspect loss
-    text("We can rewrite the zero-one loss in terms of the margin.")
-    loss = zero_one_loss_inline(Example(x=np.array([2, 0]), target_y=1), params)  # @inspect loss
-    plot(make_plot("zero-one loss", "margin", "loss", lambda margin: int(margin <= 0)))  # @stepover
+    text(r"In math: $\text{Loss}\_{0\text{-}1}(\mathbf x, y, \theta) = \mathbf 1[f\_\theta(\mathbf x) \neq y]$")
+    loss = zero_one_loss(Example(x=np.array([1, 2]), target_y=1), params)  # @inspect loss
+    loss = zero_one_loss(Example(x=np.array([2, 0]), target_y=-1), params)  # @inspect loss
 
-    text("The training loss is the average of the per-example losses of the training examples.")  # @clear loss
-    params = Parameters(weight=np.array([0, 0]), bias=-1)  # @inspect params
-    train_loss = train_zero_one_loss(params, training_data)  # @inspect train_loss
+    text("We can rewrite the zero-one loss in terms of the **margin**.")
+    text(r"**Margin**: $y (\mathbf w \cdot \mathbf x + b)$ (positive iff the prediction is correct)")
+    text(r"In math: $\text{Loss}_{0\text{-}1}(\mathbf x, y, \theta) = \mathbf 1[y (\mathbf w \cdot \mathbf x + b) \le 0]$")
+    loss = zero_one_loss_inline(Example(x=np.array([1, 2]), target_y=1), params)  # @inspect loss
+    text("Examples:")
+    text("• target_y = +1, logit =  100 ⇒ margin =  100 (correct, high confidence)", verbatim=True)
+    text("• target_y = +1, logit =    1 ⇒ margin =    1 (correct, low confidence)", verbatim=True)
+    text("• target_y = -1, logit =  100 ⇒ margin = -100 (incorrect, high confidence)", verbatim=True)
+    text("• target_y = -1, logit = -100 ⇒ margin =  100 (correct, high confidence)", verbatim=True)
+    plot(make_plot("zero-one loss", "margin", "loss", lambda margin: int(margin <= 0), num_points=1001))  # @stepover
+
+    text("The training loss is the average of the per-example losses over the training data.")  # @clear loss
+    text(r"In math: $\displaystyle \text{TrainLoss}(\theta) = \frac{1}{|\mathcal D|} \sum_{(\mathbf x, y) \in \mathcal D} \text{Loss}(\mathbf x, y, \theta)$")
+    train_loss = train_zero_one_loss(params, training_data)  # @inspect params training_data train_loss
 
     text("Summary:")
     text("- Logit: the raw score from the linear model (sign is prediction, magnitude is confidence)")
@@ -215,12 +253,12 @@ def train_zero_one_loss(params: Parameters, training_data: list[Example]) -> flo
 
 
 def zero_one_loss_optimization():
-    text("Recall that for every set of parameters `params`, we can compute the training loss `train_loss`.")
+    text(r"Recall that for every set of parameters `params` ($\theta$), we can compute the training loss `train_loss` ($\text{TrainLoss}(\theta)$).")
 
     text("Recall in linear regression we optimized the parameters using gradient descent.")
     text("So let's do the same thing here.")
 
-    params = Parameters(weight=np.array([1, 1]), bias=0)  # @inspect params
+    params = Parameters(weight=np.array([1, 1]), bias=-1)  # @inspect params
     training_data = get_training_data()  # @inspect training_data @stepover
     train_loss = train_zero_one_loss(params, training_data)  # @inspect train_loss
 
@@ -229,10 +267,11 @@ def zero_one_loss_optimization():
 
     text("Let's take the gradient of the training loss.")
     grad = gradient_zero_one_loss(training_data[0], params)  # @inspect grad
-    text("We have a problem: the gradient is zero everywhere!")
-    plot(make_plot("zero-one loss", "margin", "loss", lambda margin: int(margin <= 0)))  # @stepover
-    text("So gradient descent won't update the parameters at all!")
-    text("Intuition: if example is wrong, moving parameters a tiny bit won't make it right, so give up.")
+    text("We have a problem: the gradient is zero almost everywhere!")
+    text(r"In math: $\nabla_{\mathbf w} \text{TrainLoss}_{0\text{-}1}(\theta) = \mathbf 0$ (except where margin = 0, where it is undefined)")
+    plot(make_plot("zero-one loss", "margin", "loss", lambda margin: int(margin <= 0), num_points=1001))  # @stepover
+    text("So gradient descent won't update the parameters at all! 🫠")
+    text("Intuition: if an example is wrong, moving the parameters a tiny bit won't make it right, so give up.")
     text("So what do we do?")
 
 
@@ -245,8 +284,9 @@ def gradient_zero_one_loss(example: Example, params: Parameters) -> Parameters: 
 
 def logistic_function():
     text("A logit is a number between -∞ and +∞.")
-    text("We want to convert a logit into a probability (must be between 0 and 1).")
+    text("We want to convert a logit $z$ into a probability $p$ (must be between 0 and 1).")
     text("There are many functions that do this, but the **logistic function** is a standard choice.")
+    text(r"In math: $\sigma(z) = \frac{1}{1 + e^{-z}}$")
 
     plot(make_plot("logistic function", "logit", "prob", logistic, xrange=(-10, 10)))  # @stepover
 
@@ -262,25 +302,32 @@ def logistic_function():
     prob = logistic(logit)  # @inspect prob @stepover
 
     text("Another interpretation: log odds") # @clear logit prob
+    text("Map from probability to logit:")
     prob = 0.2  # @inspect prob
     odds = prob / (1 - prob)  # @inspect odds
     logit = np.log(odds)  # @inspect logit
-    prob2 = logistic(logit)  # @inspect prob2 @stepover
-    assert prob == prob2  # @clear prob odds logit prob2
 
-    text("Properties")
+    text("Roundtrip:")
+    check_prob = logistic(logit)  # @inspect prob2 @stepover
+    assert np.allclose(prob, check_prob)  # @clear prob odds logit prob2
+
+    text(r"In math: if $p = \sigma(z) = \frac{1}{1 + e^{-z}}$, then $z = \log \frac{p}{1 - p}$")
+
+    text("Properties:")
     text("- As logit → -∞, prob → 0")
     text("- As logit → +∞, prob → 1")
     text("- As logit → 0, prob → 0.5")
+    text(r"- Symmetry: $\sigma(z) + \sigma(-z) = 1$")
 
-    prob1 = logistic(logit=3)  # @inspect prob1 @stepover
-    prob2 = logistic(logit=-3)  # @inspect prob2 @stepover
-    assert np.allclose(prob1 + prob2, 1)
+    prob_pos = logistic(logit=3)  # @inspect prob1 @stepover
+    prob_neg = logistic(logit=-3)  # @inspect prob2 @stepover
+    assert np.allclose(prob_pos + prob_neg, 1)
 
-    text("The derivative of the logistic function is quite simple and elegant")
+    text("The derivative of the logistic function is simple and elegant.")
     grad_prob = gradient_logistic(logit=3)  # @inspect grad_prob
-    text("As |logit| → -∞, grad_prob → 0")
-    plot(make_plot("derivative of logistic function", "logit", "grad_prob", gradient_logistic, xrange=(-10, 10))) # @stepover
+    text(r"In math: $\sigma'(z) = \sigma(z) (1 - \sigma(z))$")
+    text(r"As $|z| \to \infty$, we have $\sigma'(z) \to 0$")
+    plot(make_plot("derivative of logistic function", "logit", "grad_prob", gradient_logistic, xrange=(-10, 10), num_points=1001)) # @stepover
 
 
 def logistic(logit: float) -> float:  # @inspect logit
@@ -296,47 +343,58 @@ def gradient_logistic(logit: float) -> float:
 
 def logistic_loss_function():
     text("To solve the zero gradient problem, we have to rethink the loss function")
-    text("...and actually, even what our classifer outputs.")
+    text("...and actually, even what our classifier outputs.")
 
     text("Let's take a set of parameters and an example.")
-    params = Parameters(weight=np.array([1, -1]), bias=1)  # @inspect params
-    example = Example(x=np.array([2, 0]), target_y=1)  # @inspect example
+    params = Parameters(weight=np.array([1, 1]), bias=-1)  # @inspect params
+    example = Example(x=np.array([1, 2]), target_y=-1)  # @inspect example
 
     text("So far, our predictor turns a logit into a single prediction")
     predicted_y = binary_classifier(params, example.x)  # @inspect predicted_y @stepover
     text("Thresholding is a very discrete operation...")
 
-    text("Instead, let us make things continuous by having a classifier output a probability distribution (continuous) over labels.")  # @clear predicted_y
-    text("The key to doing this will be the **logistic** function.")
-    logistic_function()
-    text("The logistic function was used in statistics in **logistic regression** [Berkson, 1944].")
+    text("Instead, let us make things continuous by having a classifier output")
+    text("...a probability distribution (continuous) over labels.")
+    text(r"$[1, 2] \mapsto \\{ +1: 0.7, -1: 0.3 \\}$")
 
-    text("Now we can compute the probability of y")
+    text("The key to doing this will be the **logistic** function.")
+    text("The logistic function was used in statistics in **logistic regression** [Berkson, 1944].")
+    logistic_function()
+
+    text("Now we can compute the probability of y = 1 or -1 given x:")
     logit = example.x @ params.weight + params.bias  # @inspect logit
     prob_pos = logistic(logit)  # p(y=1|x) @inspect prob_pos @stepover
     prob_neg = logistic(-logit)  # p(y=-1|x) @inspect prob_neg @stepover
+    text("In math:")
+    text(r"- $p(y = +1 \mid \mathbf x) = \sigma(\mathbf w \cdot \mathbf x + b)$")
+    text(r"- $p(y = -1 \mid \mathbf x) = \sigma(-(\mathbf w \cdot \mathbf x + b))$")
+
+    text("We can express both cases succinctly in terms of the margin:")
     margin = logit * example.target_y  # @inspect margin
     prob_target = logistic(margin)  # p(y=target_y|x) @inspect prob_target @stepover
+    text(r"In math: $p(y \mid \mathbf x) = \sigma(y (\mathbf w \cdot \mathbf x + b))$")
 
     text("**Maximum likelihood** principle: maximize the log probability of the training targets")
 
-    text("If we have multiple examples, we'd multiply the probabilities: p(y1|x1) * p(y2|x2)")
-    text("Equivalent to summing the log probabilities: log p(y1|x1) + log p(y2|x2)")
+    text(r"If we have multiple examples, we'd multiply the probabilities: $p(y_1 \mid \mathbf x_1) \cdot p(y_2 \mid \mathbf x_2)$")
+    text(r"Equivalent to summing the log probabilities: $\log p(y_1 \mid \mathbf x_1) + \log p(y_2 \mid \mathbf x_2)$")
+    text(r"For the full dataset:")
+    text("- Maximize $\displaystyle \prod_{(\mathbf x, y) \in \mathcal D} p(y \mid \mathbf x)$")
+    text("- Equivalently: maximize $\displaystyle \sum_{(\mathbf x, y) \in \mathcal D} \log p(y \mid \mathbf x)$")
     log_prob_target = np.log(prob_target)  # @inspect log_prob_target
 
     text("To turn this into a loss, just negate it (maximize likelihood = minimize loss)")
     loss = -log_prob_target  # @inspect loss
+    text(r"$\displaystyle \text{Loss}(\mathbf x, y, \theta) = -\log \sigma(y (\mathbf w \cdot \mathbf x + b))$")
 
     text("Let's package it up into a function:")  # @clear logit prob_pos prob_neg prob_target log_prob_target loss
     loss = logistic_loss(example, params)  # @inspect loss
 
     text("Recall the zero-one loss, which has a sharp cliff at 0.")
-    data = make_plot("zero-one loss", "margin", "loss", lambda margin: int(margin <= 0))  # @stepover
-    plot(data)
+    plot(make_plot("zero-one loss", "margin", "loss", lambda margin: int(margin <= 0), num_points=1001))  # @stepover
 
-    text("The logistic loss is smooth, but goes to 0 when the margin grows.")
-    data = make_plot("logistic loss", "margin", "loss", lambda margin: -np.log(logistic(margin)))  # @stepover
-    plot(data)
+    text("The logistic loss is smooth, and goes to 0 as the margin grows.")
+    plot(make_plot("logistic loss", "margin", "loss", lambda margin: -np.log(logistic(margin))))  # @stepover
 
     text("As before, the training loss is the average of the per-example losses.")
     training_data = get_training_data()  # @inspect training_data @clear example params loss @stepover
@@ -362,16 +420,18 @@ def train_logistic_loss(params: Parameters, training_data: list[Example]) -> flo
 def logistic_loss_optimization():
     text("Now we are ready to optimize the logistic loss.")
 
-    text("Let's compute the gradient of the loss for one example.")
-    params = Parameters(weight=np.array([0, 0]), bias=0)  # @inspect params
-    example = Example(x=np.array([2, 0]), target_y=1)  # @inspect example
+    text("Let's compute the gradient of the loss for one example:")
+    params = Parameters(weight=np.array([1, 1]), bias=-1)  # @inspect params
+    example = Example(x=np.array([1, 2]), target_y=-1)  # @inspect example
+    text(r"- $\frac{\partial}{\partial \mathbf w} \text{Loss}(\mathbf x, y, \theta) = -\sigma(-y (\mathbf w \cdot \mathbf x + b)) \cdot y \mathbf x$")
+    text(r"- $\frac{\partial}{\partial b} \text{Loss}(\mathbf x, y, \theta) = -\sigma(-y (\mathbf w \cdot \mathbf x + b)) \cdot y$")
     grad = gradient_logistic_loss(example, params)  # @inspect grad
 
     text("Now the gradient of the training loss is the average of the gradients of the examples.")
     training_data = get_training_data()  # @inspect training_data @clear example grad @stepover
     grad = gradient_train_logistic_loss(params, training_data)  # @inspect grad
 
-    text("Now we can do gradient descent, which repeatedly updates the parameters in the direction of the gradient.")
+    text("Now we can do gradient descent.")
     gradient_descent()
 
 
@@ -379,9 +439,10 @@ def gradient_logistic_loss(example: Example, params: Parameters) -> Parameters: 
     logit = example.x @ params.weight + params.bias  # @inspect logit
     margin = logit * example.target_y  # @inspect margin
     loss = -np.log(logistic(margin))  # @inspect loss @stepover
-    grad_logit = -logistic(-margin)  # @inspect grad_logit @stepover
-    grad_weight = example.target_y * example.x * grad_logit  # @inspect grad_weight
-    grad_bias = example.target_y * grad_logit  # @inspect grad_bias
+
+    grad_margin = -logistic(-margin)  # d loss / d margin @inspect grad_margin @stepover
+    grad_weight = example.target_y * example.x * grad_margin  # @inspect grad_weight
+    grad_bias = example.target_y * grad_margin  # @inspect grad_bias
     return Parameters(weight=grad_weight, bias=grad_bias)
 
 
@@ -393,6 +454,11 @@ def gradient_train_logistic_loss(params: Parameters, training_data: list[Example
 
 
 def gradient_descent():
+    text(r"Goal: minimize $\text{TrainLoss(\theta)$")
+    text(r"Let $\eta$ be the learning rate.")
+    text(r"Repeatedly update the parameters $\theta$ in the direction of the negative gradient:")
+    text(r"- $\displaystyle \mathbf \theta \leftarrow \mathbf \theta - \eta \nabla \text{TrainLoss}(\theta)$")
+
     # Initialization
     training_data = get_training_data()  # @stepover
     params = Parameters(weight=np.array([0, 0]), bias=0)  # @inspect params
@@ -408,17 +474,20 @@ def gradient_descent():
         )
         losses.append(train_loss)
 
-    # Learning curve
+    text("Learning curve:")
     plot(Chart(Data(values=[{"step": i, "loss": loss} for i, loss in enumerate(losses)])).mark_line().encode(x="step:Q", y="loss:Q").to_dict())
 
     text("Plot the decision boundary:")
-    points = [example_to_point(example) for example in training_data]  # @stepover
-    plot(make_plot("decision boundary", "x0", "x1", lambda x0: -(params.weight[0] * x0 + params.bias) / params.weight[1], points=points))  # @stepover
+    points = [example_to_point(example) for example in training_data]  # @stepover @hide
+    plot(make_plot("decision boundary", "x0", "x1", lambda x0: -(params.weight[0] * x0 + params.bias) / params.weight[1], points=points, line_color=DECISION_BOUNDARY_COLOR, above_color="red" if params.weight[1] > 0 else "blue", below_color="blue" if params.weight[1] > 0 else "red", arrow=((0, -params.bias / params.weight[1]), (params.weight[0], params.weight[1] - params.bias / params.weight[1])), domain=(-4, 4)))  # @stepover
+
+    text("The training logistic loss is not zero (probability of correct answer not 1).")
+    text("However, the training zero-one loss is 0 (only care about the sign).")
 
 
 def multiclass_classification():
-    text("Binary classification (output y ∈ {-1, 1})")
-    text("Multiclass classification (output y ∈ {0, 1, ..., K-1})")
+    text(r"Binary classification (output $y \in \\{-1, +1\\}$)")
+    text(r"Multiclass classification (output $y \in \\{0, 1, \dots, K-1\\}$)")
 
     text("For binary classification, we compute a single logit for each input.")
     text("Sign of logit is the predicted class")
@@ -432,10 +501,16 @@ def multiclass_classification():
     text("- Define a weight vector for each class")
     text("- Compute a logit for each class")
     text("- Predict a distribution over classes")
+
     params = Parameters(weight=np.array([[1, -1], [1, -1], [0, 2]]), bias=np.array([1, 1, 0]))  # @inspect params
     x = np.array([2, 0])  # @inspect x
     logits = params.weight @ x + params.bias  # @inspect logits
-    text("How do I turn logits into probabilities?")
+    text(r"In math:")
+    text("- weight vectors $\mathbf w_0, \dots, \mathbf w_{K-1}$")
+    text("- biases $b_0, \dots, b_{K-1}$")
+    text("- logit of class $k$ is $\mathbf w_k \cdot \mathbf x + b_k$")
+
+    text("How do we turn logits into probabilities?")
     introduce_softmax()
     probs = softmax(logits)  # @inspect probs
 
@@ -443,6 +518,7 @@ def multiclass_classification():
     introduce_cross_entropy()
 
     text("Now we can compute the cross entropy loss for an example:")
+    text(r"In math: $\text{Loss}(\mathbf x, y, \mathbf W, \mathbf b) = -\log \text{softmax}(\mathbf W \mathbf x + \mathbf b)_y$")
     example = Example(x=x, target_y=0)  # @inspect example
     cross_entropy = cross_entropy_loss(params, example)  # @inspect cross_entropy
     text("Given this loss, we can perform gradient descent to optimize the parameters.")
@@ -457,11 +533,13 @@ def introduce_softmax():
     text("Recall: the logistic function maps (-∞, +∞) to (0, 1)")
 
     text("The softmax function generalizes this to multiple classes.")
+    text("Let $\mathbf z = (z_0, \dots, z_{K-1})$ be the logits for the $K$ classes.")
+    text(r"Define $\displaystyle \text{softmax}(\mathbf z)\_k = \frac{e^{z\_k}}{\sum\_{j=0}^{K-1} e^{z\_j}}$")
 
     logits = np.array([1, -1, 0])  # @inspect logits
-    probs = softmax(logits)  # @inspect softmax_logits
+    probs = softmax(logits)  # @inspect probs
 
-    text("Shifting up logits doesn't change the relative probabilities")
+    text("Note that shifting all logits by a constant doesn't change the probabilities.")
     logits1 = np.array([1, -1, 0])  # @inspect logits1
     probs1 = softmax(logits1)  # @inspect probs1 @stepover
     logits2 = np.array(logits1 + 2)  # @inspect logits2
@@ -485,6 +563,7 @@ def cross_entropy_loss(params: Parameters, example: Example) -> float:  # @inspe
 
 def introduce_cross_entropy():
     text("Cross entropy: measures the difference between a target distribution and a predicted distribution")
+    text(r"In math: $H(p, q) = -\sum_k p(k) \log q(k)$ for target $p$ and predicted $q$")
     target = np.array([0.5, 0.2, 0.3])  # @inspect target
     predicted = np.array([0.1, 0.5, 0.4])  # @inspect predicted
 
@@ -492,8 +571,8 @@ def introduce_cross_entropy():
     terms = target * -np.log(predicted)  # @inspect terms
     cross_entropy = np.sum(terms)  # @inspect cross_entropy
 
-    text("Cross entropy is minimized when target = predicted")
-    text("... and the cross entropy is entropy of target (or predicted).")
+    text("For a fixed target, cross entropy is minimized when predicted = target")
+    text("...and then the cross entropy is the entropy of the target.")
 
     text("Special case: target is a single label (represented as a one-hot vector)") # @clear target predicted terms cross_entropy
     target = np.array([0, 1, 0])  # @inspect target
@@ -501,10 +580,11 @@ def introduce_cross_entropy():
     terms = target * -np.log(predicted)  # @inspect terms
     cross_entropy = np.sum(terms)  # @inspect cross_entropy
     text("This is the same as the negative log probability of the target class.")
+    text(r"In math: if $p$ puts all its mass on class $y$, then $H(p, q) = -\log q(y)$")
 
 
 def representing_text():
-    text("Prediction tasks involve text(strings), but machine learning operates on tensors.")
+    text("Prediction tasks involve text (strings), but machine learning operates on tensors.")
 
     string = "the cat in the hat"
 
@@ -516,6 +596,7 @@ def representing_text():
 
     text("### Interpretation")
     text("Represent each index as a one-hot vector.")
+    text(r"In math: index $i$ is represented by $\mathbf e_i \in \\{0, 1\\}^V$ (1 in position $i$, 0 elsewhere), where $V$ is the vocabulary size")
     index = indices[4]  # @inspect index
     vector = np.eye(len(vocab))[index]  # @inspect vector @stepover
 
@@ -538,6 +619,7 @@ def representing_text():
     text("### Bag of words representation")
     text("Represent each token as a (one-hot) vector.")
     text("Represent each text as the average of the token vectors.")
+    text(r"In math: for token indices $t_1, \dots, t_L$, the representation is $\frac{1}{L} \sum_{i=1}^L \mathbf e_{t_i}$")
     bow = reduce(matrix, "pos vocab -> vocab", "mean")  # @inspect bow
     text("Then we can operate on this fixed-dimensional vector.")
     y_bow = bow @ w  # @inspect y_bow
@@ -563,13 +645,13 @@ def tokenization():
     text("Split a string by space into words and convert them into integers.")
     vocab = Vocabulary()  # @inspect vocab
     words = string.split()  # @inspect words
-    indices = [vocab.get_index(word) for word in words]  # @inspect indices vocab
+    indices = [vocab.get_index(word) for word in words]  # @inspect indices vocab @stepover
 
     # Fancier tokenization
     text("Language models use more sophisticated tokenizers (Byte-Pair Encoding) "), link("https://arxiv.org/pdf/1508.07909")
     text("To get a feel for how tokenizers work, play with this "), link(title="interactive site", url="https://tiktokenizer.vercel.app/?encoder=gpt2")
-    tokenzier = tiktoken.get_encoding("gpt2")
-    gpt2_indices = tokenzier.encode(string)  # @inspect gpt2_indices
+    tokenizer = tiktoken.get_encoding("gpt2")
+    gpt2_indices = tokenizer.encode(string)  # @inspect gpt2_indices
 
     return vocab, indices
 
