@@ -2,3 +2,10 @@
 __pycache__
 edtrace
 rc.local
+
+.claude/
+dist/
+last-year
+notes.otl
+var/x.npy
+
