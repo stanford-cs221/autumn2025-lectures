@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 245" width="640" height="245" font-family="Helvetica, Arial, sans-serif" font-size="14">
+<rect width="640" height="245" fill="white"/>
+<rect x="77.0" y="42.0" width="26" height="26" rx="4" fill="#2a9d8f" fill-opacity="0.55" stroke="#2a9d8f"/>
+<rect x="77.0" y="72.0" width="26" height="26" rx="4" fill="#2a9d8f" fill-opacity="0.85" stroke="#2a9d8f"/>
+<rect x="77.0" y="102.0" width="26" height="26" rx="4" fill="#2a9d8f" fill-opacity="0.36" stroke="#2a9d8f"/>
+<rect x="77.0" y="132.0" width="26" height="26" rx="4" fill="#2a9d8f" fill-opacity="0.55" stroke="#2a9d8f"/>
+<text x="90" y="200" fill="#333" text-anchor="middle" font-size="15">x (input)</text>
+<rect x="307.0" y="27.0" width="26" height="26" rx="4" fill="#2a9d8f" fill-opacity="0.85" stroke="#2a9d8f"/>
+<rect x="307.0" y="57.0" width="26" height="26" rx="4" fill="#9b72cf" fill-opacity="0.62" stroke="#9b72cf"/>
+<rect x="307.0" y="87.0" width="26" height="26" rx="4" fill="#2a9d8f" fill-opacity="0.47" stroke="#2a9d8f"/>
+<rect x="307.0" y="117.0" width="26" height="26" rx="4" fill="#9b72cf" fill-opacity="0.93" stroke="#9b72cf"/>
+<rect x="307.0" y="147.0" width="26" height="26" rx="4" fill="#2a9d8f" fill-opacity="0.70" stroke="#2a9d8f"/>
+<text x="320" y="200" fill="#333" text-anchor="middle" font-size="15">hidden</text>
+<rect x="537.0" y="57.0" width="26" height="26" rx="4" fill="#2a9d8f" fill-opacity="0.40" stroke="#2a9d8f"/>
+<rect x="537.0" y="87.0" width="26" height="26" rx="4" fill="#2a9d8f" fill-opacity="0.93" stroke="#2a9d8f"/>
+<rect x="537.0" y="117.0" width="26" height="26" rx="4" fill="#9b72cf" fill-opacity="0.55" stroke="#9b72cf"/>
+<text x="550" y="200" fill="#333" text-anchor="middle" font-size="15">logits</text>
+<line x1="115.0" y1="100" x2="287.0" y2="100" stroke="#555" stroke-width="2"/>
+<path d="M295.0,100 L285.0,95 L285.0,105 Z" fill="#555"/>
+<text x="205.0" y="88" fill="#555" text-anchor="middle" font-size="14">linear</text>
+<line x1="345.0" y1="100" x2="517.0" y2="100" stroke="#555" stroke-width="2"/>
+<path d="M525.0,100 L515.0,95 L515.0,105 Z" fill="#555"/>
+<text x="435.0" y="88" fill="#555" text-anchor="middle" font-size="14">linear</text>
+<rect x="20" y="219" width="12" height="12" rx="2" fill="#2a9d8f" stroke="#2a9d8f"/>
+<text x="38" y="230" fill="#555" font-size="12">positive</text>
+<rect x="105" y="219" width="12" height="12" rx="2" fill="#9b72cf" stroke="#9b72cf"/>
+<text x="123" y="230" fill="#555" font-size="12">negative</text>
+</svg>

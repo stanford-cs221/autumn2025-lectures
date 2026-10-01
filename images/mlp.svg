@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 245" width="640" height="245" font-family="Helvetica, Arial, sans-serif" font-size="14">
+<rect width="640" height="245" fill="white"/>
+<g transform="translate(0,-15)">
+<rect x="57.0" y="57.0" width="26" height="26" rx="4" fill="#2a9d8f" fill-opacity="0.55" stroke="#2a9d8f"/>
+<rect x="57.0" y="87.0" width="26" height="26" rx="4" fill="#2a9d8f" fill-opacity="0.85" stroke="#2a9d8f"/>
+<rect x="57.0" y="117.0" width="26" height="26" rx="4" fill="#2a9d8f" fill-opacity="0.36" stroke="#2a9d8f"/>
+<rect x="57.0" y="147.0" width="26" height="26" rx="4" fill="#2a9d8f" fill-opacity="0.55" stroke="#2a9d8f"/>
+<text x="70" y="215" fill="#333" text-anchor="middle" font-size="15">x (input)</text>
+<rect x="227.0" y="42.0" width="26" height="26" rx="4" fill="#2a9d8f" fill-opacity="0.85" stroke="#2a9d8f"/>
+<rect x="227.0" y="72.0" width="26" height="26" rx="4" fill="#9b72cf" fill-opacity="0.62" stroke="#9b72cf"/>
+<rect x="227.0" y="102.0" width="26" height="26" rx="4" fill="#2a9d8f" fill-opacity="0.47" stroke="#2a9d8f"/>
+<rect x="227.0" y="132.0" width="26" height="26" rx="4" fill="#9b72cf" fill-opacity="0.93" stroke="#9b72cf"/>
+<rect x="227.0" y="162.0" width="26" height="26" rx="4" fill="#2a9d8f" fill-opacity="0.70" stroke="#2a9d8f"/>
+<text x="240" y="215" fill="#333" text-anchor="middle" font-size="15">pre-activation</text>
+<rect x="397.0" y="42.0" width="26" height="26" rx="4" fill="#2a9d8f" fill-opacity="0.85" stroke="#2a9d8f"/>
+<rect x="397.0" y="72.0" width="26" height="26" rx="4" fill="white" stroke="#bbb" stroke-dasharray="3 2"/>
+<text x="410" y="89.5" fill="#aaa" text-anchor="middle" font-size="13">0</text>
+<rect x="397.0" y="102.0" width="26" height="26" rx="4" fill="#2a9d8f" fill-opacity="0.47" stroke="#2a9d8f"/>
+<rect x="397.0" y="132.0" width="26" height="26" rx="4" fill="white" stroke="#bbb" stroke-dasharray="3 2"/>
+<text x="410" y="149.5" fill="#aaa" text-anchor="middle" font-size="13">0</text>
+<rect x="397.0" y="162.0" width="26" height="26" rx="4" fill="#2a9d8f" fill-opacity="0.70" stroke="#2a9d8f"/>
+<text x="410" y="215" fill="#333" text-anchor="middle" font-size="15">hidden</text>
+<rect x="557.0" y="72.0" width="26" height="26" rx="4" fill="#2a9d8f" fill-opacity="0.40" stroke="#2a9d8f"/>
+<rect x="557.0" y="102.0" width="26" height="26" rx="4" fill="#2a9d8f" fill-opacity="0.93" stroke="#2a9d8f"/>
+<rect x="557.0" y="132.0" width="26" height="26" rx="4" fill="#9b72cf" fill-opacity="0.55" stroke="#9b72cf"/>
+<text x="570" y="215" fill="#333" text-anchor="middle" font-size="15">logits</text>
+<line x1="95.0" y1="115" x2="207.0" y2="115" stroke="#555" stroke-width="2"/>
+<path d="M215.0,115 L205.0,110 L205.0,120 Z" fill="#555"/>
+<text x="155.0" y="103" fill="#555" text-anchor="middle" font-size="14">linear</text>
+<line x1="265.0" y1="115" x2="377.0" y2="115" stroke="#555" stroke-width="2"/>
+<path d="M385.0,115 L375.0,110 L375.0,120 Z" fill="#555"/>
+<text x="325.0" y="103" fill="#555" text-anchor="middle" font-size="14">ReLU</text>
+<line x1="435.0" y1="115" x2="537.0" y2="115" stroke="#555" stroke-width="2"/>
+<path d="M545.0,115 L535.0,110 L535.0,120 Z" fill="#555"/>
+<text x="490.0" y="103" fill="#555" text-anchor="middle" font-size="14">linear</text>
+</g>
+<g transform="translate(0,-5)">
+<rect x="20" y="221" width="12" height="12" rx="2" fill="#2a9d8f" stroke="#2a9d8f"/>
+<text x="38" y="232" fill="#555" font-size="12">positive</text>
+<rect x="105" y="221" width="12" height="12" rx="2" fill="#9b72cf" stroke="#9b72cf"/>
+<text x="123" y="232" fill="#555" font-size="12">negative</text>
+<rect x="195" y="221" width="12" height="12" rx="2" fill="white" stroke="#bbb" stroke-dasharray="3 2"/>
+<text x="213" y="232" fill="#555" font-size="12">zero (ReLU)</text>
+</g>
+</svg>
