@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 278" width="680" height="278" font-family="Helvetica, Arial, sans-serif" font-size="14">
+<rect width="680" height="278" fill="white"/>
+<rect x="57.0" y="102.0" width="26" height="26" rx="4" fill="#2a9d8f" fill-opacity="0.93" stroke="#2a9d8f"/>
+<rect x="57.0" y="132.0" width="26" height="26" rx="4" fill="#2a9d8f" fill-opacity="0.55" stroke="#2a9d8f"/>
+<text x="70" y="230" fill="#333" text-anchor="middle" font-size="15">x (input)</text>
+<rect x="247.0" y="57.0" width="26" height="26" rx="4" fill="#2a9d8f" fill-opacity="0.85" stroke="#2a9d8f"/>
+<rect x="247.0" y="87.0" width="26" height="26" rx="4" fill="white" stroke="#bbb" stroke-dasharray="3 2"/>
+<text x="260" y="104.5" fill="#aaa" text-anchor="middle" font-size="13">0</text>
+<rect x="247.0" y="117.0" width="26" height="26" rx="4" fill="#2a9d8f" fill-opacity="0.47" stroke="#2a9d8f"/>
+<rect x="247.0" y="147.0" width="26" height="26" rx="4" fill="white" stroke="#bbb" stroke-dasharray="3 2"/>
+<text x="260" y="164.5" fill="#aaa" text-anchor="middle" font-size="13">0</text>
+<rect x="247.0" y="177.0" width="26" height="26" rx="4" fill="#2a9d8f" fill-opacity="0.70" stroke="#2a9d8f"/>
+<text x="260" y="230" fill="#333" text-anchor="middle" font-size="15">hidden 1</text>
+<rect x="437.0" y="57.0" width="26" height="26" rx="4" fill="#2a9d8f" fill-opacity="0.85" stroke="#2a9d8f"/>
+<rect x="437.0" y="87.0" width="26" height="26" rx="4" fill="#2a9d8f" fill-opacity="0.77" stroke="#2a9d8f"/>
+<rect x="437.0" y="117.0" width="26" height="26" rx="4" fill="#2a9d8f" fill-opacity="0.85" stroke="#2a9d8f"/>
+<rect x="437.0" y="147.0" width="26" height="26" rx="4" fill="white" stroke="#bbb" stroke-dasharray="3 2"/>
+<text x="450" y="164.5" fill="#aaa" text-anchor="middle" font-size="13">0</text>
+<rect x="437.0" y="177.0" width="26" height="26" rx="4" fill="#2a9d8f" fill-opacity="0.85" stroke="#2a9d8f"/>
+<text x="450" y="230" fill="#333" text-anchor="middle" font-size="15">hidden 2</text>
+<rect x="607.0" y="102.0" width="26" height="26" rx="4" fill="#9b72cf" fill-opacity="0.62" stroke="#9b72cf"/>
+<rect x="607.0" y="132.0" width="26" height="26" rx="4" fill="#2a9d8f" fill-opacity="0.85" stroke="#2a9d8f"/>
+<text x="620" y="230" fill="#333" text-anchor="middle" font-size="15">logits</text>
+<line x1="95.0" y1="130" x2="227.0" y2="130" stroke="#555" stroke-width="2"/>
+<path d="M235.0,130 L225.0,125 L225.0,135 Z" fill="#555"/>
+<text x="165.0" y="118" fill="#555" text-anchor="middle" font-size="14">linear, ReLU</text>
+<line x1="285.0" y1="130" x2="385" y2="130" stroke="#555" stroke-width="2"/>
+<path d="M393,130 L383,125 L383,135 Z" fill="#555"/>
+<text x="339.0" y="118" fill="#555" text-anchor="middle" font-size="14">linear, ReLU</text>
+<circle cx="405" cy="130" r="11" fill="white" stroke="#555" stroke-width="2"/>
+<line x1="399" y1="130" x2="411" y2="130" stroke="#555" stroke-width="2"/>
+<line x1="405" y1="124" x2="405" y2="136" stroke="#555" stroke-width="2"/>
+<line x1="416" y1="130" x2="417.0" y2="130" stroke="#555" stroke-width="2"/>
+<path d="M425.0,130 L415.0,125 L415.0,135 Z" fill="#555"/>
+<path d="M260,53.0 L260,32.0 L405,32.0 L405,111" fill="none" stroke="#555" stroke-width="2"/>
+<path d="M405,119 L400,109 L410,109 Z" fill="#555"/>
+<text x="332.5" y="24.0" fill="#555" text-anchor="middle" font-size="14">skip connection</text>
+<line x1="475.0" y1="130" x2="587.0" y2="130" stroke="#555" stroke-width="2"/>
+<path d="M595.0,130 L585.0,125 L585.0,135 Z" fill="#555"/>
+<text x="535.0" y="118" fill="#555" text-anchor="middle" font-size="14">linear</text>
+<rect x="20" y="255" width="12" height="12" rx="2" fill="#2a9d8f" stroke="#2a9d8f"/>
+<text x="38" y="266" fill="#555" font-size="12">positive</text>
+<rect x="105" y="255" width="12" height="12" rx="2" fill="#9b72cf" stroke="#9b72cf"/>
+<text x="123" y="266" fill="#555" font-size="12">negative</text>
+<rect x="195" y="255" width="12" height="12" rx="2" fill="white" stroke="#bbb" stroke-dasharray="3 2"/>
+<text x="213" y="266" fill="#555" font-size="12">zero (ReLU)</text>
+</svg>
