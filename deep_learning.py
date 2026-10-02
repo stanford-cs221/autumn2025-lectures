@@ -39,6 +39,8 @@ def main():
 
     text("Summary:")
     text("- PyTorch: NumPy + automatic differentiation + pre-defined modules")
+    text("- Can get non-linear decision boundaries with linear machinery")
+    text("- Need non-linear activation functions to get non-linear expressivity")
     text("- More (non-linear) layers = more expressivity")
     text("- Don't vanish/explode: choose activation functions to avoid dead neurons")
     text("- Don't vanish/explode: use residual connections")
@@ -55,7 +57,7 @@ def computation_graphs():
 
     text("In practice, you want to use PyTorch (or JAX), which is:") # @clear x y z
     text("- much more efficient, industrial grade, and")
-    text("- already implements the many common operations.")
+    text("- already implements many common operations.")
 
     introduce_pytorch()
     node_or_value()
@@ -68,7 +70,7 @@ def introduce_pytorch():
     z = DotProduct("z", x, y)  # @inspect z @clear x y
     image(z.get_graphviz().render("var/graph-xyz", format="png"), width=100)
     text("As we build up the graph, values get computed (forward).")
-    text("In the backward pass, we compute the gradient of a node with respect to the root `z`.")
+    text("In the backward pass, we compute the gradient of the root `z` with respect to each node.")
     backpropagation(z)  # @inspect z
 
     text("The same computation graph using PyTorch:")  # @clear x y z
@@ -80,7 +82,7 @@ def introduce_pytorch():
     text("In PyTorch:")
     text("- `torch.tensor` represents an actual node in the computation graph (pointers to dependencies)")
     text("- Use nice syntax (`@`) parallel to NumPy to construct nodes")
-    text("- `torch.tensor` and `np.array` use same operations, but former is node, latter is value")
+    text("- `torch.tensor` and `np.array` use the same operations, but the former is a node and the latter is a value")
     text("- `.backward()` backpropagates gradients (`.grad`) recursively like `backpropagation`")
     text("- `requires_grad=True` specifies whether to compute gradients for a node (parameters)")
 
@@ -98,11 +100,11 @@ def node_or_value():
     z2 = Add("z2", y2, Input("u", np.array(3.)))   # @inspect z2 @clear x
     image(y1.get_graphviz().render("var/graph-y1", format="png"), width=50), image(z2.get_graphviz().render("var/graph-sq-z2", format="png"), width=100)
 
-    backpropagation(z2)  # @inspect y1 z2  Doesn't propagate to x!
+    backpropagation(z2)  # Doesn't propagate to x! @inspect y1 z2
     text("Note that `u.grad` is computed, but `x.grad` is not.")
     text("This is because `x` is not upstream of `z2`.")
 
-    text("In PyTorch, we use tensors (nodes) directly as values (don't do `x.value`).")  # @clear z l2
+    text("In PyTorch, we use tensors (nodes) directly as values (don't do `x.value`).")  # @clear y1 y2 z2
     text("By default, PyTorch references by node.")
     text("To reference by value, call `detach()`.")
     x = torch.tensor(1., requires_grad=True)  # @inspect x
@@ -127,7 +129,7 @@ def node_or_value():
 
 
 def linear_models():
-    text("PyTorch has built-in:")  # @clear x y z u l2
+    text("PyTorch has built-in:")  # @clear x y z u y1 z2
     text("- models (e.g., `nn.Linear`)")
     text("- loss functions (e.g., `nn.CrossEntropyLoss`)")
     text("- optimizers (e.g., `torch.optim.SGD`)")
@@ -215,7 +217,7 @@ def train_model(model: nn.Module,  # @inspect training_data num_steps learning_r
     losses: list[float] = []
     optimizer = optimizer_class(model.parameters(), lr=learning_rate)
     for step in range(num_steps):  # @inspect step
-        # Forward pass (logits is example x feature)
+        # Forward pass (logits is example x class)
         logits = model(x)  # @inspect logits @stepover
         loss = cross_entropy(logits, target_y)  # @inspect loss
         losses.append(loss.item())
@@ -333,7 +335,7 @@ def nonlinear_features():
     text("Wait, what? Linear models? 😮")
 
     text("We're going to start with a non-linear classifier")
-    text("...and show that expressed as a linear classifier (with non-linear features).")
+    text("...and show that it can be expressed as a linear classifier (with non-linear features).")
 
     text("Suppose we wanted to define a quadratic (non-linear) classifier:")
     plot(make_circle_plot("quadratic classifier", center=(1, 1), radius=np.sqrt(2), domain=(-4, 4), points=[{"x0": 1, "x1": 1, "color": "blue"}, {"x0": 3, "x1": 0, "color": "red"}]))  # @stepover
@@ -356,9 +358,9 @@ def nonlinear_features():
         return np.array([x[0], x[1], x[0] ** 2 + x[1] ** 2])
 
     text("Then we define a linear predictor:")
-    text(r"$\displaystyle f(x) = -2 x_0 - 2 x_1 + (x_0^2 + x_1^2)$")
-    text(r"$\displaystyle f(x) = -2 \phi(x)_0 - 2 \phi(x)_1 + \phi(x)_2$")
-    text(r"$\displaystyle f(x) = \phi(x) \cdot [-2, -2, 1]$")
+    text(r"$\displaystyle f(x) = \text{sign}(-2 x_0 - 2 x_1 + (x_0^2 + x_1^2))$")
+    text(r"$\displaystyle f(x) = \text{sign}(-2 \phi(x)_0 - 2 \phi(x)_1 + \phi(x)_2)$")
+    text(r"$\displaystyle f(x) = \text{sign}(\phi(x) \cdot [-2, -2, 1])$")
     def predictor(x: np.ndarray) -> int:  # @inspect x
         phi = feature_map(x)  # @inspect phi
         # This is a predictor that is *linear* in phi
@@ -383,15 +385,15 @@ def nonlinear_features():
     text(r"Let's train a linear classifier on $\phi(x)$ instead of $x$:")
     training_data = get_training_data()  # @inspect training_data @stepover
     torch.manual_seed(1)
-    model = nn.Sequential(QuadraticFeatureMap(), nn.Linear(3, 2))  # Fixed feature map, then a linear classifier @inspect model
+    model = nn.Sequential(QuadraticFeatureMap(), nn.Linear(3, 2))  # Fixed feature map, then a linear classifier
     losses = train_model(model, training_data)  # @stepover
-    plot_learning_curves("linear on features", losses)  # @stepover
+    plot_learning_curves("linear with non-linear features", losses)  # @stepover
     plot_decision_boundary(model, training_data)  # @stepover
 
     text("We now have a non-linear decision boundary that classifies the training data correctly")
     text("...using the machinery of linear classifiers! 🤯")
 
-    text("Drawback: $\phi$ is manually handcrafted...can we learn it as well?")
+    text(r"Drawback: $\phi$ is handcrafted...can we learn it as well?")
 
 
 class QuadraticFeatureMap(nn.Module):
@@ -452,7 +454,7 @@ def multi_layer_perceptron_linear():
     plot_decision_boundary(model, training_data)  # @stepover
 
     text("This didn't work at all!")
-    text("In fact, it seemed like it just learned a linear classifer.")
+    text("In fact, it seemed like it just learned a linear classifier.")
     text("Wait a minute...")
 
     text("In general, linear MLPs define the **same hypothesis class** of predictors as linear models.")
@@ -499,14 +501,13 @@ def multi_layer_perceptron():
     text("We can make things more expressive if we add a non-linear **activation function**.")
 
     text("There are many choices for activation functions (sigmoid, tanh, ReLU, GELU, Swish, etc.).")
-    text("We will use the *rectified linear unit* (ReLU) for simplicity.")
     plot(make_activations_plot())  # @stepover
     text("The important thing is that they are not linear.")
     text("Tension between:")
     text("1. Want the function to be as linear as possible (gradients are far from zero)")
     text("2. Want the function to be non-linear for expressivity")
 
-    text("Let's go with the ReLU due to simplicity:")
+    text("Let's go with the rectified linear unit (ReLU) for simplicity:")
     x = torch.tensor([-1., 0, 1])  # @inspect x
     y = relu(x)  # @inspect y
     text(r'Caution: ReLU has zero gradient when $x \le 0$; can result in "dead neurons".')
@@ -532,7 +533,7 @@ def multi_layer_perceptron():
     plot_learning_curves("MLP", losses)  # @stepover
     plot_decision_boundary(model, training_data)  # @stepover
 
-    text("Not bad, but the loss is still not as good.")
+    text("Not bad, but the loss is still not as good as linear with non-linear features.")
 
 
 def make_activations_plot() -> dict:
@@ -647,7 +648,7 @@ class DeepNeuralNetwork(nn.Module):
 def residual_connections():
     text("Training deep neural networks is challenging because of vanishing gradients.")
 
-    text("Solution: residual connections (skip connections, highway networks).")
+    text("Solution: residual connections (skip connections; cf. highway networks).")
     text("Idea appears in many places:")
     text("- LSTMs for sequence modeling (1997) "), link(title="Hochreiter and Schmidhuber 1997", url="https://doi.org/10.1162/neco.1997.9.8.1735")
     text("- Residual networks for computer vision (2015) "), link("https://arxiv.org/abs/1512.03385")
@@ -657,7 +658,7 @@ def residual_connections():
 
     text(r"For $f(x) = w x$,")
     text(r"each layer computes: $x \mapsto (1 + w) x$")
-    text("which keeps the multiplier away from zero (still can explode if w is large).")
+    text("which keeps the multiplier away from zero (still can explode if $w$ is large).")
 
     # Data
     training_data = get_training_data()  # @stepover
@@ -724,7 +725,7 @@ def layer_normalization():
     y = layernorm(x, gamma, beta)  # @inspect y
     x = torch.tensor([100., 200, 300])  # @inspect x @clear y
     y = layernorm(x, gamma, beta)  # @inspect y
-    text("So each layernorm has $2d$ parameters.")
+    text(r"So each layernorm has $2d$ parameters ($\gamma$ and $\beta$), where $d$ is the dimension.")
 
     text("In PyTorch:")
     layer = nn.LayerNorm(3)  # @clear y gamma beta epsilon
@@ -747,15 +748,15 @@ def initialization():
     w = nn.Parameter(torch.randn(input_dim, output_dim))
     x = nn.Parameter(torch.randn(input_dim))
     y = x @ w  # @inspect y
-    text(f"Note that each element of `y` scales as sqrt(input_dim).")
+    text(r"Note that each element of `y` scales as $\sqrt{\text{input\_dim}}$.")
     text("Large values can cause gradients to blow up and cause training to be unstable.")
 
     text("We want an initialization that is invariant to `input_dim`,")
     text("so we don't have to worry every time we change `input_dim`.")
-    text("To do that, we simply rescale the initialization by 1/sqrt(input_dim).")
+    text(r"To do that, we simply rescale the initialization by $1/\sqrt{\text{input\_dim}}$.")
     w = nn.Parameter(torch.randn(input_dim, output_dim) / np.sqrt(input_dim))
     y = x @ w  # @inspect y
-    text(f"Now each element of `y` is constant.")
+    text("Now each element of `y` doesn't grow with `input_dim`.")
 
     text("Up to a constant, this is Xavier initialization. "), link(title="Glorot and Bengio 2010", url="https://proceedings.mlr.press/v9/glorot10a/glorot10a.pdf")
 
