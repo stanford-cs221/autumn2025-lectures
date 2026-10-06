@@ -1,4 +1,4 @@
-from edtrace import link
+from edtrace import link, make_graph
 from typing import Callable, Any
 import altair as alt
 from altair import Chart, Data
@@ -180,3 +180,139 @@ def normalize_dict(choices: dict[Any, float]) -> dict[Any, float]:
     """Normalize a dictionary of choices based on their probabilities (values)."""
     total_prob = sum(choices.values())
     return {key: prob / total_prob for key, prob in choices.items()}
+
+
+# Graphs of search problems (drawn with `graph`)
+
+def search_graph_stylesheet() -> list[dict]:
+    """Stylesheet for graphs of search problems."""
+    return [
+        {"selector": "node.end", "style": {"border-style": "double", "border-width": 6}},  # End states: double circle
+        {"selector": "edge.walk", "style": {"line-color": "#2a9d8f", "target-arrow-color": "#2a9d8f", "color": "#2a9d8f"}},
+        {"selector": "edge.tram", "style": {"line-color": "#9b72cf", "target-arrow-color": "#9b72cf", "color": "#9b72cf"}},
+        {"selector": "edge[curve]", "style": {"curve-style": "unbundled-bezier", "control-point-weights": 0.5,
+                                              "control-point-distances": "data(curve)"}},
+        # Solution path: thicker, bright orange, drawn on top
+        {"selector": "edge.path", "style": {"width": 4, "line-color": "#f77f00", "target-arrow-color": "#f77f00", "color": "#f77f00",
+                                            "z-index": 10}},
+        # Numbers (e.g., costs) next to nodes: separate, unclickable label nodes
+        {"selector": "node.annotation", "style": {"width": 1, "height": 1, "background-opacity": 0, "border-width": 0,
+                                                  "color": "#f77f00", "font-weight": "bold", "events": "no"}},
+    ]
+
+
+def draw_rollouts(problem, solutions: list, solution_only: bool = False, draw_graph: Callable | None = None) -> dict | None:
+    """
+    Return a graph showing `solutions` (lists of steps from the start state of the search `problem`) to show with `graph`:
+    - If the states are strings (e.g., prompt + generated text for language models): show the tree of solutions,
+      with what each step adds to the text in the nodes and costs on the edges.
+    - If `solution_only`: show just the states and steps of the solutions (as a tree, sharing common prefixes),
+      with the last state of each labeled with its cost.
+    - Otherwise: a copy of the full graph for each solution (from `draw_graph(problem, solution, state_costs)`), stacked vertically,
+      with the solution's path in orange and each state on it labeled with the cost remaining along the solution
+      (None if `draw_graph` isn't given, which `graph` shows as nothing).
+    """
+    if isinstance(problem.start_state(), str):
+        return draw_solution_tree(problem, solutions, edge_label=lambda step: f"{step.cost:.2f}", text_nodes=True)
+    if solution_only:
+        return draw_solution_tree(problem, solutions)
+    if draw_graph is None:
+        return None
+    specs = []
+    for solution in solutions:
+        # Cost remaining from each state on the path (the sum of the costs of the rest of the steps)
+        states = [problem.start_state()] + [step.state for step in solution.steps]
+        costs = [step.cost for step in solution.steps]
+        remaining_costs = {state: sum(costs[i:]) for i, state in enumerate(states)}
+        specs.append(draw_graph(problem, solution, state_costs=remaining_costs))
+    return stack_graphs(specs, spacing=150)
+
+
+def draw_solution_tree(problem, solutions: list,
+                       edge_label: Callable = lambda step: f"{step.action[0].upper()}:{step.cost}",
+                       text_nodes: bool = False) -> dict:
+    """
+    Return the graph of just the states and steps of `solutions` (steps in orange), with the last state of each solution labeled with its cost.
+    Solutions that share a prefix (the same step objects, e.g., candidates extended from the same candidate) share its nodes,
+    so this is a tree rooted at the start state, growing to the right.
+    - `edge_label(step)`: how to label the edge for `step`
+    - `text_nodes`: states are strings that extend each other (e.g., prompt + generated text): show the start state in full,
+      and each other state as just what it adds to the previous one, in rounded rectangles
+    """
+    # Build the tree: a node per distinct prefix of steps (identified by the step objects)
+    root = {"id": 0, "state": problem.start_state(), "depth": 0, "children": [], "step": None, "parent": None}
+    prefix_to_node = {(): root}
+    end_costs = {}  # Node id -> cost of a solution that ends there
+    for solution in solutions:
+        prefix, node = (), root
+        for step in solution.steps:
+            prefix = prefix + (id(step),)
+            if prefix not in prefix_to_node:
+                child = {"id": len(prefix_to_node), "state": step.state, "depth": node["depth"] + 1, "children": [], "step": step, "parent": node}
+                prefix_to_node[prefix] = child
+                node["children"].append(child)
+            node = prefix_to_node[prefix]
+        end_costs[node["id"]] = solution.cost
+
+    def node_label(node) -> str:
+        if not text_nodes or node["parent"] is None:
+            return str(node["state"])
+        # Just what this state adds to the previous one (making whitespace visible)
+        added = node["state"][len(node["parent"]["state"]):]
+        return added.replace("\n", "⏎").strip() or "␣"
+
+    # Lay out the tree from left to right: leaves stacked vertically, each parent centered beside its children
+    leaf_spacing, depth_spacing = (44, 120) if text_nodes else (60, 80)
+    num_leaves = 0
+    nodes, edges = [], []
+    def layout(node) -> float:
+        nonlocal num_leaves
+        if node["children"]:
+            y = sum(layout(child) for child in node["children"]) / len(node["children"])
+        else:
+            y = leaf_spacing * num_leaves
+            num_leaves += 1
+        x = depth_spacing * node["depth"] - (30 if text_nodes and node["parent"] is None else 0)  # Room for the (wider) prompt
+        classes = ("end " if problem.is_end(node["state"]) else "") + ("text" if text_nodes else "") + (" prompt" if text_nodes and node["parent"] is None else "")
+        nodes.append({"id": node["id"], "label": node_label(node), "x": x, "y": y, "classes": classes.strip()})
+        if node["id"] in end_costs:
+            cost = end_costs[node["id"]]
+            cost_label = f"{cost:.2f}" if isinstance(cost, float) else str(cost)
+            cost_position = (x + 68, y) if text_nodes else (x + 20, y - 24)  # Right of text nodes, upper right of circles
+            nodes.append({"id": f"{node['id']}-cost", "label": cost_label, "x": cost_position[0], "y": cost_position[1], "classes": "annotation"})
+        for child in node["children"]:
+            step = child["step"]
+            classes = "path" if text_nodes else f"{step.action} path"  # Color by action (walk/tram) if it's a name
+            edges.append({"source": node["id"], "target": child["id"], "label": edge_label(step), "classes": classes})
+        return y
+    layout(root)
+
+    max_depth = max(node["depth"] for node in prefix_to_node.values())
+    stylesheet = search_graph_stylesheet()
+    if text_nodes:
+        # Rounded rectangles with the text (the prompt is wider)
+        stylesheet += [
+            {"selector": "node.text", "style": {"shape": "round-rectangle", "width": 76, "height": 28, "font-size": 12,
+                                                "text-wrap": "ellipsis", "text-max-width": "72px"}},
+            {"selector": "node.prompt", "style": {"width": 116, "text-max-width": "112px"}},
+        ]
+        # Shrink wide trees to fit (keeping the proportions)
+        width, height = depth_spacing * max_depth + 200, leaf_spacing * num_leaves + 40
+        scale = min(1, 760 / width)
+        return make_graph(nodes, edges, stylesheet=stylesheet, width=round(width * scale), height=round(height * scale))
+    return make_graph(nodes, edges, stylesheet=stylesheet, width=min(760, 80 * max_depth + 120), height=60 * num_leaves + 60)
+
+
+def stack_graphs(specs: list[dict], spacing: float) -> dict:
+    """Combine graphs (from `make_graph`) into one, stacking them vertically `spacing` apart (they share the first stylesheet)."""
+    nodes, edges = [], []
+    for i, spec in enumerate(specs):
+        prefix = f"g{i}-"  # Keep the ids of the copies distinct
+        for node in spec["nodes"]:
+            node = {**node, "data": {**node["data"], "id": prefix + node["data"]["id"]}}
+            if "position" in node:
+                node["position"] = {"x": node["position"]["x"], "y": node["position"]["y"] + spacing * i}
+            nodes.append(node)
+        for edge in spec["edges"]:
+            edges.append({**edge, "data": {**edge["data"], "source": prefix + edge["data"]["source"], "target": prefix + edge["data"]["target"]}})
+    return {**specs[0], "nodes": nodes, "edges": edges, "height": specs[0]["height"] * len(specs)}

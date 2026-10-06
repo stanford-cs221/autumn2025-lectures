@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 220" width="560" height="220" font-family="Helvetica, Arial, sans-serif" font-size="14">
+<rect width="560" height="220" fill="white"/>
+<line x1="30" y1="120" x2="203.0" y2="120" stroke="#2a9d8f" stroke-width="3"/>
+<path d="M213.0,120.0 L202.0,126.0 L202.0,114.0 Z" fill="#2a9d8f"/>
+<text x="122.5" y="106" text-anchor="middle" fill="#2a9d8f" font-size="17" font-weight="bold">perceive</text>
+<line x1="345.0" y1="120" x2="518" y2="120" stroke="#2a9d8f" stroke-width="3"/>
+<path d="M530.0,120.0 L519.0,126.0 L519.0,114.0 Z" fill="#2a9d8f"/>
+<text x="437.5" y="106" text-anchor="middle" fill="#2a9d8f" font-size="17" font-weight="bold">act</text>
+<path d="M246,95.0 A34,34 0 1 1 313.3,87.9" fill="none" stroke="#9b72cf" stroke-width="3"/>
+<path d="M314.0,95.0 L307.9,84.0 L320.1,84.0 Z" fill="#9b72cf"/>
+<text x="280" y="41" text-anchor="middle" fill="#9b72cf" font-size="17" font-weight="bold">reason</text>
+<path d="M246,145.0 A34,34 0 1 0 313.3,152.1" fill="none" stroke="#2a9d8f" stroke-width="3"/>
+<path d="M314.0,145.0 L320.1,156.0 L307.9,156.0 Z" fill="#2a9d8f"/>
+<text x="280" y="203" text-anchor="middle" fill="#2a9d8f" font-size="17" font-weight="bold">learn</text>
+<rect x="215.0" y="95.0" width="130" height="50" rx="8" fill="white" stroke="#555" stroke-width="2"/>
+<text x="280" y="127" text-anchor="middle" fill="#222" font-size="20">Agent</text>
+</svg>

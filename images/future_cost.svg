@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 250" width="600" height="250" font-family="Helvetica, Arial, sans-serif" font-size="14">
+<rect width="600" height="250" fill="white"/>
+<line x1="98.0" y1="125" x2="204.6" y2="50.2" stroke="#2a9d8f" stroke-width="2.5"/>
+<path d="M212.0,45.0 L206.7,54.8 L200.9,46.7 Z" fill="#2a9d8f"/>
+<rect x="137.0" y="66.0" width="36" height="16" fill="white"/>
+<text x="155.0" y="78.0" text-anchor="middle" fill="#2a9d8f" font-size="13" font-family="Menlo, Consolas, monospace">cost</text>
+<line x1="98.0" y1="125" x2="203.0" y2="125.0" stroke="#2a9d8f" stroke-width="2.5"/>
+<path d="M212.0,125.0 L202.0,130.0 L202.0,120.0 Z" fill="#2a9d8f"/>
+<rect x="137.0" y="105.0" width="36" height="16" fill="white"/>
+<text x="155.0" y="117.0" text-anchor="middle" fill="#2a9d8f" font-size="13" font-family="Menlo, Consolas, monospace">cost</text>
+<line x1="98.0" y1="125" x2="204.6" y2="199.8" stroke="#2a9d8f" stroke-width="2.5"/>
+<path d="M212.0,205.0 L200.9,203.3 L206.7,195.2 Z" fill="#2a9d8f"/>
+<rect x="137.0" y="146.0" width="36" height="16" fill="white"/>
+<text x="155.0" y="158.0" text-anchor="middle" fill="#2a9d8f" font-size="13" font-family="Menlo, Consolas, monospace">cost</text>
+<path d="M288.0,45 Q410.0,45 483.0,105.0" fill="none" stroke="#9b72cf" stroke-width="2.5" stroke-dasharray="7 5"/>
+<path d="M492.0,105.0 L481.0,103.1 L486.9,95.1 Z" fill="#9b72cf"/>
+<path d="M288.0,125 Q410.0,125 483.0,125.0" fill="none" stroke="#9b72cf" stroke-width="2.5" stroke-dasharray="7 5"/>
+<path d="M492.0,125.0 L482.0,130.0 L482.0,120.0 Z" fill="#9b72cf"/>
+<path d="M288.0,205 Q410.0,205 483.0,145.0" fill="none" stroke="#9b72cf" stroke-width="2.5" stroke-dasharray="7 5"/>
+<path d="M492.0,145.0 L486.9,154.9 L481.0,146.9 Z" fill="#9b72cf"/>
+<text x="400.0" y="37" text-anchor="middle" fill="#9b72cf" font-size="13" font-family="Menlo, Consolas, monospace">future_cost(state')</text>
+<rect x="22.0" y="107.0" width="76" height="36" rx="8" fill="white" stroke="#555" stroke-width="2"/>
+<text x="60" y="130" text-anchor="middle" fill="#333" font-size="15">state</text>
+<rect x="212.0" y="27.0" width="76" height="36" rx="8" fill="white" stroke="#555" stroke-width="2"/>
+<text x="250" y="50" text-anchor="middle" fill="#333" font-size="15">state'</text>
+<rect x="212.0" y="107.0" width="76" height="36" rx="8" fill="white" stroke="#555" stroke-width="2"/>
+<text x="250" y="130" text-anchor="middle" fill="#333" font-size="15">state'</text>
+<rect x="212.0" y="187.0" width="76" height="36" rx="8" fill="white" stroke="#555" stroke-width="2"/>
+<text x="250" y="210" text-anchor="middle" fill="#333" font-size="15">state'</text>
+<rect x="492.0" y="107.0" width="76" height="36" rx="8" fill="white" stroke="#555" stroke-width="2"/>
+<rect x="496.0" y="111.0" width="68" height="28" rx="5" fill="none" stroke="#555" stroke-width="1.5"/>
+<text x="530" y="130" text-anchor="middle" fill="#333" font-size="15">end</text>
+</svg>

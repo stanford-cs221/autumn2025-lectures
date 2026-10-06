@@ -1,8 +1,9 @@
-from re import T
-from edtrace import text, link, image, note
-from typing import Any
-from dataclasses import dataclass, field
-from graphviz import Digraph
+from __future__ import annotations
+from edtrace import text, link, image, graph, make_graph
+from util import draw_rollouts, search_graph_stylesheet
+from typing import Any, Callable
+from dataclasses import dataclass
+from fractions import Fraction
 import math
 import random
 import torch
@@ -11,31 +12,47 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 
 
 def main():
+    text("# Search I")
     text("Last week: **machine learning**")
-    text("- Learning algorithm: training data {(input, output)} → predictor")
-    text("- Predictor: input → output (number for regression, class for classification)")
+    image("images/learning-algorithm.svg", width=560)
+    text(r"- Predictor: $f_\theta$ maps input $x$ to predicted output $y = f_\theta(x)$")
+    text(r"  * $y \in \mathbb R$ for regression")
+    text(r"  * $y \in \\{0, \dots, K-1\\}$ for classification")
 
-    text("Recall the ingredients of intelligence:")
-    image("images/perceive-reason-act-learn.png", width=400)
+    text("Stepping back, recall the ingredients of intelligence:")
+    image("images/perceive-reason-act-learn.svg", width=560)
     text("A predictor reflexively maps **percepts** to **actions** (and we're **learning** it).")
-    text("But many problems in the real world require reasoning (thinking, problem solving, planning).")
+    text("But many problems in the real world require **reasoning** (thinking, problem solving, planning).")
 
     text("This week: **search** (one form of reasoning, when the world is deterministic)")
 
     text("Example: finding a sequence of moves to solve a Rubik's cube")
     image("images/rubiks-cube.jpg", width=200)
+
     text("Example: finding the shortest path from point A to point B")
     image("images/maps.png", width=200)
+
+    text("Example: word ladder (change one letter at a time to get from one word to another)")
+    text("- Input: cold, warm")
+    text("- Output: cold → cord → card → ward → warm")
+
+    text("Example: Game of 24 (combine four numbers with +, -, ×, ÷ to get 24)")
+    text("- Input: 4, 7, 8, 8")
+    text("- Output: (4 + 7 - 8) × 8 = 24")
+
+    text("Example: theorem proving")
+    text("- Input: *There are infinitely many primes.*")
+    text("- Output: *Suppose there are finitely many primes...*")
 
     text("Recall: (symbolic) AI started in the 1950s with search, and that didn't pan out.")
     text("So is this still relevant today?")
 
-    text("Rich Sutton's *The Bitter Lesson* essay (2019) "), link("http://www.incompleteideas.net/IncIdeas/BitterLesson.html", title="[article]")
+    text("Rich Sutton's *The Bitter Lesson* essay (2019) "), link("http://www.incompleteideas.net/IncIdeas/BitterLesson.html", title="article")
     text("- *...general methods that leverage computation are ultimately the most effective, and by a large margin.*")
     text("- *The two methods that seem to scale arbitrarily in this way are **search and learning***.")
 
     text("Search is increasingly important (e.g., test-time compute in language models)!")
-    text("You just also need learning too.")
+    text("You just need learning too.")
 
     # Modeling
     search_problem()
@@ -47,8 +64,8 @@ def main():
     text("So far: compute the minimum cost solution.")
     text("Time complexity: at least O(number of states).")
     text("But what if state is:")
-    text("- Set of locations?")
-    text("- Sequence of words generated so far?")
+    text("- A set of locations?")
+    text("- A sequence of words generated so far?")
     text("Exact search will be intractable.")
 
     text("We will now turn to approximate search.")
@@ -58,17 +75,21 @@ def main():
     # Approximate methods: find a hopefully good enough solution
     introduce_best_of_n()
     introduce_beam_search()
+
+    # More examples
+    example_game_of_24()
+    example_word_ladder()
     test_time_compute_in_language_models()
 
-    text("Summary")
+    text("Summary:")
     text("- Search problem: formally defines the problem (state, actions, costs, etc.)")
     text("- Objective: find a solution (sequence of actions) that minimizes the total cost.")
     text("- Exhaustive search: find exact solution, but takes exponential time.")
     text("- Dynamic programming: find exact solution, exponentially faster (if the number of states is small).")
-    text("- Best-of-n: find approximate solution by throwing `n` darts")
+    text("- Best-of-n: find approximate solution by throwing $n$ darts.")
     text("- Beam search: find approximate solution by keeping track of `beam_width` partial solutions.")
 
-    text("Synergy between learning and search")
+    text("Synergy between learning and search:")
     text("- Costs are learned from data")
     text("- Search: find the best solution given those costs")
 
@@ -83,41 +104,51 @@ def search_problem():
 
     text("In general, the **state** contains any information that's needed to evaluate actions, costs, and successors.")
 
-    text("Example: if we can't take the tram twice in a row?")
+    text("Example: what if we can't take the tram twice in a row?")
     text("State: (location, number of tickets, whether the last action was taking the tram)")
 
     text("Why not just include everything in the state?")
-    text("As we'll see later, some algorithms (dynamic programming) scale in the number of states")
+    text("As we'll see later, some algorithms (dynamic programming) scale with the number of states")
     text("...so we want to keep the number of states small.")
 
     text("So far, we have focused on the **modeling** (representing the problem formally).")
-    text("With all these constraints, it's not obvious what the solution is...")
-    text("...but we don't care!")
 
-    text("Ok, now we have to care about it...")
+    text("Now, how do you solve a search problem?")
 
 
 def example_travel_problem():
     text("Example problem:")
-    image("images/walk-tram.png", width=400)
-    text("- Street with blocks numbered to 1 to n.")
-    text("- Walking from i to i+1 takes 1 minute.")
-    text("- Taking a magic tram from i to 2*i takes 2 minutes.")
-    text("- How to travel from 1 to n in the least time?")
+    image("images/walk-tram.svg", width=560)
+    text(r"- Street with blocks numbered $1$ to $n$.")
+    text(r"- Walking from $i$ to $i+1$ takes 1 minute.")
+    text(r"- Taking a magic tram from $i$ to $2i$ takes 2 minutes.")
+    text(r"- How to travel from $1$ to $n$ in the least time?")
 
     text("Mindset: don't solve it!")
-    text("Formalize the problem first")
-    text("...because we want general methods that can solve **any** search problem.")
+    text("Formalize the problem first...")
+    text("...and then use general methods that can solve **any** search problem.")
 
+    # Formalize the search problem
     problem = TravelSearchProblem(num_locs=10)  # @stepover
     state = problem.start_state()  # Where we start @inspect state
     successors = problem.successors(state)  # From each state, where can we go @inspect successors
-    is_end = problem.is_end(successors[0].state)  # Are we done? @inspect is_end
+    is_end = problem.is_end(state)  # Are we done? @inspect is_end
 
-    text("A search problem has the following components:")  # @clear
-    text("- `start_state()`: the initial state.")
-    text("- `successors(state)`: specifies the actions one can take in `state`, their costs, and the resulting states.")
-    text("- `is_end(state)`: whether `state` is an end state.")
+    text("Visualize the search problem as a graph:")
+    graph(draw_travel_graph(problem))  # @stepover
+    text("- States are nodes")
+    text("- Actions are edges labeled with [action]:[cost] (W = walk, T = tram)")
+    text("- End nodes have double circles")
+
+    text("In general, a **search problem** has the following components:")  # @clear
+    text("- Start state: `start_state()`")
+    text(r"  * $s_\text{start} \in \text{States}$: where we start")
+    text("- Where we can go from each state: `successors(state)` returns the (action, cost, new state) tuples")
+    text(r"  * $\text{Actions}(s)$: the actions we can take in state $s$")
+    text(r"  * $\text{Succ}(s, a)$: the state we end up in if we take action $a$ in state $s$")
+    text(r"  * $\text{Cost}(s, a)$: the cost of taking action $a$ in state $s$")
+    text("- End state test: `is_end(state)`")
+    text(r"  * $\text{IsEnd}(s)$: whether $s$ is an end state")
 
     text("**Objective**: find a solution (**sequence of actions**) that minimizes the total cost.")
     solution = Solution(steps=[  # @inspect solution
@@ -126,15 +157,9 @@ def example_travel_problem():
         Step(action="walk", cost=1, state=5),
         Step(action="tram", cost=2, state=10),
     ])
-    text("This is only one possible solution...is this the best solution?  Let's see...")
-
-
-@dataclass(frozen=True)
-class Step:
-    """Represents taking an `action`, incurring some `cost` and ending up in a new `state`."""
-    action: Any
-    cost: float
-    state: Any
+    graph(draw_travel_graph(problem, solution))  # @stepover
+    text("This is only one possible solution...is this the best solution?")
+    text("Let's see later...")
 
 
 class SearchProblem:
@@ -147,6 +172,14 @@ class SearchProblem:
 
     def is_end(self, state: Any) -> bool:
         raise NotImplementedError
+
+
+@dataclass(frozen=True)
+class Step:
+    """Represents taking an `action`, incurring some `cost` and ending up in a new `state`."""
+    action: Any
+    cost: float
+    state: Any
 
 
 class TravelSearchProblem(SearchProblem):
@@ -172,30 +205,39 @@ class TravelSearchProblem(SearchProblem):
 
     def is_end(self, state: int) -> bool:
         # Have we reached the destination?
-        return state == self.num_locs
+        return state == self.num_locs  # @inspect state self.num_locs
+
+
+@dataclass
+class Solution:
+    """Represents a solution to a search problem (sequence of actions that produces a cost)."""
+    steps: list[Step]
+    cost: float
+
+    def __init__(self, steps: list[Step]):
+        self.steps = steps  # @inspect self.steps
+        # The cost of a solution is the sum of the costs of the actions
+        costs = [step.cost for step in steps]  # @inspect costs
+        self.cost = sum(costs)  # @inspect self.cost
 
 
 def example_limited_travel_problem():
     text("Let's make the problem more complex.")
-    text("Suppose the magic tram requires tickets and we only have a fixed number of tickets.")
+    text("Suppose the magic tram requires tickets, and we only have a fixed number of tickets. 🎟️")
 
     text("How do we modify our formal search problem to incorporate this constraint?")
-    text("The state so far is where we are, but we also need to track the number of tickets we have.")
+    text("- Previously: state = current location")
+    text("- Now: we also need to track the number of tickets we have")
     problem = LimitedTravelSearchProblem(num_locs=10, starting_tickets=1)  # @stepover
-    state = problem.start_state()  # @inspect state
+    state = problem.start_state()  # @inspect state @stepover
     successors = problem.successors(state)  # @inspect successors
-    is_end = problem.is_end(successors[0].state)  # @inspect is_end
+    is_end = problem.is_end(state)  # @inspect is_end
 
-
-@dataclass(frozen=True)
-class TravelState:
-    """Represents the state of the `LimitedTravelSearchProblem`, where you are at `loc` and have `tickets` left."""
-    loc: int
-    tickets: int
-
-    def __lt__(self, other: 'TravelState') -> bool:
-        # This can be arbitrary - only used because we put it in the priority queue
-        return self.loc < other.loc
+    text("As before, visualize the graph:")
+    graph(draw_limited_travel_graph(problem))  # @stepover
+    text("- States are represented as [location],[tickets]t")
+    text("- Taking the tram uses up a ticket (goes from the top row to the bottom row)")
+    text("- Can't take the tram from the bottom row (no tickets left)")
 
 
 class LimitedTravelSearchProblem(SearchProblem):
@@ -222,20 +264,18 @@ class LimitedTravelSearchProblem(SearchProblem):
 
     def is_end(self, state: TravelState) -> bool:
         # Have we reached the destination?  Don't care about how many tickets we have
-        return state.loc == self.num_locs
+        return state.loc == self.num_locs  # @inspect state self.num_locs
 
 
-@dataclass
-class Solution:
-    """Represents a solution to a search problem (sequence of actions that produces a cost)."""
-    steps: list[Step]
-    cost: float
+@dataclass(frozen=True)
+class TravelState:
+    """Represents the state of the `LimitedTravelSearchProblem`, where you are at `loc` and have `tickets` left."""
+    loc: int
+    tickets: int
 
-    def __init__(self, steps: list[Step]):
-        self.steps = steps  # @inspect self.steps
-        # The cost of a solution is the sum of the costs of the actions
-        costs = [step.cost for step in steps]  # @inspect costs
-        self.cost = sum(costs)  # @inspect self.cost
+    def __lt__(self, other: 'TravelState') -> bool:
+        # This can be arbitrary - only used because we put it in the priority queue
+        return self.loc < other.loc
 
 
 def introduce_exhaustive_search():
@@ -247,18 +287,23 @@ def introduce_exhaustive_search():
     text("...that will generalize to dynamic programming and eventually reinforcement learning.")
 
     text("Key definition: **future cost**")
-    text("`future_cost(state)`: the cost of the minimum cost solution from `state` to an end state.")
+    text(r"Define $\text{FutureCost}(s)$ to be the minimum cost from state $s$ to an end state.")
 
-    image("images/future_cost.png", width=400)
+    image("images/future_cost.svg", width=600)
     text("How to compute this?")
-    text("- Consider a first step (`successor.cost`)")
-    text("- Consider the optimal rest of the solution (`future_cost(successor.state)`)")
-    text("- Minimize over all possible successors from `state`")
+    text(r"- Consider a first step: action $a$ with cost $\text{Cost}(s, a)$")
+    text(r"- Then there is the optimal rest of the solution: $\text{FutureCost}(\text{Succ}(s, a))$")
+    text(r"- Minimize over all possible actions $a \in \text{Actions}(s)$")
     text("Recurrence:")
-    text("`future_cost(state) = min_{successor} (successor.cost + future_cost(successor.state))`")
+    text(r"$\displaystyle \text{FutureCost}(s) = \begin{cases} 0 & \text{if } \text{IsEnd}(s) \\\\ \min_{a \in \text{Actions}(s)} \left[\text{Cost}(s, a) + \text{FutureCost}(\text{Succ}(s, a))\right] & \text{otherwise} \end{cases}$")
 
     text("Let's do an example.")
     problem = TravelSearchProblem(num_locs=4)  # @stepover
+    graph(draw_travel_graph(problem))  # @stepover
+
+    text("Exhaustive search explores this search tree:")
+    graph(draw_search_tree(problem))  # @stepover
+    text("Each node is annotated with its future cost in orange.")
 
     solution, num_explored = exhaustive_search(problem)  # @inspect solution num_explored
     text("Notice that the number of states explored (9) is larger than the number of states (4).")
@@ -268,11 +313,17 @@ def introduce_exhaustive_search():
     text("Let's try some larger problems.")
 
     problem = TravelSearchProblem(num_locs=10)  # @stepover
+    graph(draw_travel_graph(problem))  # @stepover
+    graph(draw_search_tree(problem))  # @stepover
     solution, num_explored = exhaustive_search(problem)  # @stepover @inspect solution num_explored
+    graph(draw_travel_graph(problem, solution))  # @stepover
     text("Note: solution has the same cost (6) that we had before (different actions though).")
 
     problem = TravelSearchProblem(num_locs=17)  # @stepover
+    graph(draw_travel_graph(problem))  # @stepover
+    graph(draw_search_tree(problem))  # @stepover
     solution, num_explored = exhaustive_search(problem)  # @stepover @inspect solution num_explored
+    graph(draw_travel_graph(problem, solution))  # @stepover
 
     text("Oh no, the number of states explored is growing exponentially with the number of locations!")
     text("So the **time complexity** of exhaustive search is worst case **exponential** in the number of states.")
@@ -280,14 +331,7 @@ def introduce_exhaustive_search():
     text("What about the **memory complexity**?")
     text("Good news: it is linear in the length of a solution (the stack in the recurrence).")
 
-    text("Assumption: there cannot be cycles (e.g., A → B → C → A)")
-    text("...or else the recurrence is not well-defined (infinite loop).")
-    text("Next week, we'll see how value iteration for MDPs gets around this.")
-
-    text("In the meantime:")
-    text("- Add number of steps into the state (no cycles since always increment by 1).")
-    text("- Define `is_end(state)` to be true when `state.num_steps > threshold`.")
-    text("- Define an infinite cost to enter states `state.num_steps > threshold` (to prune).")
+    cycles()
 
     text("Can we improve on the efficiency of exhaustive search?")
 
@@ -313,7 +357,7 @@ def exhaustive_search(problem: SearchProblem) -> tuple[Solution | None, int]:
             # Flesh each successor out recursively into a solution
             solutions = []  # @inspect solutions
             for first_step in successors:  # @inspect first_step
-                future_steps = future_solution(first_step.state).steps  # @inspect future_successors
+                future_steps = future_solution(first_step.state).steps  # @inspect future_steps
                 solutions.append(Solution(steps=[first_step] + future_steps))  # @inspect solutions @stepover
             # Pick the best one
             best_solution = min(solutions, key=lambda x: x.cost)  # @inspect best_solution @stepover
@@ -321,8 +365,27 @@ def exhaustive_search(problem: SearchProblem) -> tuple[Solution | None, int]:
         return best_solution
 
     state = problem.start_state()  # @inspect state @stepover
-    solution = future_solution(state)  # @inspect cache solution num_explored
+    solution = future_solution(state)  # @inspect solution num_explored
     return solution, num_explored
+
+
+def cycles():
+    text("### Cycles")
+    text("Assumption: there cannot be cycles (e.g., A → B → C → A).")
+    text("...or else the recurrence is not well-defined (infinite loop).")
+    text("Here's a simple search problem with cycles (start at A, end at C; edges labeled [action]:[cost], where the action is where we go; all costs are 1):")
+    problem = CyclicSearchProblem()  # @stepover
+    graph(draw_cyclic_graph(problem))  # @stepover
+    text("Next week, we'll see how value iteration for MDPs gets around this.")
+
+    text("In the meantime:")
+    text("- Add number of steps into the state (no cycles since always increment by 1).")
+    text("- Define `is_end(state)` to be true when `state.num_steps` reaches the threshold.")
+    text("- Define an infinite cost to reach the threshold without reaching the goal (to prune).")
+    text("Augmenting the problem above: the state is now [location],[number of steps taken], with at most 3 steps (all costs are still 1):")
+    problem = StepCountSearchProblem(CyclicSearchProblem(), max_steps=3)  # @stepover
+    graph(draw_step_count_graph(problem))  # @stepover
+    text("No more cycles (and no cycles possible), at the cost of more states.")
 
 
 def introduce_dynamic_programming():
@@ -334,10 +397,13 @@ def introduce_dynamic_programming():
     text("Also known as *memoization*.")
 
     text("Recall that exhaustive search explores some states more than once.")
-    text("Dynamic programming: if already saw a state, don't explore it again.")
+    text("Dynamic programming: if we've already seen a state, don't explore it again.")
 
     problem = TravelSearchProblem(num_locs=10)  # @stepover
-    solution, num_explored, _ = dynamic_programming(problem)  # @inspect solution num_explored
+    graph(draw_travel_graph(problem))  # @stepover
+    solution, num_explored, cache = dynamic_programming(problem)  # @inspect solution num_explored
+    text("The cache gives the future cost of every state (in orange) and thus the best action from every state (highlighted):")
+    graph(draw_travel_graph(problem, cache=cache))  # @stepover
     text("Note that the number of states explored (10) = number of states (10).")
 
     text("We can try larger problems:")
@@ -349,16 +415,26 @@ def introduce_dynamic_programming():
     solution, num_explored, _ = dynamic_programming(problem)  # @inspect solution num_explored @stepover
 
     text("When can you even use dynamic programming?")  # @clear solution num_explored
-    text("- In general, memory is more precious than time. Can always run program for longer, but memory doesn't grow.")
+    text("- In general, memory is more precious than time.")
+    text("- Can always run a program for longer, but memory doesn't grow.")
     text("- So run dynamic programming only when number of states fits in memory.")
 
     text("When does dynamic programming provide speedup over exhaustive search?")
     text("- Intuition: DP is useful when there are a lot of ways to reach a state.")
     text("- If every action takes you to a new state, might as well do exhaustive search (no cache).")
 
+    text("Let's solve our other examples with dynamic programming.")
+    problem = Game24SearchProblem(numbers=[4, 7, 8, 8])  # @stepover
+    solution, num_explored, _ = dynamic_programming(problem)  # @inspect solution num_explored @stepover
+    text("The actions of the solution (cost 3 = three operations) give an expression for 24.")
+
+    problem = WordLadderSearchProblem(start="cold", target="warm", max_steps=6)  # @stepover
+    solution, num_explored, _ = dynamic_programming(problem)  # @inspect solution num_explored @stepover
+    text("The minimum number of single-letter changes from cold to warm is 4.")
+
     text("Summary:")
     text("- Dynamic programming = exhaustive search + caching")
-    text("- Use when number of states fits in memory and lots of ways to go between same states")
+    text("- Use when the number of states fits in memory and there are lots of ways to reach the same states")
 
 
 def dynamic_programming(problem: SearchProblem) -> tuple[Solution | None, int, dict[Any, Solution]]:
@@ -389,7 +465,7 @@ def dynamic_programming(problem: SearchProblem) -> tuple[Solution | None, int, d
             # Flesh each successor out recursively into a solution
             solutions = []  # @inspect solutions
             for first_step in successors:  # @inspect first_step
-                future_steps = future_solution(first_step.state).steps  # @inspect future_successors @stepover
+                future_steps = future_solution(first_step.state).steps  # @inspect future_steps @stepover
                 solutions.append(Solution(steps=[first_step] + future_steps))  # @inspect solutions @stepover
             # Pick the best one
             best_solution = min(solutions, key=lambda x: x.cost)  # @inspect best_solution @stepover
@@ -404,6 +480,76 @@ def dynamic_programming(problem: SearchProblem) -> tuple[Solution | None, int, d
     return solution, num_explored, cache
 
 
+class Game24SearchProblem(SearchProblem):
+    """Combine `numbers` with +, -, ×, ÷ to get 24."""
+    def __init__(self, numbers: list[int], target: int = 24):
+        self.numbers = numbers
+        self.target = target
+
+    def start_state(self) -> tuple[Fraction, ...]:
+        # Use fractions so that division is exact
+        return tuple(sorted(Fraction(number) for number in self.numbers))
+
+    def successors(self, state: tuple[Fraction, ...]) -> list[Step]:
+        successors = []
+        for i in range(len(state)):
+            for j in range(len(state)):
+                if i == j:
+                    continue
+                a, b = state[i], state[j]
+                rest = [state[k] for k in range(len(state)) if k not in (i, j)]
+                results = {}
+                if i < j:  # + and × are commutative, so only consider each pair once
+                    results["+"] = a + b
+                    results["×"] = a * b
+                results["-"] = a - b
+                if b != 0:
+                    results["÷"] = a / b
+                for op, result in results.items():
+                    new_state = tuple(sorted(rest + [result]))
+                    # The last operation must produce the target (otherwise, infinite cost)
+                    cost = 1 if len(new_state) > 1 or result == self.target else math.inf
+                    successors.append(Step(action=f"{a} {op} {b} = {result}", cost=cost, state=new_state))
+        return successors
+
+    def is_end(self, state: tuple[Fraction, ...]) -> bool:
+        return len(state) == 1
+
+
+class WordLadderSearchProblem(SearchProblem):
+    """Go from `start` to `target` by changing one letter at a time (through words in the dictionary), in at most `max_steps` steps."""
+    dictionary = ["cold", "cord", "card", "ward", "warm", "word", "worm", "wore", "core", "care", "bold", "bolt", "colt", "coat"]
+
+    def __init__(self, start: str, target: str, max_steps: int):
+        self.start = start
+        self.target = target
+        self.max_steps = max_steps
+
+    def start_state(self) -> WordLadderState:
+        return WordLadderState(word=self.start, num_steps=0)
+
+    def successors(self, state: WordLadderState) -> list[Step]:  # @inspect state
+        successors = []
+        for word in self.dictionary:
+            # Words that differ in exactly one letter
+            if sum(a != b for a, b in zip(word, state.word)) == 1:
+                new_state = WordLadderState(word=word, num_steps=state.num_steps + 1)
+                # Running out of steps without reaching the target has infinite cost
+                cost = 1 if word == self.target or new_state.num_steps < self.max_steps else math.inf
+                successors.append(Step(action=word, cost=cost, state=new_state))  # @inspect successors
+        return successors
+
+    def is_end(self, state: WordLadderState) -> bool:
+        return state.word == self.target or state.num_steps == self.max_steps
+
+
+@dataclass(frozen=True)
+class WordLadderState:
+    """At `word` after `num_steps` steps."""
+    word: str
+    num_steps: int
+
+
 def introduce_best_of_n():
     text("The simplest idea is to randomly choose actions until we reach the end state.")
     text("Do this `n` times and take the best solution.")
@@ -411,8 +557,8 @@ def introduce_best_of_n():
     text("Let's take the example:")
     problem = TravelSearchProblem(num_locs=10)  # @stepover
 
-    text("How we choose actions is determined by a **policy**.")
-    text("A **policy** is a function that maps state to action (can be non-deterministic).")
+    text(r"How we choose actions is determined by a **policy** $\pi : \text{States} \to \text{Actions}$.")
+    text("A policy can be non-deterministic (randomly choose an action).")
     random.seed(1)
     state = problem.start_state()  # @inspect state @stepover
     step = uniform_policy(problem, state)  # @inspect step
@@ -427,13 +573,13 @@ def introduce_best_of_n():
     text("And again:")
     solution = rollout(problem, uniform_policy)  # @inspect solution @stepover
 
-    text("Let's rollout the policy `n` times and take the best solution:")
+    text("Let's roll out the policy $n$ times and take the best solution:")
     solution, num_explored = best_of_n(problem, uniform_policy, num_candidates=10)  # @inspect solution num_explored
 
-    text("Guarantee: as n goes to infinity, solution will converge to the minimum cost solution.")
+    text(r"Guarantee: as $n \to \infty$, solution will converge to the minimum cost solution.")
     text("It might take exponentially long though...")
 
-    text("Embarrassingly parallel: each of `n` paths can be computed independently")
+    text("Embarrassingly parallel: each of the $n$ rollouts can be computed independently.")
 
 
 def uniform_policy(problem: SearchProblem, state: Any) -> Step:  # @inspect state
@@ -444,7 +590,7 @@ def uniform_policy(problem: SearchProblem, state: Any) -> Step:  # @inspect stat
 
 
 def rollout(problem: SearchProblem, policy, max_steps: int = 10) -> Solution:
-    """Sample a policy from the start state of `problem`."""
+    """Roll out `policy` from the start state of `problem` (until we reach an end state or take `max_steps` steps)."""
     state = problem.start_state()  # @inspect state @stepover
     steps = []  # @inspect steps
 
@@ -461,18 +607,18 @@ def rollout(problem: SearchProblem, policy, max_steps: int = 10) -> Solution:
 
 def best_of_n(problem: SearchProblem, policy, num_candidates: int, max_steps: int = 10) -> tuple[Solution | None, int]:
     """
-    Perform best-of-n search to `problem`.
+    Perform best-of-n search on `problem`.
     Return the best solution and the number of states explored.
     """
     num_explored = 0
     solutions = []
     for _ in range(num_candidates):
         solution = rollout(problem, policy, max_steps=max_steps)  # @inspect solution @stepover
-        solutions.append(solution)  # @inspect solutions
+        solutions.append(solution)
         num_explored += len(solution.steps)  # @inspect num_explored
 
-    # For debugging
-    final_steps = [solution.steps[-1] for solution in solutions]  # @inspect final_steps
+    # Show all the solutions (each with its cost)
+    graph(draw_rollouts(problem, solutions, solution_only=True))  # @stepover
 
     # Choose the best solution
     best_solution = min(solutions, key=lambda x: x.cost)  # @inspect best_solution @stepover
@@ -481,55 +627,144 @@ def best_of_n(problem: SearchProblem, policy, num_candidates: int, max_steps: in
 
 
 def introduce_beam_search():
-    text("Beam search:")
-    text("- Keep track of a set of `beam_width` partial solutions (from the starting state).")
-    text("- Consider all possible actions from each of the partial solutions.")
-    text('- Evaluate the cost so far of all extended partial solutions.')
-    text("- Keep only the `beam_width` best partial solutions.")
+    text("Recall the example:")
+    problem = TravelSearchProblem(num_locs=10)  # @stepover
+    graph(draw_travel_graph(problem))  # @stepover
 
+    text("Start with the empty candidate solution:")
+    candidates = [Solution([])]  # @stepover
+    graph(draw_rollouts(problem, candidates, solution_only=True))  # @stepover
+
+    text("Extend this candidate:")
+    candidates = extend_candidates(problem, candidates)
+    graph(draw_rollouts(problem, candidates, solution_only=True))  # @stepover
+
+    text("Extend the resulting candidates:")
+    candidates = extend_candidates(problem, candidates)  # @stepover
+    graph(draw_rollouts(problem, candidates, solution_only=True))  # @stepover
+
+    text("If we keep on doing this, we'll end up with exhaustive search")
+    text("...which is too expensive.")
+
+    text("Key idea of beam search: keep only the best $K$ candidates after each extension.")
     image("images/beam_car.jpeg", width=200)
     text("Beam: the set of partial solutions at each step.")
 
-    text("Let's consider the same example as before.")
-    problem = TravelSearchProblem(num_locs=10)  # @stepover
-    solution, num_explored = beam_search(problem, beam_width=2, max_steps=10)  # @inspect solution num_explored
+    text("Let's do the full beam search algorithm:")
+    solution = beam_search(problem, beam_width=2, max_steps=10)  # @inspect solution
+    graph(draw_rollouts(problem, [solution], solution_only=True))  # @stepover
 
-    text("Notes")
-    text("- If beam width is 1, then beam search is equivalent to greedy search.")
-    text("- As beam width goes to infinity, beam search becomes exhaustive search.")
-    text("- Beam search is deterministic (stochastic version: particle filtering).")
+    text("Notes:")
+    text("- The beam width $K$ trades off speed and accuracy")
+    text("- If $K = 1$, then beam search = greedy search")
+    text(r"- As $K \to \infty$, beam search becomes exhaustive search")
+    text("- Beam search is deterministic (stochastic version: particle filtering)")
     text("- Best-of-n incorporates a policy as a prior; beam search just uses the costs")
-    text("- best-of-n is simpler, more parallelizable than beam search")
+    text("- Best-of-n is simpler and more parallelizable than beam search")
 
 
-def beam_search(problem: SearchProblem, beam_width: int, max_steps: int) -> tuple[Solution | None, int]:
-    """Perform beam search on `problem` keeping `beam_width` candidates and `max_steps`."""
-    # Keep track of how many states we've explored
-    num_explored = 0
+def extend_candidates(problem: SearchProblem, candidates: list[Solution]) -> list[Solution]:
+    """Extend each of the `candidates` (partial solutions) by one step in all possible ways (keeping the ones that have reached the end)."""
+    new_candidates = []  # @inspect new_candidates
+    for candidate in candidates:
+        state = candidate.steps[-1].state if candidate.steps else problem.start_state()  # @inspect state @stepover
+        if problem.is_end(state):  # If we've already reached the end, just keep @stepover
+            new_candidates.append(candidate)  # @inspect new_candidates
+        else:
+            # Try all possible actions from `state`
+            for successor in problem.successors(state):  # @inspect successor @stepover
+                new_candidates.append(Solution(steps=candidate.steps + [successor]))  # @stepover
+    return new_candidates
 
+
+def beam_search(problem: SearchProblem, beam_width: int, max_steps: int) -> Solution | None:
+    """Perform beam search on `problem`, keeping `beam_width` candidates, for `max_steps` steps."""
     candidates = [Solution(steps=[])]  # @inspect candidates @stepover
 
     for step in range(max_steps):  # @inspect step
-        # Given the existing candidates, expand them by one step
-        new_candidates = []  # @inspect new_candidates
-        for candidate in candidates:
-            state = candidate.steps[-1].state if candidate.steps else problem.start_state()  # @inspect state @stepover
-            if problem.is_end(state):  # If we've already reached the end, just keep @stepover
-                new_candidates.append(candidate)  # @inspect new_candidates
-            else:
-                # Try all possible actions from `state`
-                for successor in problem.successors(state):  # @inspect successor @stepover
-                    new_candidates.append(Solution(steps=candidate.steps + [successor]))  # @inspect new_candidates @stepover
-                    num_explored += 1  # @inspect num_explored
+        # Candidates
+        graph(draw_rollouts(problem, candidates, solution_only=True))  # @stepover
 
-        # Take the `beam_width` best candidates (lowest cost)
-        new_candidates.sort(key=lambda x: x.cost)  # Sort @stepover @inspect new_candidates @clear successor state
-        candidates = new_candidates[:beam_width]  # Prune @inspect candidates @clear new_candidates
+        new_candidates = extend_candidates(problem, candidates)  # Extend each candidate @stepover
+        new_candidates.sort(key=lambda x: x.cost)                # Sort candidates by cost @stepover
+        graph(draw_rollouts(problem, new_candidates, solution_only=True))  # @stepover
+        candidates = new_candidates[:beam_width]                 # Prune to `beam_width` candidates @inspect beam_width
+        graph(draw_rollouts(problem, candidates, solution_only=True))  # @stepover
 
     # Keep only candidates that are done
-    candidates = [candidate for candidate in candidates if problem.is_end(candidate.steps[-1].state)]
+    candidates = [candidate for candidate in candidates if problem.is_end(candidate.steps[-1].state)]  # @stepover
+    graph(draw_rollouts(problem, candidates, solution_only=True))  # @stepover
 
-    return candidates[0], num_explored
+    return candidates[0]
+
+
+def example_game_of_24():
+    text("Example: **Game of 24**")
+    text("- Given a set of numbers, combine them with +, -, ×, ÷ to get 24.")
+    text("- State: the set of numbers we have left")
+    text("- Action: pick two numbers and an operation, and replace the two numbers with the result.")
+    text("- Cost: 1 per operation, except that ending with a number other than 24 has infinite cost")
+    text("- End state: one number is left")
+    problem = Game24SearchProblem(numbers=[5, 6, 6])  # @stepover
+    state = problem.start_state()  # @inspect state
+    successors = problem.successors(state)  # @inspect successors
+
+    text("Visualize the state graph:")
+    graph(draw_game24_graph(problem))  # @stepover
+
+
+def example_word_ladder():
+    text("Example: **word ladder**")
+    text("- Change one letter at a time to get from one word to another, going through real words (e.g., cold → cord → card → ward → warm).")
+    text("- State: the current word, and the number of steps taken so far.")
+    text("- Action: change one letter to get another word in the dictionary.")
+    text("- End: we reach the target word, or we've taken `max_steps` steps.")
+    text("- Cost: 1 per step, except that running out of steps has infinite cost.")
+    text("Note: words can be revisited (e.g., cold → cord → cold), so we track the number of steps to avoid cycles.")
+    problem = WordLadderSearchProblem(start="cold", target="warm", max_steps=6)  # @stepover
+    state = problem.start_state()  # @inspect state @stepover
+    successors = problem.successors(state)  # @inspect successors
+
+    text("Visualize the state graph:")
+    graph(draw_word_ladder_graph(problem))  # @stepover
+
+
+def test_time_compute_in_language_models():
+    text("Motivation: test-time compute for language models")
+
+    text("Given:")
+    text("- language model: prompt → distribution over next token")
+    text("- verifier: response → boolean (is the response correct?)")
+    text("Goal: produce a response that passes the verifier (and has high probability under the LM)")
+
+    text("Test-time compute: rather than sampling one answer, expend more compute to get a better answer")
+    text("Simple strategy: best-of-n sampling")
+    text("Large Language Monkeys "), link("https://arxiv.org/pdf/2407.21787")
+    image("images/llm-monkeys.png", width=600)
+
+    text("Cast this as a search problem:")
+    text("- State: prompt + prefix of the response (so far)")
+    text("- Action: next token")
+    text("- Cost: negative log probability of the next token (and -100 if verifier succeeds)")
+
+    problem = LanguageModelSearchProblem(prompt="Stanford is the")
+
+    # Starting state
+    state = problem.start_state()  # @inspect state
+    successors = problem.successors(state)  # @inspect successors
+
+    text("Let us define a policy that samples from the LM.")
+    step = lm_policy(problem, state)  # @inspect step
+
+    text("Now let us run best-of-n search.")  # @clear step
+    torch.manual_seed(1)
+    solution, num_explored = best_of_n(problem, lm_policy, num_candidates=10, max_steps=10)
+    graph(draw_rollouts(problem, [solution], solution_only=True))  # @stepover
+
+    text("Notes:")
+    text("- Language model + success criterion defines the search problem.")
+    text("- Language model defines a sampling policy (prior).")
+    text("- In practice, we would do many optimizations to speed up language model inference.")
 
 
 class LanguageModelSearchProblem(SearchProblem):
@@ -561,14 +796,14 @@ class LanguageModelSearchProblem(SearchProblem):
         for index, prob in zip(topk.indices, topk.values):  # @inspect prob
             action = index.item()  # @inspect action
 
-            # Maximize product of probabilities = minimize sum of log probabiltiies (costs)
+            # Maximize product of probabilities = minimize sum of negative log probabilities (costs)
             cost = -torch.log(prob).item()  # @inspect prob cost
 
             # Here's where we end up
             new_state = state + self.tokenizer.decode([action])  # @inspect new_state
 
-            # If the resulting state is the end and has a number, get a big reward (negative cost)
-            if is_complete_sentence(new_state) and contains_number(new_state):
+            # If the resulting state is a complete sentence (passes the verifier), get a big reward (negative cost)
+            if is_complete_sentence(new_state):
                 cost -= 100  # @inspect cost
 
             successors.append(Step(action=action, cost=cost, state=new_state))  # @inspect successors
@@ -576,70 +811,259 @@ class LanguageModelSearchProblem(SearchProblem):
         return successors
 
     def is_end(self, state: str) -> bool:
-        """We're done once we get well-formed JSON."""
+        """We're done once we get a complete sentence."""
         return is_complete_sentence(state)
 
 
 def is_complete_sentence(state: str) -> bool:
-    return state.endswith(")")
-
-def contains_number(state: str) -> bool:
-    try:
-        eval(state)  # Dangerous!!!
-        return True
-    except:
-        return False
+    return state.rstrip().endswith((".", "!", "?"))
 
 
 def lm_policy(problem: LanguageModelSearchProblem, state: str) -> Step:  # @inspect state
     """Sample the next token given the tokens so far (`state`)."""
     # Get the successors from the state
-    successors = problem.successors(state)  # @inspect successors
+    successors = problem.successors(state)  # @inspect successors @stepover
 
     # Get the costs for all the successors
-    costs = [successor.cost for successor in successors]  # @inspect costs
+    costs = [successor.cost for successor in successors]  # @inspect costs @stepover
 
     # Convert costs to probabilities
-    probs = torch.softmax(-torch.tensor(costs), dim=-1)  # @inspect probs
+    probs = torch.softmax(-torch.tensor(costs), dim=-1)  # @inspect probs @stepover
 
     # Sample an element from the `probs` distribution
-    index = torch.multinomial(probs, num_samples=1)[0]  # @inspect index
+    index = torch.multinomial(probs, num_samples=1)[0]  # @inspect index @stepover
 
     # Return the corresponding successor
     successor = successors[index]  # @inspect successor
     return successor
 
 
-def test_time_compute_in_language_models():
-    text("Motivation: test-time compute for language models")
+def draw_travel_graph(problem: TravelSearchProblem, solution: "Solution | None" = None, cache: "dict[Any, Solution] | None" = None,
+                      highlight_best_actions: bool = True, state_costs: dict[Any, float] | None = None) -> dict:
+    """Return the graph of the travel problem: locations in a line, with trams arcing below (more for longer trips)."""
+    return draw_search_graph(problem, position=lambda loc: (80 * loc, 0), solution=solution, cache=cache,
+                             highlight_best_actions=highlight_best_actions, state_costs=state_costs,
+                             curve=lambda state, step: 20 + 15 * (step.state - state) if step.action == "tram" else None,
+                             width=min(760, 80 * problem.num_locs + 80), height=150)
 
-    text("Given:")
-    text("- language model: prompt → distribution over next token")
-    text("- verifier: response → boolean (is the response correct?)")
-    text("Goal: produce a response that passes the verifier (and has high probability under LM)")
 
-    text("Test-time compute: rather than sampling one answer, expend more compute to get a better answer")
-    text("Simple strategy: best-of-n sampling")
-    text("Large Language Monkeys "), link("https://arxiv.org/pdf/2407.21787")
-    image("images/llm-monkeys.png", width=600)
+def draw_search_graph(problem: "SearchProblem", position: Callable[[Any], tuple[float, float]], label: Callable[[Any], str] = str,
+                      solution: "Solution | None" = None, curve: Callable[[Any, "Step"], float | None] | None = None,
+                      width: int = 760, height: int = 150, extra_stylesheet: list[dict] | None = None,
+                      show_end_successors: bool = False, cache: "dict[Any, Solution] | None" = None,
+                      highlight_best_actions: bool = True, state_costs: dict[Any, float] | None = None) -> dict:
+    """
+    Return the graph of states reachable from the start state of `problem` (to show with `graph`).
+    - `position(state)`: where to draw `state`; `label(state)`: how to label it
+    - `solution`: if given, highlight its path (in orange)
+    - `cache`: if given (state -> best solution from that state, from dynamic programming), label each state with its
+      future cost (in orange) and (if `highlight_best_actions`) highlight the best action(s) from every state
+    - `state_costs`: if given (state -> number), label those states with those numbers (in orange)
+    - `curve(state, step)`: if given, how far to bend the edge for taking `step` from `state` (None for straight)
+    Walk edges are teal, tram edges purple, and end states are double circles (with no edges out, since search stops there).
+    """
+    # Edges (source, target, action) along the solution's path
+    path = set()
+    if solution is not None:
+        state = problem.start_state()
+        for step in solution.steps:
+            path.add((state, step.state, step.action))
+            state = step.state
 
-    text("Cast this as a search problem:")
-    text("- State: prompt + prefix of the response (so far)")
-    text("- Action: next token")
-    text("- Cost: negative log probability of the next token (and -100 if verifier succeeds)")
+    def is_best_action(state: Any, step: "Step") -> bool:
+        """Whether `step` is a best action from `state` (cost + future cost of where we end up = future cost of `state`)."""
+        return cache is not None and highlight_best_actions and step.cost + cache[step.state].cost == cache[state].cost
 
-    problem = LanguageModelSearchProblem(prompt="(3 + 7 *")
+    # Numbers to label states with: given, or the future costs from the cache
+    costs = state_costs if state_costs is not None else {state: solution.cost for state, solution in (cache or {}).items()}
 
-    text("Let us define a policy that samples from the LM.")
-    step = lm_policy(problem, problem.start_state())  # @inspect step
+    # Find all the reachable states and the edges between them
+    nodes, edges = [], []
+    edge_keys = {}  # (source, target[, action]) -> edge, to avoid duplicates
+    visited = {problem.start_state()}
+    queue = [problem.start_state()]
+    while queue:
+        state = queue.pop(0)
+        x, y = position(state)
+        nodes.append({"id": str(state), "label": label(state), "x": x, "y": y, "classes": "end" if problem.is_end(state) else ""})
+        if state in costs:  # Cost label, as a separate (unclickable) label node to the upper right
+            nodes.append({"id": f"{state}-cost", "label": str(costs[state]), "x": x + 20, "y": y - 24, "classes": "annotation"})
+        if problem.is_end(state) and not show_end_successors:  # Search stops at end states, so by default don't show where we could go from them
+            continue
+        for step in problem.successors(state):
+            on_path = (state, step.state, step.action) in path or is_best_action(state, step)
+            # Skip duplicate edges (e.g., the same action generated twice), merging their highlighting
+            key = (state, step.state, step.action)
+            if key in edge_keys:
+                if on_path and "path" not in edge_keys[key]["classes"]:
+                    edge_keys[key]["classes"] += " path"
+                continue
+            edge = {"source": str(state), "target": str(step.state), "label": f"{step.action[0].upper()}:{step.cost}",
+                    "classes": step.action + (" path" if on_path else "")}
+            if curve is not None and curve(state, step) is not None:
+                edge["curve"] = curve(state, step)
+            edge_keys[key] = edge
+            edges.append(edge)
+            if step.state not in visited:
+                visited.add(step.state)
+                queue.append(step.state)
 
-    text("Now let us run best-of-n search.")  # @clear step
-    torch.manual_seed(1)
-    solution, num_explored = best_of_n(problem, lm_policy, num_candidates=5, max_steps=10)  # @inspect solution num_explored
+    stylesheet = search_graph_stylesheet() + (extra_stylesheet or [])
+    if any(len(node["label"]) > 2 for node in nodes):  # Make room for longer labels
+        stylesheet.append({"selector": "node", "style": {"width": 44}})
+    return make_graph(nodes, edges, stylesheet=stylesheet, width=width, height=height)
 
-    text("Notes")
-    text("- In practice, we would do many optimizations to speed up language model inference.")
-    text("- ")
+
+def draw_limited_travel_graph(problem: "LimitedTravelSearchProblem") -> dict:
+    """Return the graph of the limited travel problem: one row per number of tickets left, states labeled [loc],[tickets]t."""
+    return draw_search_graph(problem, position=lambda state: (100 * state.loc, 90 * (problem.starting_tickets - state.tickets)),
+                             label=lambda state: f"{state.loc},{state.tickets}t", height=200)
+
+
+def draw_search_tree(problem: "SearchProblem") -> dict:
+    """
+    Return the search tree that exhaustive search explores (to show with `graph`):
+    one node per call to `future_solution(state)`, labeled with the state, and with its future cost in orange (to its right).
+    """
+    nodes, edges = [], []
+    num_leaves = 0  # Leaves are spaced evenly; each parent is centered over its children
+
+    def build(state: Any, depth: int) -> tuple[str, float, float]:
+        """Add the tree rooted at `state`; return its node id, x position, and future cost."""
+        nonlocal num_leaves
+        node_id = f"n{len(nodes)}"
+        node = {"id": node_id, "label": str(state), "classes": "end" if problem.is_end(state) else ""}
+        nodes.append(node)
+        if problem.is_end(state):
+            x, future_cost = 70 * num_leaves, 0
+            num_leaves += 1
+        else:
+            children = []
+            for step in problem.successors(state):
+                child_id, child_x, child_future_cost = build(step.state, depth + 1)
+                edges.append({"source": node_id, "target": child_id, "label": f"{step.action[0].upper()}:{step.cost}", "classes": step.action})
+                children.append((child_x, step.cost + child_future_cost))
+            x = sum(child_x for child_x, _ in children) / len(children)
+            future_cost = min(cost for _, cost in children)
+        node["x"], node["y"] = x, 80 * depth
+        # The future cost, as a separate (unclickable) label node to the right (edges come in from above and leave below)
+        nodes.append({"id": f"{node_id}-cost", "label": str(future_cost), "x": x + 28, "y": 80 * depth, "classes": "annotation"})
+        return node_id, x, future_cost
+
+    build(problem.start_state(), depth=0)
+    stylesheet = [
+        {"selector": "node.end", "style": {"border-style": "double", "border-width": 6}},  # End states: double circle
+        {"selector": "node.annotation", "style": {"width": 1, "height": 1, "background-opacity": 0, "border-width": 0,
+                                                  "color": "#f77f00", "font-weight": "bold", "events": "no"}},
+        {"selector": "edge.walk", "style": {"line-color": "#2a9d8f", "target-arrow-color": "#2a9d8f", "color": "#2a9d8f"}},
+        {"selector": "edge.tram", "style": {"line-color": "#9b72cf", "target-arrow-color": "#9b72cf", "color": "#9b72cf"}},
+    ]
+    # Size the graph to fit the tree, shrinking big trees to at most 760 pixels wide (zoom in to see details)
+    width = 70 * num_leaves + 140
+    height = max(node["y"] for node in nodes) + 140
+    scale = min(1, 760 / width)
+    return make_graph(nodes, edges, stylesheet=stylesheet, width=round(width * scale), height=round(height * scale))
+
+
+class CyclicSearchProblem(SearchProblem):
+    """Locations {A, B, C}, with self loops; start at A and end at C (all costs are 1)."""
+    # Where we can go from each location
+    neighbors = {"A": ["A", "B", "C"], "B": ["A", "B", "C"], "C": ["B", "C"]}
+
+    def start_state(self) -> str:
+        return "A"
+
+    def successors(self, state: str) -> list[Step]:
+        # The action is the location we go to
+        return [Step(action=loc, cost=1, state=loc) for loc in self.neighbors[state]]
+
+    def is_end(self, state: str) -> bool:
+        return state == "C"
+
+
+def draw_cyclic_graph(problem: CyclicSearchProblem) -> dict:
+    """Return the graph of the cyclic problem: A, B, C in a triangle."""
+    positions = {"A": (0, 100), "B": (100, 0), "C": (200, 100)}
+    # Point each self loop away from the triangle (0deg is up)
+    loop_directions = {"A": "-100deg", "B": "0deg", "C": "100deg"}
+    loops = [{"selector": f'edge[source = "{loc}"][target = "{loc}"]', "style": {"loop-direction": direction}}
+             for loc, direction in loop_directions.items()]
+    return draw_search_graph(problem, position=lambda state: positions[state], width=340, height=220,
+                             extra_stylesheet=loops, show_end_successors=True)
+
+
+class StepCountSearchProblem(SearchProblem):
+    """Augments `problem` so that the state also tracks the number of steps taken (at most `max_steps`), which removes cycles."""
+    def __init__(self, problem: SearchProblem, max_steps: int):
+        self.problem = problem
+        self.max_steps = max_steps
+
+    def start_state(self) -> StepCountState:
+        return StepCountState(loc=self.problem.start_state(), num_steps=0)
+
+    def successors(self, state: StepCountState) -> list[Step]:
+        if state.num_steps >= self.max_steps:  # Prune (as if entering further states had infinite cost)
+            return []
+        return [Step(action=step.action, cost=step.cost, state=StepCountState(loc=step.state, num_steps=state.num_steps + 1))
+                for step in self.problem.successors(state.loc)]
+
+    def is_end(self, state: StepCountState) -> bool:
+        return self.problem.is_end(state.loc)
+
+
+@dataclass(frozen=True)
+class StepCountState:
+    """Represents the state of a `StepCountSearchProblem`: at `loc` (a state of the original problem) after `num_steps` steps."""
+    loc: Any
+    num_steps: int
+
+
+def draw_step_count_graph(problem: StepCountSearchProblem) -> dict:
+    """Return the graph of the step-count problem: one column per number of steps, one row per location."""
+    rows = {"A": 0, "B": 1, "C": 2}
+    return draw_search_graph(problem, position=lambda state: (110 * state.num_steps, 70 * rows[state.loc]),
+                             label=lambda state: f"{state.loc},{state.num_steps}", width=520, height=240,
+                             extra_stylesheet=[{"selector": "edge", "style": {"label": ""}}],  # All costs are 1 (and the action is the next location)
+                             show_end_successors=True)
+
+
+def draw_game24_graph(problem: "Game24SearchProblem") -> dict:
+    """
+    Return the state graph of the Game of 24 (to show with `graph`): one column per number of operations done,
+    states labeled with their numbers, and a solution (from dynamic programming) highlighted.
+    """
+    # Group the states by how many operations have been done (= how many numbers are gone)
+    columns: list[list] = [[problem.start_state()]]
+    while not problem.is_end(columns[-1][0]):
+        next_states = {step.state for state in columns[-1] for step in problem.successors(state)}
+        columns.append(sorted(next_states))
+    # Spread each column vertically (centered), with more room in less crowded columns
+    positions = {}
+    for depth, states in enumerate(columns):
+        spacing = 50 if len(states) <= 12 else 24
+        for i, state in enumerate(states):
+            positions[state] = (180 * depth, spacing * (i - (len(states) - 1) / 2))
+    solution, _, _ = dynamic_programming(problem)
+    height = round(max(abs(y) for _, y in positions.values()) * 2 + 80)
+    return draw_search_graph(problem, position=lambda state: positions[state], label=lambda state: ", ".join(str(number) for number in state),
+                             solution=solution, width=560, height=height,
+                             extra_stylesheet=[{"selector": "edge", "style": {"label": "", "width": 1}},  # Too many edges to label
+                                               {"selector": "edge.path", "style": {"width": 3}},
+                                               {"selector": "node", "style": {"height": 22, "font-size": 11}}])
+
+
+def draw_word_ladder_graph(problem: "WordLadderSearchProblem") -> dict:
+    """
+    Return the state graph of the word ladder (to show with `graph`): one column per number of steps, one row per word,
+    states labeled with their words, and a solution (from dynamic programming) highlighted.
+    """
+    rows = {word: i for i, word in enumerate(sorted(problem.dictionary))}
+    solution, _, _ = dynamic_programming(problem)
+    return draw_search_graph(problem, position=lambda state: (95 * state.num_steps, 30 * rows[state.word]), label=lambda state: state.word,
+                             solution=solution, width=680, height=30 * len(rows) + 60,
+                             extra_stylesheet=[{"selector": "edge", "style": {"label": "", "width": 1}},  # All costs are 1 (the action is the next word)
+                                               {"selector": "edge.path", "style": {"width": 3}},
+                                               {"selector": "node", "style": {"height": 22, "font-size": 11}}])
 
 
 if __name__ == "__main__":

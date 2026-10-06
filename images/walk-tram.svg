@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 170" width="560" height="170" font-family="Helvetica, Arial, sans-serif" font-size="14">
+<rect width="560" height="170" fill="white"/>
+<line x1="50" y1="75" x2="510" y2="75" stroke="#bbb" stroke-width="3"/>
+<circle cx="50" cy="75" r="15" fill="white" stroke="#555" stroke-width="2"/>
+<text x="50" y="80" text-anchor="middle" fill="#333" font-size="15">1</text>
+<circle cx="142" cy="75" r="15" fill="white" stroke="#555" stroke-width="2"/>
+<text x="142" y="80" text-anchor="middle" fill="#333" font-size="15">2</text>
+<circle cx="234" cy="75" r="15" fill="white" stroke="#555" stroke-width="2"/>
+<text x="234" y="80" text-anchor="middle" fill="#333" font-size="15">3</text>
+<circle cx="326" cy="75" r="15" fill="white" stroke="#555" stroke-width="2"/>
+<text x="326" y="80" text-anchor="middle" fill="#333" font-size="15">4</text>
+<circle cx="418" cy="75" r="15" fill="white" stroke="#555" stroke-width="2"/>
+<text x="418" y="80" text-anchor="middle" fill="#333" font-size="15">5</text>
+<circle cx="510" cy="75" r="15" fill="white" stroke="#555" stroke-width="2"/>
+<text x="510" y="80" text-anchor="middle" fill="#333" font-size="15">6</text>
+<path d="M234,56 Q280.0,20 317.3,49.2" fill="none" stroke="#2a9d8f" stroke-width="2.5"/>
+<path d="M326,56 L320.7,44.9 L313.9,53.6 Z" fill="#2a9d8f"/>
+<text x="280.0" y="24" text-anchor="middle" fill="#2a9d8f" font-size="14">walk (1 min)</text>
+<path d="M234,94 Q372.0,184 500.8,100.0" fill="none" stroke="#9b72cf" stroke-width="2.5"/>
+<path d="M510,94 L497.8,95.4 L503.8,104.6 Z" fill="#9b72cf"/>
+<text x="372.0" y="158" text-anchor="middle" fill="#9b72cf" font-size="14">tram (2 min)</text>
+</svg>
