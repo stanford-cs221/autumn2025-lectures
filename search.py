@@ -62,8 +62,8 @@ def main():
     introduce_dynamic_programming()
 
     text("So far: compute the minimum cost solution.")
-    text("Time complexity: at least O(number of states).")
-    text("But what if state is:")
+    text(r"Time complexity: at least $O(|\text{States}|)$.")
+    text("But what if the state is:")
     text("- A set of locations?")
     text("- A sequence of words generated so far?")
     text("Exact search will be intractable.")
@@ -77,6 +77,7 @@ def main():
     introduce_beam_search()
 
     # More examples
+    cycles()
     example_game_of_24()
     example_word_ladder()
     test_time_compute_in_language_models()
@@ -93,7 +94,7 @@ def main():
     text("- Costs are learned from data")
     text("- Search: find the best solution given those costs")
 
-    text("Next time: what if there are cycles (A → B → C → A)?")
+    text("Next time: exact algorithms that allow for cycles (uniform cost search and A*)")
 
 
 def search_problem():
@@ -331,8 +332,6 @@ def introduce_exhaustive_search():
     text("What about the **memory complexity**?")
     text("Good news: it is linear in the length of a solution (the stack in the recurrence).")
 
-    cycles()
-
     text("Can we improve on the efficiency of exhaustive search?")
 
 
@@ -369,25 +368,6 @@ def exhaustive_search(problem: SearchProblem) -> tuple[Solution | None, int]:
     return solution, num_explored
 
 
-def cycles():
-    text("### Cycles")
-    text("Assumption: there cannot be cycles (e.g., A → B → C → A).")
-    text("...or else the recurrence is not well-defined (infinite loop).")
-    text("Here's a simple search problem with cycles (start at A, end at C; edges labeled [action]:[cost], where the action is where we go; all costs are 1):")
-    problem = CyclicSearchProblem()  # @stepover
-    graph(draw_cyclic_graph(problem))  # @stepover
-    text("Next week, we'll see how value iteration for MDPs gets around this.")
-
-    text("In the meantime:")
-    text("- Add number of steps into the state (no cycles since always increment by 1).")
-    text("- Define `is_end(state)` to be true when `state.num_steps` reaches the threshold.")
-    text("- Define an infinite cost to reach the threshold without reaching the goal (to prune).")
-    text("Augmenting the problem above: the state is now [location],[number of steps taken], with at most 3 steps (all costs are still 1):")
-    problem = StepCountSearchProblem(CyclicSearchProblem(), max_steps=3)  # @stepover
-    graph(draw_step_count_graph(problem))  # @stepover
-    text("No more cycles (and no cycles possible), at the cost of more states.")
-
-
 def introduce_dynamic_programming():
     text("Originates from Richard Bellman (1950s):")
     text("- *dynamic* means multiple actions over time")
@@ -422,15 +402,6 @@ def introduce_dynamic_programming():
     text("When does dynamic programming provide speedup over exhaustive search?")
     text("- Intuition: DP is useful when there are a lot of ways to reach a state.")
     text("- If every action takes you to a new state, might as well do exhaustive search (no cache).")
-
-    text("Let's solve our other examples with dynamic programming.")
-    problem = Game24SearchProblem(numbers=[4, 7, 8, 8])  # @stepover
-    solution, num_explored, _ = dynamic_programming(problem)  # @inspect solution num_explored @stepover
-    text("The actions of the solution (cost 3 = three operations) give an expression for 24.")
-
-    problem = WordLadderSearchProblem(start="cold", target="warm", max_steps=6)  # @stepover
-    solution, num_explored, _ = dynamic_programming(problem)  # @inspect solution num_explored @stepover
-    text("The minimum number of single-letter changes from cold to warm is 4.")
 
     text("Summary:")
     text("- Dynamic programming = exhaustive search + caching")
@@ -552,7 +523,7 @@ class WordLadderState:
 
 def introduce_best_of_n():
     text("The simplest idea is to randomly choose actions until we reach the end state.")
-    text("Do this `n` times and take the best solution.")
+    text("Do this $n$ times and take the best solution.")
 
     text("Let's take the example:")
     problem = TravelSearchProblem(num_locs=10)  # @stepover
@@ -698,6 +669,24 @@ def beam_search(problem: SearchProblem, beam_width: int, max_steps: int) -> Solu
     return candidates[0]
 
 
+def cycles():
+    text("So far, we've assumed that there are no cycles (e.g., A → B → C → A)...")
+    text("...or else the future cost recurrence is not well-defined (infinite loop).")
+    text("Here's a simple search problem with cycles (start at A, end at C; edges labeled [action]:[cost], where the action is where we go; all costs are 1):")
+    problem = CyclicSearchProblem()  # @stepover
+    graph(draw_cyclic_graph(problem))  # @stepover
+    text("Next time, we'll see exact algorithms that allow for cycles (uniform cost search and A*).")
+
+    text("In the meantime:")
+    text("- Add number of steps into the state (no cycles since always increment by 1).")
+    text("- Define `is_end(state)` to be true when `state.num_steps` reaches the threshold.")
+    text("- Define an infinite cost to reach the threshold without reaching the goal (to prune).")
+    text("Augmenting the problem above: the state is now [location],[number of steps taken], with at most 3 steps (all costs are still 1):")
+    problem = StepCountSearchProblem(CyclicSearchProblem(), max_steps=3)  # @stepover
+    graph(draw_step_count_graph(problem))  # @stepover
+    text("No more cycles (and no cycles possible), at the cost of more states.")
+
+
 def example_game_of_24():
     text("Example: **Game of 24**")
     text("- Given a set of numbers, combine them with +, -, ×, ÷ to get 24.")
@@ -711,6 +700,11 @@ def example_game_of_24():
 
     text("Visualize the state graph:")
     graph(draw_game24_graph(problem))  # @stepover
+
+    text("Let's solve a harder instance (4, 7, 8, 8) with dynamic programming:")
+    problem = Game24SearchProblem(numbers=[4, 7, 8, 8])  # @stepover
+    solution, num_explored, _ = dynamic_programming(problem)  # @inspect solution num_explored @stepover
+    text("The actions of the solution give (4 + 7 - 8) × 8 = 24.")
 
 
 def example_word_ladder():
@@ -727,6 +721,11 @@ def example_word_ladder():
 
     text("Visualize the state graph:")
     graph(draw_word_ladder_graph(problem))  # @stepover
+
+    text("Let's solve it with dynamic programming:")
+    problem = WordLadderSearchProblem(start="cold", target="warm", max_steps=6)  # @stepover
+    solution, num_explored, _ = dynamic_programming(problem)  # @inspect solution num_explored @stepover
+    text("The solution takes 4 steps: cold → cord → card → ward → warm.")
 
 
 def test_time_compute_in_language_models():
