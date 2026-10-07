@@ -528,7 +528,7 @@ def introduce_best_of_n():
     text("Let's take the example:")
     problem = TravelSearchProblem(num_locs=10)  # @stepover
 
-    text(r"How we choose actions is determined by a **policy** $\pi : \text{States} \to \text{Actions}$.")
+    text(r"How we choose actions is determined by a **policy** $\pi$ maps a state $s$ to a distribution over actions $\pi(a \mid s)$.")
     text("A policy can be non-deterministic (randomly choose an action).")
     random.seed(1)
     state = problem.start_state()  # @inspect state @stepover
@@ -672,19 +672,19 @@ def beam_search(problem: SearchProblem, beam_width: int, max_steps: int) -> Solu
 def cycles():
     text("So far, we've assumed that there are no cycles (e.g., A → B → C → A)...")
     text("...or else the future cost recurrence is not well-defined (infinite loop).")
-    text("Here's a simple search problem with cycles (start at A, end at C; edges labeled [action]:[cost], where the action is where we go; all costs are 1):")
+    text("Here's a simple search problem with cycles:")
     problem = CyclicSearchProblem()  # @stepover
     graph(draw_cyclic_graph(problem))  # @stepover
     text("Next time, we'll see exact algorithms that allow for cycles (uniform cost search and A*).")
 
     text("In the meantime:")
     text("- Add number of steps into the state (no cycles since always increment by 1).")
-    text("- Define `is_end(state)` to be true when `state.num_steps` reaches the threshold.")
+    text("- This introduces a time dimension that we always move forward along (can't time travel).")
     text("- Define an infinite cost to reach the threshold without reaching the goal (to prune).")
-    text("Augmenting the problem above: the state is now [location],[number of steps taken], with at most 3 steps (all costs are still 1):")
+    text("Augmenting the problem above: the state is now [location],[number of steps taken]:")
     problem = StepCountSearchProblem(CyclicSearchProblem(), max_steps=3)  # @stepover
     graph(draw_step_count_graph(problem))  # @stepover
-    text("No more cycles (and no cycles possible), at the cost of more states.")
+    text("No more cycles, at the cost of more states.")
 
 
 def example_game_of_24():
@@ -712,9 +712,8 @@ def example_word_ladder():
     text("- Change one letter at a time to get from one word to another, going through real words (e.g., cold → cord → card → ward → warm).")
     text("- State: the current word, and the number of steps taken so far.")
     text("- Action: change one letter to get another word in the dictionary.")
-    text("- End: we reach the target word, or we've taken `max_steps` steps.")
     text("- Cost: 1 per step, except that running out of steps has infinite cost.")
-    text("Note: words can be revisited (e.g., cold → cord → cold), so we track the number of steps to avoid cycles.")
+    text("- End state: we reach the target word, or we've taken `max_steps` steps.")
     problem = WordLadderSearchProblem(start="cold", target="warm", max_steps=6)  # @stepover
     state = problem.start_state()  # @inspect state @stepover
     successors = problem.successors(state)  # @inspect successors

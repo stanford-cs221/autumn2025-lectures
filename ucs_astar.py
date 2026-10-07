@@ -8,6 +8,7 @@ import heapq
 Heuristic = Callable[[Any], float]
 
 def main():
+    text("# Search II: UCS and A*")
     text("Last time: we need search to solve complex problems (thinking, reasoning)")
     image("images/walk-tram.png", width=400)
     text("- Search problem: formal definition")
