@@ -228,7 +228,7 @@ wheels = [
 
 [[package]]
 name = "edtrace"
-version = "0.1.19"
+version = "0.1.20"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "beautifulsoup4" },
@@ -237,9 +237,9 @@ dependencies = [
     { name = "sympy" },
     { name = "torch" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/9c/71/a8dd1a6eb8f47b719a1270ed139cc8219f7fe07e61434a95d309981fb588/edtrace-0.1.19.tar.gz", hash = "sha256:3fa8a03981528658b8832f9ae5be6ed3ce4ee318ee0fcd5a34e331965cc4b499", size = 11116, upload-time = "2026-10-08T06:16:08.007Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/dd/0f/04a08b1ddcdc4844339769090b541a6d1ed4c40ef36ffc0b3c2f530f5035/edtrace-0.1.20.tar.gz", hash = "sha256:f94a82e8a1a4992c6373154d5eb3d862c45014d9862b076b6492d2cb0ca482fb", size = 11113, upload-time = "2026-10-08T07:59:32.278Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/fb/99/d6db24141fa19bb5a60b3eabc0599cc0dcce162cab9820a49ace625d5dc3/edtrace-0.1.19-py3-none-any.whl", hash = "sha256:e1c0119fc24bc201ba9730223584a9548665a5e5a1d6ca63a7c70950efd59618", size = 12422, upload-time = "2026-10-08T06:16:06.869Z" },
+    { url = "https://files.pythonhosted.org/packages/6c/85/fad0ac12d07f6b5f79acd236379b7cdeba75cf13ddf09cec2c3cd237a2fa/edtrace-0.1.20-py3-none-any.whl", hash = "sha256:e9e7ff6b25c010fcc74634a0fdf4ec151d487cb8f22b28659dd4366c3e29748b", size = 12419, upload-time = "2026-10-08T07:59:33.051Z" },
 ]
 
 [[package]]
@@ -545,7 +545,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "altair", specifier = ">=5.5.0" },
-    { name = "edtrace", specifier = ">=0.1.19" },
+    { name = "edtrace", specifier = ">=0.1.20" },
     { name = "einops", specifier = ">=0.8.1" },
     { name = "graphviz", specifier = ">=0.21" },
     { name = "jaxtyping", specifier = ">=0.3.2" },

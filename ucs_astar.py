@@ -9,27 +9,19 @@ Heuristic = Callable[[Any], float]
 
 def main():
     text("# Search II: UCS and A*")
-    text("Last unit: we need search to solve complex problems (thinking, reasoning)")
-    image("images/walk-tram.svg", width=560)
-    text("- Search problem: formal definition")
-    text(r"  * $s_\text{start} \in \text{States}$: where we start")
-    text(r"  * $\text{Actions}(s)$: the actions we can take in state $s$")
-    text(r"  * $\text{Succ}(s, a)$: the state we end up in if we take action $a$ in state $s$")
-    text(r"  * $\text{Cost}(s, a)$: the cost of taking action $a$ in state $s$")
-    text(r"  * $\text{IsEnd}(s)$: whether $s$ is an end state")
-    problem = TravelSearchProblem(num_locs=10)
-    state = problem.start_state()  # @inspect state
-    successors = problem.successors(state)  # @inspect successors
-    is_end = problem.is_end(state)  # @inspect is_end
-    text("- Objective: find a solution (sequence of actions) that minimizes the total cost.")  # @clear state successors is_end
-    text("- Exact algorithms: exhaustive search, dynamic programming (caching)")
+    text("Last unit:")
+    text("- Introduced **search problems** for reasoning")
+    text("- Exact algorithms: exhaustive search, dynamic programming")
     text("- Approximate algorithms: best-of-n, beam search")
+    text("- Assumption: graph has no cycles")
+    graph(draw_travel_graph(TravelSearchProblem(num_locs=10)))
 
     text("This unit: exact algorithms that allow for cycles")
-    problem = CyclicSearchProblem()  # @stepover
-    graph(draw_cyclic_graph(problem))  # @stepover
+    graph(draw_cyclic_graph(CyclicSearchProblem()))  # @stepover
     text("- Uniform cost search (UCS)")
-    text("- A* search: UCS with a heuristic function")
+    text("- A* search: equivalent to UCS with a heuristic function")
+
+    review_search_problem()
 
     ucs()
     astar()
@@ -43,6 +35,27 @@ def main():
     text("- Heuristics: future cost of some relaxed problem (lowering costs in a structured way)")
 
     text("Next time: what happens when actions have non-deterministic outcomes (e.g., rolling dice)?")
+
+
+def review_search_problem():
+    text("Formal definition of a **search problem**:")
+    text(r"- $s_\text{start} \in \text{States}$: where we start")
+    text(r"- $\text{Actions}(s)$: the actions we can take in state $s$")
+    text(r"- $\text{Succ}(s, a)$: the state we end up in if we take action $a$ in state $s$")
+    text(r"- $\text{Cost}(s, a)$: the cost of taking action $a$ in state $s$")
+    text(r"- $\text{IsEnd}(s)$: whether $s$ is an end state")
+    text("Objective: find a solution (sequence of actions) that minimizes the total cost.")
+
+    text("Example:")
+    problem = TravelSearchProblem(num_locs=10)
+    graph(draw_travel_graph(problem))
+    state = problem.start_state()  # @inspect state
+    successors = problem.successors(state)  # @inspect successors
+    is_end = problem.is_end(state)  # @inspect is_end
+
+    # Solve the search problem
+    solution, num_explored, cache = dynamic_programming(problem)
+    graph(draw_travel_graph(problem, solution))
 
 
 class DiamondSearchProblem(SearchProblem):
@@ -128,9 +141,10 @@ def ucs():
 
 
 def ucs_motivation():
-    text("Two key concepts in search:")
-    text(r"- **Future cost** $\text{FutureCost}(s)$: cost of the minimum cost solution from state $s$ to an end state.")
-    text(r"- **Past cost** $\text{PastCost}(s)$: cost of the minimum cost solution from the start state to state $s$.")
+    text("First, define two key concepts in search:")
+    text(r"- $\text{FutureCost}(s)$: cost of the minimum cost solution from state $s$ to an end state.")
+    text(r"- $\text{PastCost}(s)$: cost of the minimum cost solution from the start state to state $s$.")
+    text("Both are costs of partial solutions: from the start state, or to an end state.")
     image("images/past-future.svg", width=640)
 
     text("In dynamic programming, we compute the future cost for each state.")
@@ -253,7 +267,7 @@ def ucs_examples():
     problem = DiamondSearchProblem()  # @stepover
     graph(draw_diamond_graph(problem))  # @stepover
 
-    successors = problem.successors("A")  # @inspect successors
+    successors = problem.successors("A")  # @inspect successors @stepover
 
     text("Let's run UCS on this example.")  # @clear successors
     solution, num_explored = uniform_cost_search(problem)  # @inspect solution num_explored
@@ -287,43 +301,51 @@ def ucs_examples():
 
 def ucs_correctness():
     text("We now prove that UCS is guaranteed to compute the minimum cost solution.")
-    text("Assumption: all costs are non-negative.")
+    text("Recall that UCS updates priorities for each state.")
+    text("What do these have to do with past cost?")
 
     image("images/ucs-strategy.svg", width=420)
     text("**Theorem:**")
+    text("- Assume all costs are non-negative.")
     text(r"- Suppose UCS moves a state $s$ from the frontier to the explored set.")
     text(r"- Then $\text{priority}(s) = \text{PastCost}(s)$.")
 
+    text("**Proof:**")
     text("Let's prove by induction.")
     text(r"Base case: $\text{priority}(s_\text{start}) = \text{PastCost}(s_\text{start}) = 0$.")
 
     image("images/ucs-proof.svg", width=420)
     text(r"Inductive case: assume $\text{priority}(s') = \text{PastCost}(s')$ for all states $s'$ in the explored set.")
-    text(r"- Suppose we remove $s$ from the frontier, corresponding to the blue path.")
-    text(r"- Consider any alternative red path to $s$ that goes through $t$ (explored) and $u$ (frontier).")
-    text(r"- Want to show $\text{cost}(\text{red}) \ge \text{cost}(\text{blue})$.")
-    text(r"$\text{cost}(\text{red})$")
-    text(r"$\rlap{\ge \text{PastCost}(t) + \text{Cost}(t, u)}\hspace{14em}$($\text{PastCost}(t)$ is the minimum cost to $t$; the cost from $u$ to $s$ is non-negative)")
-    text(r"$\rlap{= \text{priority}(t) + \text{Cost}(t, u)}\hspace{14em}$(inductive hypothesis)")
-    text(r"$\rlap{\ge \text{priority}(u)}\hspace{14em}$($t$ is explored, and was used to update $\text{priority}(u)$)")
-    text(r"$\rlap{\ge \text{priority}(s)}\hspace{14em}$($s$ has the minimum priority in the frontier)")
-    text(r"$\rlap{= \text{cost}(\text{blue})}\hspace{14em}$(by definition)")
+    text(r"  * Suppose we remove $s$ from the frontier, corresponding to the blue path.")
+    text(r"  * Consider any alternative red path to $s$ that goes through $t$ (explored) and $u$ (frontier).")
+    text(r"  * Want to show $\text{cost}(\text{red}) \ge \text{cost}(\text{blue})$.")
+    text(r"$\qquad \text{cost}(\text{red})$")
+    text(r"$\qquad \rlap{\ge \text{PastCost}(t) + \text{Cost}(t, u)}\hspace{14em}$($\text{PastCost}(t)$ is the minimum cost to $t$; the cost from $u$ to $s$ is non-negative)")
+    text(r"$\qquad \rlap{= \text{priority}(t) + \text{Cost}(t, u)}\hspace{14em}$(inductive hypothesis)")
+    text(r"$\qquad \rlap{\ge \text{priority}(u)}\hspace{14em}$($t$ is explored, and was used to update $\text{priority}(u)$)")
+    text(r"$\qquad \rlap{\ge \text{priority}(s)}\hspace{14em}$($s$ has the minimum priority in the frontier)")
+    text(r"$\qquad \rlap{= \text{cost}(\text{blue})}\hspace{14em}$(by definition)")
 
 
 def astar():
-    text("UCS in action:")
-    video("images/ucs-pathfinding.mp4", width=640)  # Video by TheSuboptimalGuy (used with permission)
-    text("A* in action:")
-    video("images/astar-pathfinding.mp4", width=640)  # Video by TheSuboptimalGuy (used with permission)
+    text("Let us define A*, which is an exact search algorithm that uses prior knowledge in the form of a heuristic.")
 
-    text("UCS orders states by increasing past cost (which has no knowledge of the end state).")
+    text("To get intuition, watch the two videos in parallel:")
+    # UCS
+    video("images/ucs-pathfinding.mp4", width=640)
+    # A*
+    video("images/astar-pathfinding.mp4", width=640)
+
+    text("Recall that UCS orders states by increasing past cost (which has no knowledge of the end state).")
     text("We would also like to consider the cost from a state to an end state.")
+
     text(r"Ideal: explore in order of $\text{PastCost}(s) + \text{FutureCost}(s)$")
-    text(r"A*: explore in order of $\text{PastCost}(s) + h(s)$ for some **heuristic** $h(s)$")
-    text(r"$h(s)$ is an approximation of $\text{FutureCost}(s)$")
+    text(r"But we can't easily compute $\text{FutureCost}(s)$.")
+    text(r"So we define a **heuristic** $h(s)$ that approximates $\text{FutureCost}(s)$.")
+    text(r"Then we'll see how A* explores in order of $\text{PastCost}(s) + h(s)$.")
 
     text("**A* algorithm** [Hart/Nilsson/Raphael 1968]: run UCS with modified costs:")
-    text(r"$\text{Cost}'(s, a) = \text{Cost}(s, a) + [h(\text{Succ}(s, a)) - h(s)]$")
+    text(r"Define modified costs $\text{Cost}'(s, a) = \text{Cost}(s, a) + [h(\text{Succ}(s, a)) - h(s)]$")
     text("Intuition: add a penalty for how much an action takes us away from the end state.")
 
     text("Let's consider a simple example:")
@@ -334,50 +356,80 @@ def astar():
     is_end = problem.is_end(state)  # @inspect is_end @stepover
 
     text("Let's run UCS on this example.")  # @clear state successors is_end
-    solution, num_explored = uniform_cost_search(problem)  # @inspect solution num_explored @stepover
+    solution, num_explored = uniform_cost_search(problem)  # @inspect solution num_explored @stepover @animate
 
-    text("Let's run A* on this example.")  # @clear solution num_explored
+    text("Let's run A* on this example.")
+    text("First, let's define a heuristic, which approximates the future cost.")
+    text("Let $h(s) = 2 - s$, which is larger the farther we are from the end state ($s = 2$).")
     image("images/line-problem-heuristic.svg", width=560)
     def line_heuristic(state: int) -> float:
         return 2 - state
 
-    text("We define a **modified search problem**:")
+    text("We define a **modified search problem**, which is the same except for the edge costs:")
     text(r"- $s^\prime_\text{start} = s_\text{start}$")
     text(r"- $\text{Actions}'(s) = \text{Actions}(s)$")
     text(r"- $\text{Succ}'(s, a) = \text{Succ}(s, a)$")
     text(r"- $\text{Cost}'(s, a) = \text{Cost}(s, a) + h(\text{Succ}(s, a)) - h(s)$")
     text(r"- $\text{IsEnd}'(s) = \text{IsEnd}(s)$")
+    text("Intuition: the modified edge cost adds a penalty for going farther away from an end state.")
     modified_problem = ModifiedSearchProblem(problem, heuristic=line_heuristic)  # @stepover
     successors = modified_problem.successors(0)  # @inspect successors
-    text("Note that the heuristic makes us favor going to the right.")
+    text("In this case, the heuristic makes us favor going to the right.")
 
+    text("Now let us run A* with this heuristic.")
     solution, num_explored = astar_search(problem, heuristic=line_heuristic)  # @inspect solution num_explored
     graph(draw_line_graph(problem, solution=solution))  # @stepover
 
-    text("Will any heuristic work?")
+    text("Will any heuristic $h$ work?")
     text("No.")
+    text("Here's a counterexample:")
     image("images/astar-counterexample.svg", width=500)
-    text(r"Here, $h(C) = 1000$ actively messes things up.")
+    text("We have a negative modified edge cost ($-999$), which means we can't use UCS.")
+
+    text("How do we tell if a heuristic is good or not?")
 
     text(r"**Consistency**: a heuristic $h$ is consistent when")
-    text(r"- $\text{Cost}(s, a) + h(\text{Succ}(s, a)) - h(s) \ge 0$ (these are the modified costs!)")
     text(r"- $h(s_\text{end}) = 0$")
-    text("UCS does not work with negative costs.")
+    text(r"- $\text{Cost}(s, a) + h(\text{Succ}(s, a)) - h(s) \ge 0$ (these are the modified costs!)")
+    text("...which can be depicted like a triangle inequality:")
+    image("images/consistency.svg", width=480)
+    text("Intuitively, going from $s$ to an end state is no more expensive than first going to $s'$ and then to the end state.")
+    text("Consistency ensures that the modified edge costs are non-negative")
+    text("...which means UCS will find the minimum cost solution.")
 
-    text(r"Proposition (correctness): A* is correct if $h$ is consistent.")
+    graph(draw_line_graph(problem))  # @stepover
+
+    text(r"**Proposition (correctness)**: A* is correct if $h$ is consistent.")
     text("Proof:")
-    text("- Consider any path from the start state to the end state.")
-    text(r"- The sum of the modified costs is the sum of the original costs $- h(s_\text{start})$ (since $h(s_\text{end}) = 0$).")
-    text(r"- Reason: the $h$ terms form a telescoping sum")
+    text(r"- Consider any path from the start state to the end state (e.g., $0 \to 1 \to 2$).")
+    text(r"- Let's compute the sum of the original edge costs (e.g., $\text{Cost}(0, 1) + \text{Cost}(1, 2)$).")
+    text(r"- Let's compute the sum of the modified edge costs (e.g., $(\text{Cost}(0, 1) + h(1) - h(0)) + (\text{Cost}(1, 2) + h(2) - h(1))$).")
+    text(r"- Note the $h$ terms form a telescoping sum.")
+    text(r"- The sum of the modified costs is the sum of the original costs plus $h(s_\text{end}) - h(s_\text{start}) = -h(s_\text{start})$.")
+    text(r"- Example: $\text{Cost}(0, 1) + \text{Cost}(1, 2) - h(0)$")
+    text(r"- Note that $h(s_\text{start})$ (e.g., $h(0)$) does not depend on the solution.")
+    text(r"- Therefore, minimizing using the original edge costs is equivalent to minimizing using the modified edge costs.")
 
-    text("Proposition (efficiency): A* explores all states satisfying")
-    text(r"$\text{PastCost}(s) \le \text{PastCost}(s_\text{end}) - h(s)$")
-    text(r"Proof: A* explores all $s$ such that $\text{PastCost}(s) + h(s) \le \text{PastCost}(s_\text{end})$")
+    text("How much faster is A* than UCS?")
+    text("Recall that UCS explores states in increasing order of past cost.")
+    text(r"So UCS explores all states $s$ such that $\text{PastCost}(s) \le \text{PastCost}(s_\text{end})$.")
+
+    text("**Proposition (efficiency)**: A* explores all states satisfying")
+    text(r"$\text{PastCost}(s) \le \text{PastCost}(s_\text{end}) - h(s)$.")
+    text("We explore fewer states, and the larger $h(s)$ is, the fewer states we explore.")
+    text(r"Proof:")
+    text(r"- The modified cost from the start state to a state $s$ is $\text{PastCost}(s) + h(s) - h(s_\text{start})$.")
+    text(r"- The modified cost from the start state to an end state is $\text{PastCost}(s_\text{end}) + h(s_\text{end}) - h(s_\text{start})$.")
+    text(r"- A* explores paths in order of increasing modified cost.")
+    text(r"- Therefore, it only visits $s$ for which $\text{PastCost}(s) + h(s) - h(s_\text{start}) \le \text{PastCost}(s_\text{end}) + h(s_\text{end}) - h(s_\text{start})$.")
+    text(r"- Recall that $h(s_\text{end}) = 0$, cancel the $h(s_\text{start})$, and the result follows.")
+
+    text("Notes:")
     text(r"- If $h(s) = 0$, then A* = UCS.")
     text(r"- If $h(s) = \text{FutureCost}(s)$, then A* explores only the states on a minimum cost path.")
     text(r"- Usually $h(s)$ is somewhere in between.")
 
-    text(r"Definition (admissibility): $h$ is admissible when $h(s) \le \text{FutureCost}(s)$ for all $s$")
+    text(r"**Definition (admissibility)**: $h$ is admissible when $h(s) \le \text{FutureCost}(s)$ for all $s$.")
     text(r"In other words: $h$ never overestimates the future cost.")
     text("Consistency implies admissibility.")
 
@@ -449,7 +501,7 @@ def astar_relaxations():
     text("So let's relax the problem to make it easier.")
 
     text("Winning recipe:")
-    text("- Define a relaxed problem by getting rid of some constraints.")
+    text("- Define a **relaxed problem** by getting rid of some constraints.")
     text(r"- Compute $\text{FutureCost}_\text{relaxed}(s)$, the future cost of state $s$ under the relaxed problem.")
     text(r"- Run A* using the heuristic $h(s) = \text{FutureCost}_\text{relaxed}(s)$.")
 
@@ -498,9 +550,10 @@ def closed_form_solution():
     cost = future_cost_relaxed(state=(3, 0))  # Seems farther (heuristic is imperfect)! @inspect cost @stepover
     text("Intuition: favor states that are closer to E.")
 
-    text("Run UCS and A*:")
-    solution, num_explored = uniform_cost_search(problem)  # @inspect solution num_explored @stepover
-    solution, num_explored = astar_search(problem, heuristic=future_cost_relaxed)  # @inspect solution num_explored @stepover
+    # Run UCS
+    solution, num_explored = uniform_cost_search(problem)  # @inspect solution num_explored @stepover @animate
+    # Run A*
+    solution, num_explored = astar_search(problem, heuristic=future_cost_relaxed)  # @inspect solution num_explored @stepover @animate
     text("Note that A* does not provide a benefit in this case.")
 
 
@@ -528,8 +581,9 @@ def search_fewer_states():
     solution, num_explored = uniform_cost_search(problem)  # @inspect solution num_explored @stepover
     solution, num_explored = astar_search(problem, heuristic=heuristic)  # @inspect solution num_explored @stepover
 
-    text("For accounting purposes, need to include the cost of solving the relaxed problem!")
+    text("For accounting purposes, we need to include the cost of solving the relaxed problem!")
     num_explored += num_explored_relaxed  # @inspect num_explored
+    text("A* explores fewer states than UCS!")
 
     text("Note: dynamic programming cannot deal with cycles.")
     text("If we have cycles, what do we do?")
@@ -573,9 +627,9 @@ def unifying_principle():
 
     text(r"Theorem: Let $h(s) = \text{FutureCost}_\text{relaxed}(s)$ be the future cost of a relaxed problem. Then $h$ is a consistent heuristic.")
     text("Proof:")
-    text(r"$h(s)$")
-    text(r"$\le \text{Cost}_\text{relaxed}(s, a) + h(\text{Succ}(s, a))$ ($h$ is the minimum future cost in the relaxed problem)")
-    text(r"$\le \text{Cost}(s, a) + h(\text{Succ}(s, a))$ (definition of relaxation)")
+    text(r"$\qquad h(s)$")
+    text(r"$\qquad \rlap{\le \text{Cost}_\text{relaxed}(s, a) + h(\text{Succ}(s, a))}\hspace{17em}$($h$ is the minimum future cost in the relaxed problem)")
+    text(r"$\qquad \rlap{\le \text{Cost}(s, a) + h(\text{Succ}(s, a))}\hspace{17em}$(definition of relaxation)")
 
     text("Of course, a relaxed problem isn't automatically easier to solve!")
 
@@ -615,6 +669,9 @@ def draw_ucs_graph(problem: SearchProblem, frontier: "PriorityQueue | None" = No
     If `solution` is given, highlight its path (in orange).
     Return None if we don't know how to draw `problem` (which `graph` shows as nothing).
     """
+    if isinstance(problem, ModifiedSearchProblem):
+        # A*: draw the underlying problem (states and actions are the same; past costs are the modified ones)
+        return draw_ucs_graph(problem.problem, frontier, backpointers, solution)
     if isinstance(problem, DiamondSearchProblem):
         return draw_diamond_graph(problem, frontier, backpointers, solution)
     if isinstance(problem, GridSearchProblem):
