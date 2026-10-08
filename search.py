@@ -915,7 +915,7 @@ def draw_search_graph(problem: "SearchProblem", position: Callable[[Any], tuple[
 def draw_limited_travel_graph(problem: "LimitedTravelSearchProblem") -> dict:
     """Return the graph of the limited travel problem: one row per number of tickets left, states labeled [loc],[tickets]t."""
     return draw_search_graph(problem, position=lambda state: (100 * state.loc, 90 * (problem.starting_tickets - state.tickets)),
-                             label=lambda state: f"{state.loc},{state.tickets}t", height=200)
+                             label=lambda state: f"{state.loc},{state.tickets}t", height=90 * problem.starting_tickets + 110)
 
 
 def draw_search_tree(problem: "SearchProblem") -> dict:

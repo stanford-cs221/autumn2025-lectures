@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 225" width="560" height="225" font-family="Helvetica, Arial, sans-serif" font-size="14">
+<rect width="560" height="225" fill="white"/>
+<line x1="40" y1="95" x2="520" y2="95" stroke="#ccc" stroke-width="3"/>
+<circle cx="70" cy="95" r="17" fill="white" stroke="#555" stroke-width="2"/>
+<text x="70" y="100" text-anchor="middle" fill="#333" font-size="15">-3</text>
+<text x="70" y="171" text-anchor="middle" fill="#9b72cf" font-size="14">5</text>
+<circle cx="140" cy="95" r="17" fill="white" stroke="#555" stroke-width="2"/>
+<text x="140" y="100" text-anchor="middle" fill="#333" font-size="15">-2</text>
+<text x="140" y="171" text-anchor="middle" fill="#9b72cf" font-size="14">4</text>
+<circle cx="210" cy="95" r="17" fill="white" stroke="#555" stroke-width="2"/>
+<text x="210" y="100" text-anchor="middle" fill="#333" font-size="15">-1</text>
+<text x="210" y="171" text-anchor="middle" fill="#9b72cf" font-size="14">3</text>
+<circle cx="280" cy="95" r="17" fill="white" stroke="#555" stroke-width="4"/>
+<text x="280" y="100" text-anchor="middle" fill="#333" font-size="15">0</text>
+<text x="280" y="171" text-anchor="middle" fill="#9b72cf" font-size="14">2</text>
+<circle cx="350" cy="95" r="17" fill="white" stroke="#555" stroke-width="2"/>
+<text x="350" y="100" text-anchor="middle" fill="#333" font-size="15">1</text>
+<text x="350" y="171" text-anchor="middle" fill="#9b72cf" font-size="14">1</text>
+<circle cx="420" cy="95" r="17" fill="white" stroke="#555" stroke-width="2"/>
+<circle cx="420" cy="95" r="12.5" fill="none" stroke="#555" stroke-width="1.5"/>
+<text x="420" y="100" text-anchor="middle" fill="#333" font-size="15">2</text>
+<text x="420" y="171" text-anchor="middle" fill="#9b72cf" font-size="14">0</text>
+<circle cx="490" cy="95" r="17" fill="white" stroke="#555" stroke-width="2"/>
+<text x="490" y="100" text-anchor="middle" fill="#333" font-size="15">3</text>
+<text x="490" y="171" text-anchor="middle" fill="#9b72cf" font-size="14">-1</text>
+<text x="32" y="171" text-anchor="end" fill="#9b72cf" font-size="14" font-style="italic">h(s)</text>
+<text x="420" y="193" text-anchor="middle" fill="#9b72cf" font-size="12">h(s) = 2 − s</text>
+<text x="280" y="131" text-anchor="middle" fill="#555" font-size="13" font-weight="bold">start</text>
+<text x="420" y="131" text-anchor="middle" fill="#555" font-size="13" font-weight="bold">end</text>
+<path d="M268,82 Q245.0,33 226.2,72.9" fill="none" stroke="#2a9d8f" stroke-width="2.5"/>
+<path d="M222,82 L221.7,70.8 L230.8,75.1 Z" fill="#2a9d8f"/>
+<text x="245.0" y="47" text-anchor="middle" fill="#2a9d8f" font-size="13">left: 1</text>
+<path d="M292,82 Q315.0,33 333.8,72.9" fill="none" stroke="#2a9d8f" stroke-width="2.5"/>
+<path d="M338,82 L329.2,75.1 L338.3,70.8 Z" fill="#2a9d8f"/>
+<text x="315.0" y="47" text-anchor="middle" fill="#2a9d8f" font-size="13">right: 1</text>
+</svg>

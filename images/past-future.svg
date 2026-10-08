@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 30 640 190" width="640" height="190" font-family="Helvetica, Arial, sans-serif" font-size="14">
+<rect width="640" height="250" fill="white"/>
+<line x1="92.0" y1="125" x2="122" y2="125" stroke="#555" stroke-width="2"/>
+<path d="M130,125 L120,120 L120,130 Z" fill="#555"/>
+<line x1="170" y1="125" x2="210.0" y2="125" stroke="#555" stroke-width="2"/>
+<path d="M218.0,125 L208.0,120 L208.0,130 Z" fill="#555"/>
+<line x1="302.0" y1="125" x2="350.0" y2="125" stroke="#555" stroke-width="2"/>
+<path d="M358.0,125 L348.0,120 L348.0,130 Z" fill="#555"/>
+<line x1="442.0" y1="125" x2="472" y2="125" stroke="#555" stroke-width="2"/>
+<path d="M480,125 L470,120 L470,130 Z" fill="#555"/>
+<line x1="520" y1="125" x2="540.0" y2="125" stroke="#555" stroke-width="2"/>
+<path d="M548.0,125 L538.0,120 L538.0,130 Z" fill="#555"/>
+<text x="150" y="130" text-anchor="middle" fill="#555" font-size="18">···</text>
+<text x="500" y="130" text-anchor="middle" fill="#555" font-size="18">···</text>
+<rect x="12.0" y="107.0" width="76" height="36" rx="8" fill="white" stroke="#555" stroke-width="2"/>
+<text x="50" y="130" text-anchor="middle" fill="#333" font-size="16">start</text>
+<rect x="222.0" y="107.0" width="76" height="36" rx="8" fill="white" stroke="#555" stroke-width="2"/>
+<text x="260" y="130" text-anchor="middle" fill="#333" font-size="16">s</text>
+<rect x="362.0" y="107.0" width="76" height="36" rx="8" fill="white" stroke="#555" stroke-width="2"/>
+<text x="400" y="130" text-anchor="middle" fill="#333" font-size="16">s′</text>
+<rect x="552.0" y="107.0" width="76" height="36" rx="8" fill="white" stroke="#555" stroke-width="2"/>
+<rect x="556.0" y="111.0" width="68" height="28" rx="5" fill="none" stroke="#555" stroke-width="1.5"/>
+<text x="590" y="130" text-anchor="middle" fill="#333" font-size="16">end</text>
+<path d="M50,97.0 Q50,87.0 60,87.0 L215.0,87.0 Q225.0,87.0 225.0,77.0 Q225.0,87.0 235.0,87.0 L390,87.0 Q400,87.0 400,97.0" fill="none" stroke="#2a9d8f" stroke-width="2"/>
+<text x="225.0" y="61.0" text-anchor="middle" fill="#2a9d8f" font-size="15">PastCost(s′)</text>
+<path d="M400,97.0 Q400,87.0 410,87.0 L485.0,87.0 Q495.0,87.0 495.0,77.0 Q495.0,87.0 505.0,87.0 L580,87.0 Q590,87.0 590,97.0" fill="none" stroke="#f77f00" stroke-width="2"/>
+<text x="495.0" y="61.0" text-anchor="middle" fill="#f77f00" font-size="15">FutureCost(s′)</text>
+<path d="M50,153.0 Q50,163.0 60,163.0 L145.0,163.0 Q155.0,163.0 155.0,173.0 Q155.0,163.0 165.0,163.0 L250,163.0 Q260,163.0 260,153.0" fill="none" stroke="#2a9d8f" stroke-width="2"/>
+<text x="155.0" y="194.0" text-anchor="middle" fill="#2a9d8f" font-size="15">PastCost(s)</text>
+<path d="M260,153.0 Q260,163.0 270,163.0 L415.0,163.0 Q425.0,163.0 425.0,173.0 Q425.0,163.0 435.0,163.0 L580,163.0 Q590,163.0 590,153.0" fill="none" stroke="#f77f00" stroke-width="2"/>
+<text x="425.0" y="194.0" text-anchor="middle" fill="#f77f00" font-size="15">FutureCost(s)</text>
+</svg>

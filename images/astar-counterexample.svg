@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" font-family="Helvetica, Arial, sans-serif" font-size="14">
+<rect width="500" height="300" fill="white"/>
+<line x1="90" y1="150" x2="250" y2="65" stroke="#999" stroke-width="2"/>
+<line x1="250" y1="65" x2="410" y2="150" stroke="#999" stroke-width="2"/>
+<line x1="90" y1="150" x2="250" y2="235" stroke="#999" stroke-width="2"/>
+<line x1="250" y1="235" x2="410" y2="150" stroke="#999" stroke-width="2"/>
+<text x="149.5" y="98.4" text-anchor="end" fill="#555" font-size="15">1 ⇒</text><text x="153.5" y="98.4" text-anchor="start" fill="#555" font-size="15">1</text>
+<text x="362.5" y="98.4" text-anchor="end" fill="#555" font-size="15">5 ⇒</text><text x="366.5" y="98.4" text-anchor="start" fill="#555" font-size="15">5</text>
+<text x="149.5" y="211.6" text-anchor="end" fill="#555" font-size="15">2 ⇒</text><text x="153.5" y="211.6" text-anchor="start" fill="#555" font-size="15">1002</text>
+<text x="362.5" y="211.6" text-anchor="end" fill="#555" font-size="15">1 ⇒</text><text x="366.5" y="211.6" text-anchor="start" fill="#d62828" font-size="15" font-weight="bold">−999</text>
+<circle cx="90" cy="150" r="20" fill="white" stroke="#555" stroke-width="4"/>
+<text x="90" y="156" text-anchor="middle" fill="#222" font-size="17">A</text>
+<circle cx="250" cy="65" r="20" fill="white" stroke="#555" stroke-width="2"/>
+<text x="250" y="71" text-anchor="middle" fill="#222" font-size="17">B</text>
+<circle cx="250" cy="235" r="20" fill="white" stroke="#555" stroke-width="2"/>
+<text x="250" y="241" text-anchor="middle" fill="#222" font-size="17">C</text>
+<circle cx="410" cy="150" r="20" fill="white" stroke="#555" stroke-width="2"/>
+<circle cx="410" cy="150" r="15" fill="none" stroke="#555" stroke-width="1.5"/>
+<text x="410" y="156" text-anchor="middle" fill="#222" font-size="17">D</text>
+<text x="44" y="155" text-anchor="middle" fill="#9b72cf" font-size="15" font-weight="bold">0</text>
+<text x="250" y="33" text-anchor="middle" fill="#9b72cf" font-size="15" font-weight="bold">0</text>
+<text x="250" y="279" text-anchor="middle" fill="#9b72cf" font-size="15" font-weight="bold">1000</text>
+<text x="456" y="155" text-anchor="middle" fill="#9b72cf" font-size="15" font-weight="bold">0</text>
+<text x="14" y="270" fill="#9b72cf" font-size="13" font-weight="bold">h(s)</text>
+<text x="14" y="288" fill="#555" font-size="13">Cost ⇒ Cost′</text>
+</svg>

@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 232" width="520" height="232" font-family="Helvetica, Arial, sans-serif" font-size="14">
+<rect width="520" height="232" fill="white"/>
+<rect x="20" y="10" width="186" height="186" rx="8" fill="#e6e6e6" stroke="#999" stroke-width="2"/>
+<rect x="26" y="16" width="54" height="54" rx="6" fill="white" stroke="#555" stroke-width="2"/>
+<text x="53.0" y="51.0" text-anchor="middle" fill="#222" font-size="24" font-weight="bold">1</text>
+<rect x="86" y="16" width="54" height="54" rx="6" fill="white" stroke="#555" stroke-width="2"/>
+<text x="113.0" y="51.0" text-anchor="middle" fill="#222" font-size="24" font-weight="bold">2</text>
+<rect x="146" y="16" width="54" height="54" rx="6" fill="white" stroke="#555" stroke-width="2"/>
+<text x="173.0" y="51.0" text-anchor="middle" fill="#222" font-size="24" font-weight="bold">3</text>
+<rect x="26" y="76" width="54" height="54" rx="6" fill="white" stroke="#555" stroke-width="2"/>
+<text x="53.0" y="111.0" text-anchor="middle" fill="#222" font-size="24" font-weight="bold">8</text>
+<rect x="146" y="76" width="54" height="54" rx="6" fill="white" stroke="#555" stroke-width="2"/>
+<text x="173.0" y="111.0" text-anchor="middle" fill="#222" font-size="24" font-weight="bold">4</text>
+<rect x="26" y="136" width="54" height="54" rx="6" fill="white" stroke="#555" stroke-width="2"/>
+<text x="53.0" y="171.0" text-anchor="middle" fill="#222" font-size="24" font-weight="bold">7</text>
+<rect x="86" y="136" width="54" height="54" rx="6" fill="white" stroke="#555" stroke-width="2"/>
+<text x="113.0" y="171.0" text-anchor="middle" fill="#222" font-size="24" font-weight="bold">6</text>
+<rect x="146" y="136" width="54" height="54" rx="6" fill="white" stroke="#555" stroke-width="2"/>
+<text x="173.0" y="171.0" text-anchor="middle" fill="#222" font-size="24" font-weight="bold">5</text>
+<text x="113.0" y="218" text-anchor="middle" fill="#555" font-size="15">start</text>
+<rect x="314" y="10" width="186" height="186" rx="8" fill="#e6e6e6" stroke="#999" stroke-width="2"/>
+<rect x="380" y="16" width="54" height="54" rx="6" fill="white" stroke="#555" stroke-width="2"/>
+<text x="407.0" y="51.0" text-anchor="middle" fill="#222" font-size="24" font-weight="bold">1</text>
+<rect x="440" y="16" width="54" height="54" rx="6" fill="white" stroke="#555" stroke-width="2"/>
+<text x="467.0" y="51.0" text-anchor="middle" fill="#222" font-size="24" font-weight="bold">2</text>
+<rect x="320" y="76" width="54" height="54" rx="6" fill="white" stroke="#555" stroke-width="2"/>
+<text x="347.0" y="111.0" text-anchor="middle" fill="#222" font-size="24" font-weight="bold">3</text>
+<rect x="380" y="76" width="54" height="54" rx="6" fill="white" stroke="#555" stroke-width="2"/>
+<text x="407.0" y="111.0" text-anchor="middle" fill="#222" font-size="24" font-weight="bold">4</text>
+<rect x="440" y="76" width="54" height="54" rx="6" fill="white" stroke="#555" stroke-width="2"/>
+<text x="467.0" y="111.0" text-anchor="middle" fill="#222" font-size="24" font-weight="bold">5</text>
+<rect x="320" y="136" width="54" height="54" rx="6" fill="white" stroke="#555" stroke-width="2"/>
+<text x="347.0" y="171.0" text-anchor="middle" fill="#222" font-size="24" font-weight="bold">6</text>
+<rect x="380" y="136" width="54" height="54" rx="6" fill="white" stroke="#555" stroke-width="2"/>
+<text x="407.0" y="171.0" text-anchor="middle" fill="#222" font-size="24" font-weight="bold">7</text>
+<rect x="440" y="136" width="54" height="54" rx="6" fill="white" stroke="#555" stroke-width="2"/>
+<text x="467.0" y="171.0" text-anchor="middle" fill="#222" font-size="24" font-weight="bold">8</text>
+<text x="407.0" y="218" text-anchor="middle" fill="#555" font-size="15">goal</text>
+<line x1="232" y1="103.0" x2="290" y2="103.0" stroke="#555" stroke-width="3"/>
+<path d="M300,103.0 L288,96.0 L288,110.0 Z" fill="#555"/>
+</svg>
